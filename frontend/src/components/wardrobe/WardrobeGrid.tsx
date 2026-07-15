@@ -3,6 +3,8 @@ import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
 import WeatherWidget from './WeatherWidget';
 import ImageEditor from './ImageEditor';
+import ConfirmModal from '../common/ConfirmModal';
+
 import { useClosetStore } from '../../store/closetStore';
 import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag, Scissors, AlertTriangle } from 'lucide-react';
 
@@ -67,6 +69,8 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
   const [selectedEditItem, setSelectedEditItem] = useState<ClothingItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
 
   // AI duplicate warning modal states
   const [duplicateModalItem, setDuplicateModalItem] = useState<ClothingItem | null>(null);
@@ -170,8 +174,6 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
   // Delete item
   const handleDeleteItem = async (id: string) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa món đồ này khỏi tủ quần áo?')) return;
-
     try {
       await apiClient.delete(`/items/${id}`);
       setItems(items.filter((i) => i.id !== id));
@@ -180,6 +182,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       alert(err.response?.data?.error || 'Xóa món đồ thất bại');
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -509,7 +512,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                       <Edit3 className="h-4 w-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteItem(item.id)}
+                      onClick={() => setConfirmDeleteId(item.id)}
                       className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-red-600 transition-colors"
                       title="Xóa món đồ"
                     >
@@ -520,7 +523,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   /* Only allow deletion during processing */
                   <div className="absolute inset-0 bg-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                     <button
-                      onClick={() => handleDeleteItem(item.id)}
+                      onClick={() => setConfirmDeleteId(item.id)}
                       className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-red-600 transition-colors"
                       title="Xóa món đồ"
                     >
@@ -692,6 +695,20 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           </div>
         );
       })()}
+
+      <ConfirmModal
+        isOpen={confirmDeleteId !== null}
+        title="Xóa món đồ khỏi tủ quần áo"
+        message="Bạn có chắc chắn muốn xóa món đồ này khỏi tủ quần áo? Hành động này không thể hoàn tác và món đồ sẽ bị loại bỏ vĩnh viễn khỏi hệ thống."
+        confirmLabel="Xóa sản phẩm"
+        onConfirm={() => {
+          if (confirmDeleteId) {
+            handleDeleteItem(confirmDeleteId);
+            setConfirmDeleteId(null);
+          }
+        }}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

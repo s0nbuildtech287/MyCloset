@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useClosetStore } from '../../store/closetStore';
 import { FolderKanban, Plus, Trash2, Check, Loader2 } from 'lucide-react';
+import ConfirmModal from '../common/ConfirmModal';
 
 export default function ClosetSelector() {
   const { closets, activeClosetId, loading, fetchClosets, setActiveClosetId, addCloset, deleteCloset } = useClosetStore();
   const [isOpen, setIsOpen] = useState(false);
   const [newClosetName, setNewClosetName] = useState('');
   const [adding, setAdding] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+
 
   useEffect(() => {
     fetchClosets();
@@ -29,16 +32,19 @@ export default function ClosetSelector() {
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, id: string) => {
+  const handleDelete = (e: React.MouseEvent, id: string) => {
     e.stopPropagation();
-    if (confirm('Bạn có chắc muốn xóa tủ đồ này? Các món đồ bên trong sẽ tự động chuyển về Tủ đồ chính.')) {
-      try {
-        await deleteCloset(id);
-      } catch (err) {
-        alert('Không thể xóa tủ đồ');
-      }
+    setConfirmDeleteId(id);
+  };
+
+  const executeDelete = async (id: string) => {
+    try {
+      await deleteCloset(id);
+    } catch (err) {
+      alert('Không thể xóa tủ đồ');
     }
   };
+
 
   return (
     <div className="relative z-40 select-none">
@@ -129,6 +135,19 @@ export default function ClosetSelector() {
         </>
       )}
 
+      <ConfirmModal
+        isOpen={confirmDeleteId !== null}
+        title="Xóa tủ đồ"
+        message="Bạn có chắc chắn muốn xóa tủ đồ này? Các món đồ bên trong tủ đồ sẽ tự động được chuyển về Tủ đồ chính của bạn."
+        confirmLabel="Xóa tủ đồ"
+        onConfirm={() => {
+          if (confirmDeleteId) {
+            executeDelete(confirmDeleteId);
+            setConfirmDeleteId(null);
+          }
+        }}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

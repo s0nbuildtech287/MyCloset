@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
 import { Trash2, ShoppingBag, Calendar, Eye, X } from 'lucide-react';
 import OutfitCalendar from './OutfitCalendar';
+import ConfirmModal from '../common/ConfirmModal';
+
 
 interface OutfitItemDetail {
   id: string;
@@ -29,6 +31,8 @@ export default function MyOutfits() {
   
   // Selected outfit for modal preview
   const [selectedOutfit, setSelectedOutfit] = useState<OutfitDetail | null>(null);
+  const [confirmDeleteOutfitId, setConfirmDeleteOutfitId] = useState<string | null>(null);
+
 
   const fetchOutfits = async () => {
     setLoading(true);
@@ -47,10 +51,12 @@ export default function MyOutfits() {
     fetchOutfits();
   }, []);
 
-  const handleDeleteOutfit = async (id: string, e: React.MouseEvent) => {
+  const handleDeleteOutfit = (id: string, e: React.MouseEvent) => {
     e.stopPropagation(); // prevent modal opening
-    if (!window.confirm('Bạn có chắc chắn muốn xóa bộ phối này?')) return;
+    setConfirmDeleteOutfitId(id);
+  };
 
+  const executeDeleteOutfit = async (id: string) => {
     try {
       await apiClient.delete(`/outfits/${id}`);
       setOutfits(outfits.filter((o) => o.id !== id));
@@ -61,6 +67,7 @@ export default function MyOutfits() {
       alert(err.response?.data?.error || 'Xóa bộ phối thất bại');
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -256,8 +263,23 @@ export default function MyOutfits() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmDeleteOutfitId !== null}
+        title="Xóa bộ phối đồ"
+        message="Bạn có chắc chắn muốn xóa bộ phối này? Hành động này không thể hoàn tác và bộ phối sẽ bị loại bỏ vĩnh viễn khỏi danh sách của bạn."
+        confirmLabel="Xóa bộ phối"
+        onConfirm={() => {
+          if (confirmDeleteOutfitId) {
+            executeDeleteOutfit(confirmDeleteOutfitId);
+            setConfirmDeleteOutfitId(null);
+          }
+        }}
+        onCancel={() => setConfirmDeleteOutfitId(null)}
+      />
         </>
       )}
     </div>
   );
 }
+

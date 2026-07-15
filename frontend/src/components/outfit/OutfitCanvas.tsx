@@ -3,6 +3,8 @@ import { Stage, Layer, Image as KonvaImage, Transformer } from 'react-konva';
 import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
 import { Trash2, ArrowUp, ArrowDown, Save, RefreshCw, Layers } from 'lucide-react';
+import ConfirmModal from '../common/ConfirmModal';
+
 
 interface CanvasItem {
   id: string; // unique instance ID
@@ -89,8 +91,10 @@ export default function OutfitCanvas() {
   const [search, setSearch] = useState('');
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
+
   const [stageSize, setStageSize] = useState({ width: 500, height: 500 });
 
   // Responsive stage measurement
@@ -206,11 +210,14 @@ export default function OutfitCanvas() {
   };
 
   const clearCanvas = () => {
-    if (window.confirm('Xóa sạch toàn bộ sản phẩm trên canvas?')) {
-      setCanvasItems([]);
-      setSelectedId(null);
-    }
+    setIsConfirmClearOpen(true);
   };
+
+  const executeClearCanvas = () => {
+    setCanvasItems([]);
+    setSelectedId(null);
+  };
+
 
   const sortedCanvasItems = [...canvasItems].sort((a, b) => a.zIndex - b.zIndex);
 
@@ -486,6 +493,18 @@ export default function OutfitCanvas() {
           </div>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={isConfirmClearOpen}
+        title="Xóa sạch canvas"
+        message="Bạn có chắc chắn muốn xóa sạch toàn bộ sản phẩm trên canvas? Hành động này sẽ loại bỏ tất cả các món đồ đang ghép dở trên màn hình."
+        confirmLabel="Xóa sạch"
+        onConfirm={() => {
+          executeClearCanvas();
+          setIsConfirmClearOpen(false);
+        }}
+        onCancel={() => setIsConfirmClearOpen(false)}
+      />
     </div>
   );
 }

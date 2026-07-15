@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
 import type { ClothingItem, TravelTrip } from '../../../../shared/types';
 import { Briefcase, Calendar, MapPin, Plus, Trash2, CheckSquare, Square, Loader2, Sparkles, FolderLock } from 'lucide-react';
+import ConfirmModal from '../common/ConfirmModal';
+
 
 export default function TravelTab() {
   const [trips, setTrips] = useState<TravelTrip[]>([]);
@@ -18,6 +20,8 @@ export default function TravelTab() {
 
   // Selected trip details
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
+  const [confirmDeleteTripId, setConfirmDeleteTripId] = useState<string | null>(null);
+
 
   // Wardrobe items selector state
   const [wardrobe, setWardrobe] = useState<ClothingItem[]>([]);
@@ -73,8 +77,11 @@ export default function TravelTab() {
     }
   };
 
-  const handleDeleteTrip = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa kế hoạch xếp đồ chuyến đi này?')) return;
+  const handleDeleteTrip = (id: string) => {
+    setConfirmDeleteTripId(id);
+  };
+
+  const executeDeleteTrip = async (id: string) => {
     try {
       await apiClient.delete(`/trips/${id}`);
       const updatedTrips = trips.filter((t) => t.id !== id);
@@ -87,6 +94,7 @@ export default function TravelTab() {
       alert('Không thể xóa chuyến đi');
     }
   };
+
 
   // Load wardrobe items to select from (excludes damaged ones)
   const openSelector = async () => {
@@ -547,6 +555,19 @@ export default function TravelTab() {
         </div>
       )}
 
+      <ConfirmModal
+        isOpen={confirmDeleteTripId !== null}
+        title="Xóa kế hoạch chuyến đi"
+        message="Bạn có chắc chắn muốn xóa kế hoạch xếp đồ chuyến đi này? Hành động này không thể hoàn tác và toàn bộ danh sách vali xếp đồ sẽ bị loại bỏ."
+        confirmLabel="Xóa chuyến đi"
+        onConfirm={() => {
+          if (confirmDeleteTripId) {
+            executeDeleteTrip(confirmDeleteTripId);
+            setConfirmDeleteTripId(null);
+          }
+        }}
+        onCancel={() => setConfirmDeleteTripId(null)}
+      />
     </div>
   );
 }
