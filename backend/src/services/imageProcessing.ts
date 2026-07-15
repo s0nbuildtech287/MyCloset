@@ -1,6 +1,7 @@
 import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
+import sharp from 'sharp';
 import { prisma } from '../db';
 import { getEmbedding, checkDuplicateItem } from './similarityService';
 
@@ -30,9 +31,22 @@ export const processImageBackground = async (itemId: string) => {
       throw new Error(`Original image file does not exist: ${originalFilePath}`);
     }
 
-    // 2. Read file to a Blob to send via FormData
+    // Read original file buffer
     const fileBuffer = fs.readFileSync(originalFilePath);
-    const fileBlob = new Blob([fileBuffer], { type: 'image/jpeg' });
+
+    // Compress and resize original image to max 1000px width/height and JPEG 70% quality
+    // This reduces storage space from ~5MB down to ~50KB while retaining editor capabilities
+    console.log(`Compressing original raw image for item: ${item.name}...`);
+    const compressedOriginalBuffer = await sharp(fileBuffer)
+      .resize(1000, 1000, { fit: 'inside', withoutEnlargement: true })
+      .jpeg({ quality: 70 })
+      .toBuffer();
+
+    // Overwrite original file with lightweight compressed JPEG
+    fs.writeFileSync(originalFilePath, compressedOriginalBuffer);
+
+    // 2. Read file to a Blob to send via FormData
+    const fileBlob = new Blob([compressedOriginalBuffer], { type: 'image/jpeg' });
 
     const formData = new FormData();
     formData.append('file', fileBlob, filename);
@@ -49,13 +63,18 @@ export const processImageBackground = async (itemId: string) => {
       timeout: 120000, 
     });
 
-    // 3. Save the returned processed buffer as PNG (rembg returns transparent PNG)
-    const processedFilename = `processed-${path.parse(filename).name}.png`;
+    // 3. Save the returned processed buffer as transparent WebP (extremely light weight)
+    const processedFilename = `processed-${path.parse(filename).name}.webp`;
     const processedFilePath = path.join(__dirname, '../../uploads', processedFilename);
 
-    const processedBuffer = Buffer.from(response.data);
-    fs.writeFileSync(processedFilePath, processedBuffer);
+    console.log(`Converting background-removed image to transparent WebP for item: ${item.name}...`);
+    const processedWebPBuffer = await sharp(Buffer.from(response.data))
+      .webp({ quality: 80 })
+      .toBuffer();
+
+    fs.writeFileSync(processedFilePath, processedWebPBuffer);
     const processedImageUrl = `/uploads/${processedFilename}`;
+
 
     // 4. Extract visual embedding and check for duplicate uploads using MobileNet
     let embeddingStr: string | null = null;
@@ -63,7 +82,8 @@ export const processImageBackground = async (itemId: string) => {
 
     try {
       console.log(`Extracting visual embedding for item: ${item.name} (${itemId})...`);
-      const embedding = await getEmbedding(processedBuffer);
+      const embedding = await getEmbedding(processedWebPBuffer);
+
       if (embedding) {
         embeddingStr = JSON.stringify(embedding);
         
