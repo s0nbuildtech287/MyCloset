@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiClient } from '../../api/client';
-import { X, RefreshCw, Save, Loader2, Sparkles } from 'lucide-react';
+import { X, RefreshCw, Save, Loader2, Sparkles, Eraser, Paintbrush } from 'lucide-react';
 
 interface ImageEditorProps {
   itemId: string;
@@ -19,6 +19,10 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
   const [saveError, setSaveError] = useState('');
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
+  
+  // Tool selection: 'eraser' for transparent erasure, 'brush' for colored drawing
+  const [toolMode, setToolMode] = useState<'eraser' | 'brush'>('eraser');
+  const [brushColor, setBrushColor] = useState('#ffffff'); // default to white
 
   // Load and draw image to canvas
   const initCanvas = () => {
@@ -94,7 +98,14 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
 
     const currentPos = getCoordinates(e);
 
-    ctx.globalCompositeOperation = 'destination-out'; // Eraser mode
+    // Apply tools modes
+    if (toolMode === 'eraser') {
+      ctx.globalCompositeOperation = 'destination-out'; // Eraser mode (transparent)
+    } else {
+      ctx.globalCompositeOperation = 'source-over'; // Brush mode (drawing overlay)
+      ctx.strokeStyle = brushColor;
+    }
+
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.lineWidth = brushSize;
@@ -172,7 +183,7 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
         <div className="flex justify-between items-center pb-3 border-b border-stone-100">
           <div>
             <h4 className="font-bold text-md text-[#2A2521] font-serif">Tẩy nền ảnh thủ công</h4>
-            <p className="text-[10px] text-stone-400 mt-0.5">Dùng cọ tẩy để xóa các vùng thừa, rồi nhấn AI để làm sạch tiếp</p>
+            <p className="text-[10px] text-stone-400 mt-0.5">Tẩy nền thừa hoặc dùng cọ vẽ màu để che khuyết điểm</p>
           </div>
           <button
             onClick={onClose}
@@ -228,9 +239,75 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
 
         {/* Toolbar & Sliders */}
         <div className="space-y-4">
+          {/* Segmented Control Tool selection */}
+          <div className="flex gap-2 p-1 bg-stone-100 rounded-2xl">
+            <button
+              type="button"
+              onClick={() => setToolMode('eraser')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                toolMode === 'eraser'
+                  ? 'bg-white text-[#2A2521] shadow-xs'
+                  : 'text-stone-500 hover:text-stone-700'
+              }`}
+            >
+              <Eraser className="h-3.5 w-3.5" />
+              Tẩy nền
+            </button>
+            <button
+              type="button"
+              onClick={() => setToolMode('brush')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                toolMode === 'brush'
+                  ? 'bg-white text-[#2A2521] shadow-xs'
+                  : 'text-stone-500 hover:text-stone-700'
+              }`}
+            >
+              <Paintbrush className="h-3.5 w-3.5" />
+              Cọ vẽ màu
+            </button>
+          </div>
+
+          {/* Color Picker container (brush mode only) */}
+          {toolMode === 'brush' && (
+            <div className="flex items-center gap-3 p-3 bg-stone-50 border border-stone-100 rounded-2xl animate-in fade-in slide-in-from-top-1 duration-200">
+              <label className="text-xs font-bold text-stone-500">Màu:</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="color"
+                  value={brushColor}
+                  onChange={(e) => setBrushColor(e.target.value)}
+                  className="w-8 h-8 rounded-lg cursor-pointer border border-stone-200 bg-white p-0.5 shrink-0"
+                />
+                <input
+                  type="text"
+                  value={brushColor}
+                  onChange={(e) => setBrushColor(e.target.value)}
+                  placeholder="#HEX"
+                  className="w-20 px-2 py-1 border border-stone-200 rounded-lg text-xs font-mono uppercase bg-white focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                />
+              </div>
+              
+              {/* Preset Palette */}
+              <div className="flex items-center gap-1.5 ml-auto">
+                {['#ffffff', '#f43f5e', '#3b82f6', '#10b981', '#eab308', '#000000'].map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBrushColor(c)}
+                    className={`w-5 h-5 rounded-full border shadow-xs transition-transform hover:scale-110 ${
+                      brushColor.toLowerCase() === c.toLowerCase() ? 'border-[#C4704F] scale-110 ring-1 ring-[#C4704F]' : 'border-stone-300'
+                    }`}
+                    style={{ backgroundColor: c }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Brush size slider */}
           <div className="space-y-1">
             <div className="flex justify-between text-xs font-semibold text-stone-600">
-              <span>Kích thước đầu cọ tẩy</span>
+              <span>Kích thước đầu cọ / tẩy</span>
               <span className="text-[#C4704F]">{brushSize}px</span>
             </div>
             <input
