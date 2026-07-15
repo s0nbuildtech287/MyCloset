@@ -10,6 +10,7 @@ import AiStylistChat from './components/chat/AiStylistChat'
 import ClosetSelector from './components/wardrobe/ClosetSelector'
 import TravelTab from './components/travel/TravelTab'
 import headerLogo from './assets/drobe1_cropped.png'
+import loginLogo from './assets/drobe1.png'
 import type { ClothingItem } from '../../shared/types'
 import { LogOut, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase, Bell, ChevronDown, Sun, Moon, Globe } from 'lucide-react'
 
@@ -151,8 +152,122 @@ function App() {
     setActiveTab('wardrobe');
   };
 
+
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF6F1] via-[#FFFBF9] to-[#F3ECE4] font-sans flex items-center justify-center p-4">
+        {/* Floating Success Toast */}
+        {success && (
+          <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-semibold text-xs px-5 py-3 rounded-full shadow-lg flex items-center gap-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+            <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
+            {success}
+          </div>
+        )}
+
+        <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-3xl shadow-xl border border-stone-100/80 animate-in zoom-in-95 duration-200">
+          <div className="text-center flex flex-col items-center">
+            {/* Logo */}
+            <img src={loginLogo} alt="Drobe" className="h-20 w-auto object-contain mb-3 rounded-2xl shadow-xs" />
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#2A2521] leading-none" style={{ fontFamily: '"Prata", serif' }}>
+              Drobe
+            </h2>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.25em] leading-none mt-2">
+              My Closet
+            </span>
+            <p className="mt-4 text-xs text-stone-500 max-w-[280px]">
+              Web app quản lý tủ quần áo cá nhân trực quan
+            </p>
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-700 p-3 rounded-2xl text-xs text-center border border-red-100 animate-in fade-in duration-200">
+              {error}
+            </div>
+          )}
+
+          <form className="space-y-5 text-left" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              {!isLoginMode && (
+                <div className="animate-in fade-in duration-150">
+                  <label htmlFor="name" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                    Họ và tên
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white"
+                    placeholder="Nhập tên của bạn"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label htmlFor="email" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                  Email đăng nhập
+                </label>
+                <input
+                  id="email"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white"
+                  placeholder="xu4ns0n@drobe.com"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="password" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                  Mật khẩu
+                </label>
+                <input
+                  id="password"
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white"
+                  placeholder="••••••••"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] focus:outline-none transition-colors"
+              >
+                {isLoginMode ? 'Đăng Nhập' : 'Đăng Ký'}
+              </button>
+            </div>
+
+            <div className="text-center text-xs pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLoginMode(!isLoginMode)
+                  setError('')
+                  setSuccess('')
+                }}
+                className="font-bold text-[#C4704F] hover:underline bg-transparent border-none p-0 cursor-pointer"
+              >
+                {isLoginMode ? "Chưa có tài khoản? Đăng ký ngay" : 'Đã có tài khoản? Đăng nhập'}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#FAF6F1] font-sans flex flex-col lg:flex-row">
+
       
       {/* Navbar & Sidebar layout if logged in */}
       {isAuthenticated && user ? (
@@ -411,113 +526,14 @@ function App() {
         )}
 
         <div className="flex-grow w-full px-4 sm:px-6 lg:px-8 py-8">
-
-        
-        {/* Unauthenticated View: Auth Form */}
-        {!isAuthenticated ? (
-          <div className="max-w-md w-full mx-auto space-y-8 bg-white p-8 rounded-2xl shadow-sm border border-stone-100 mt-12">
-            <div className="text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-[#2A2521] font-serif">
-                Drobe.
-              </h2>
-              <p className="mt-2 text-sm text-stone-500">
-                Web app quản lý tủ quần áo cá nhân trực quan
-              </p>
-            </div>
-
-            {error && (
-              <div className="bg-red-50 text-red-700 p-3 rounded-lg text-sm text-center border border-red-100">
-                {error}
-              </div>
-            )}
-
-            {success && (
-              <div className="bg-green-50 text-green-700 p-3 rounded-lg text-sm text-center border border-green-100">
-                {success}
-              </div>
-            )}
-
-            <form className="space-y-6" onSubmit={handleSubmit}>
-              <div className="space-y-4">
-                {!isLoginMode && (
-                  <div>
-                    <label htmlFor="name" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                      Họ và tên
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm"
-                      placeholder="Nhập tên của bạn"
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label htmlFor="email" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                    Email đăng nhập
-                  </label>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm"
-                    placeholder="xu4ns0n@drobe.com"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                    Mật khẩu
-                  </label>
-                  <input
-                    id="password"
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <button
-                  type="submit"
-                  className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-[#C4704F] hover:bg-[#b05f3f] focus:outline-none transition-colors"
-                >
-                  {isLoginMode ? 'Đăng Nhập' : 'Đăng Ký'}
-                </button>
-              </div>
-
-              <div className="text-center text-sm">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsLoginMode(!isLoginMode)
-                    setError('')
-                    setSuccess('')
-                  }}
-                  className="font-medium text-[#C4704F] hover:underline"
-                >
-                  {isLoginMode ? "Chưa có tài khoản? Đăng ký ngay" : 'Đã có tài khoản? Đăng nhập'}
-                </button>
-              </div>
-            </form>
-          </div>
-        ) : (
-          /* Authenticated Pages View */
+          {/* Authenticated Pages View */}
           <div className="space-y-6">
-            
-            {/* Success flash notifications */}
+            {/* Floating Success Toast */}
             {success && (
-              <div className="bg-green-50 border border-green-100 text-green-700 p-3 rounded-lg text-sm text-center max-w-2xl mx-auto">
+              <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-semibold text-xs px-5 py-3 rounded-full shadow-lg flex items-center gap-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
                 {success}
               </div>
             )}
@@ -550,10 +566,9 @@ function App() {
             {activeTab === 'travel' && (
               <TravelTab />
             )}
-
           </div>
-        )}
         </div>
+
 
         {/* Modal: Thông tin người dùng & tài khoản */}
         {isAuthenticated && user && isUserInfoOpen && (
