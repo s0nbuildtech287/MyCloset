@@ -94,121 +94,117 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF6F1] font-sans flex flex-col justify-between">
+    <div className="min-h-screen bg-[#FAF6F1] font-sans flex flex-col lg:flex-row">
       
-      {/* Navbar if logged in */}
-      {isAuthenticated && user && (
-        <header className="bg-white border-b border-stone-100 shadow-sm sticky top-0 z-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
-                <img src={headerLogo} alt="Drobe" className="h-12 w-auto object-contain rounded-xl shadow-xs" />
+      {/* Navbar & Sidebar layout if logged in */}
+      {isAuthenticated && user ? (
+        <>
+          {/* Desktop Left Sidebar (Visible only on lg and larger) */}
+          <aside className="hidden lg:flex w-64 bg-white border-r border-stone-150 h-screen sticky top-0 flex-col justify-between shrink-0 z-30 shadow-xs">
+            <div className="flex flex-col gap-6">
+              {/* Logo section */}
+              <div className="p-6 pb-2">
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+                  <img src={headerLogo} alt="Drobe" className="h-10 w-auto object-contain rounded-xl shadow-xs" />
+                </div>
               </div>
-              <ClosetSelector />
+
+              {/* Closet Selector inside Sidebar */}
+              <div className="px-6">
+                <ClosetSelector />
+              </div>
+
+              {/* Vertical Navigation menu */}
+              <nav className="px-4 space-y-1">
+                {[
+                  { tab: 'wardrobe', label: 'Tủ đồ', icon: LayoutGrid },
+                  { tab: 'add_item', label: 'Thêm đồ', icon: PlusCircle },
+                  { tab: 'outfit_canvas', label: 'Ghép đồ', icon: Sparkles },
+                  { tab: 'my_outfits', label: 'Bộ phối', icon: Layers },
+                  { tab: 'analytics', label: 'Thống kê', icon: BarChart3 },
+                  { tab: 'travel', label: 'Xếp Vali', icon: Briefcase },
+                  { tab: 'profile', label: 'Hồ sơ', icon: UserIcon },
+                ].map((item) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.tab && (item.tab !== 'add_item' || !editingItem);
+                  return (
+                    <button
+                      key={item.tab}
+                      onClick={() => { setActiveTab(item.tab as any); setEditingItem(null); }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                        isActive
+                          ? 'bg-[#C4704F]/10 text-[#C4704F] shadow-xs'
+                          : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4 shrink-0" />
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </nav>
             </div>
-            
-            {/* Tabs */}
-            <nav className="flex gap-0.5 sm:gap-1">
-              <button
-                onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'wardrobe' && !editingItem
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <LayoutGrid className="h-4 w-4" />
-                <span className="hidden sm:inline">Tủ đồ</span>
-              </button>
 
+            {/* Profile info & Logout at bottom of Sidebar */}
+            <div className="p-4 border-t border-stone-100 space-y-3">
+              <div className="flex items-center gap-3 px-2">
+                <span className="w-8 h-8 rounded-full bg-[#C4704F]/10 text-[#C4704F] flex items-center justify-center font-bold text-xs shrink-0">
+                  {user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold text-stone-700 truncate leading-none">{user.name || 'Người dùng'}</p>
+                  <p className="text-[10px] text-stone-400 truncate mt-1">{user.email}</p>
+                </div>
+              </div>
               <button
-                onClick={() => { setActiveTab('add_item'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'add_item' && !editingItem
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-stone-500 hover:text-red-600 hover:bg-red-50 transition-colors"
               >
-                <PlusCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Thêm đồ</span>
+                <LogOut className="h-4 w-4 shrink-0" />
+                <span>Đăng xuất</span>
               </button>
+            </div>
+          </aside>
 
-              <button
-                onClick={() => { setActiveTab('outfit_canvas'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'outfit_canvas' && !editingItem
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <Sparkles className="h-4 w-4" />
-                <span className="hidden sm:inline">Ghép đồ</span>
-              </button>
+          {/* Mobile Top Header (Visible on screen < lg) */}
+          <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-stone-100 px-4 flex items-center justify-between z-40 shadow-xs">
+            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+              <img src={headerLogo} alt="Drobe" className="h-10 w-auto object-contain rounded-lg" />
+            </div>
+            <ClosetSelector />
+          </header>
 
-              <button
-                onClick={() => { setActiveTab('my_outfits'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'my_outfits' && !editingItem
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <Layers className="h-4 w-4" />
-                <span className="hidden sm:inline">Bộ phối</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab('analytics'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'analytics' && !editingItem
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <BarChart3 className="h-4 w-4" />
-                <span className="hidden sm:inline">Thống kê</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab('travel'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'travel' && !editingItem
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <Briefcase className="h-4 w-4" />
-                <span className="hidden sm:inline">Xếp Vali</span>
-              </button>
-
-              <button
-                onClick={() => { setActiveTab('profile'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-                  activeTab === 'profile'
-                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
-                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
-                }`}
-              >
-                <UserIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Hồ sơ</span>
-              </button>
-            </nav>
-
-            {/* Logout button */}
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-1 text-xs font-semibold text-stone-500 hover:text-red-600 transition-colors py-2 px-3 rounded-lg hover:bg-red-50"
-              title="Đăng xuất"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Đăng xuất</span>
-            </button>
-          </div>
-        </header>
-      )}
+          {/* Mobile Bottom Tabbar Navigation (Visible on screen < lg) */}
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-stone-150 flex items-center justify-around z-40 px-2 shadow-lg">
+            {[
+              { tab: 'wardrobe', label: 'Tủ đồ', icon: LayoutGrid },
+              { tab: 'outfit_canvas', label: 'Ghép', icon: Sparkles },
+              { tab: 'add_item', label: 'Thêm', icon: PlusCircle },
+              { tab: 'travel', label: 'Vali', icon: Briefcase },
+              { tab: 'profile', label: 'Hồ sơ', icon: UserIcon },
+            ].map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.tab && (item.tab !== 'add_item' || !editingItem);
+              return (
+                <button
+                  key={item.tab}
+                  onClick={() => { setActiveTab(item.tab as any); setEditingItem(null); }}
+                  className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold transition-all ${
+                    isActive ? 'text-[#C4704F]' : 'text-stone-400 hover:text-stone-600'
+                  }`}
+                >
+                  <Icon className="h-4.5 w-4.5 shrink-0" />
+                  <span>{item.label}</span>
+                </button>
+              );
+            })}
+          </nav>
+        </>
+      ) : null}
 
       {/* Main Content Area */}
-      <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className={`flex-1 flex flex-col min-w-0 ${isAuthenticated && user ? 'pt-16 pb-20 lg:pt-0 lg:pb-0' : ''}`}>
+        <div className="flex-grow w-full px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Unauthenticated View: Auth Form */}
         {!isAuthenticated ? (
@@ -349,43 +345,69 @@ function App() {
             )}
 
             {activeTab === 'profile' && (
-              <div className="max-w-md mx-auto bg-white border border-stone-100 rounded-2xl p-6 shadow-sm space-y-4">
-                <h3 className="text-lg font-bold text-[#2A2521] border-b border-stone-100 pb-2 font-serif">Thông tin tài khoản</h3>
-                <div className="space-y-2 text-sm text-stone-600">
-                  <p><span className="font-semibold text-stone-700">Tên hiển thị:</span> {user.name || 'Chưa thiết lập'}</p>
-                  <p><span className="font-semibold text-stone-700">Email:</span> {user.email}</p>
-                  <p><span className="font-semibold text-stone-700">Mã User ID:</span> {user.id}</p>
-                  <p><span className="font-semibold text-stone-700">Thời gian tạo:</span> {new Date(user.createdAt).toLocaleDateString('vi-VN')}</p>
+              <div className="max-w-md mx-auto space-y-6">
+                <div className="bg-white border border-stone-100 rounded-2xl p-6 shadow-sm space-y-4">
+                  <h3 className="text-lg font-bold text-[#2A2521] border-b border-stone-100 pb-2 font-serif">Thông tin tài khoản</h3>
+                  <div className="space-y-2 text-sm text-stone-600 text-left">
+                    <p><span className="font-semibold text-stone-700">Tên hiển thị:</span> {user.name || 'Chưa thiết lập'}</p>
+                    <p><span className="font-semibold text-stone-700">Email:</span> {user.email}</p>
+                    <p><span className="font-semibold text-stone-700">Mã User ID:</span> {user.id}</p>
+                    <p><span className="font-semibold text-stone-700">Thời gian tạo:</span> {new Date(user.createdAt).toLocaleDateString('vi-VN')}</p>
+                  </div>
+                  
+                  <div className="border-t border-stone-100 pt-4 space-y-2 text-left">
+                    <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider">Trạng thái hệ thống</h4>
+                    {healthStatus ? (
+                      <p className="text-xs text-green-600 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-ping"></span>
+                        API Server Online ({healthStatus.status})
+                      </p>
+                    ) : (
+                      <p className="text-xs text-red-500 font-semibold flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
+                        API Server Offline
+                      </p>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="border-t border-stone-100 pt-4 space-y-2">
-                  <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider">Trạng thái hệ thống</h4>
-                  {healthStatus ? (
-                    <p className="text-xs text-green-600 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-ping"></span>
-                      API Server Online ({healthStatus.status})
-                    </p>
-                  ) : (
-                    <p className="text-xs text-red-500 font-semibold flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
-                      API Server Offline
-                    </p>
-                  )}
+
+                {/* Mobile/Tablet Extra Shortcuts */}
+                <div className="lg:hidden bg-white border border-stone-100 rounded-2xl p-4 shadow-sm space-y-2 text-left">
+                  <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider px-2 mb-2">Tiện ích khác</h4>
+                  <button
+                    onClick={() => setActiveTab('my_outfits')}
+                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 text-xs font-bold text-stone-700 transition-colors"
+                  >
+                    <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-[#C4704F]" /> Bộ phối đã lưu</span>
+                    <span className="text-stone-300">➔</span>
+                  </button>
+                  <button
+                    onClick={() => setActiveTab('analytics')}
+                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 text-xs font-bold text-stone-700 transition-colors"
+                  >
+                    <span className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-[#8A9A5B]" /> Thống kê & Báo cáo</span>
+                    <span className="text-stone-300">➔</span>
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-red-50/50 text-xs font-bold text-red-600 transition-colors border-t border-stone-50 mt-2 pt-4"
+                  >
+                    <span className="flex items-center gap-2"><LogOut className="h-4 w-4" /> Đăng xuất tài khoản</span>
+                    <span className="text-stone-300">➔</span>
+                  </button>
                 </div>
               </div>
             )}
           </div>
         )}
+        </div>
       </main>
-
-      {/* Footer */}
-      <footer className="py-4 border-t border-stone-100 bg-white" />
 
       {/* Floating AI Stylist Chatbot */}
       {isAuthenticated && <AiStylistChat />}
 
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

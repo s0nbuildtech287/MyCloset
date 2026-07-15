@@ -271,79 +271,84 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           </div>
         </div>
 
-        {/* Categories Pills */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">Danh mục</label>
-          <div className="flex flex-wrap gap-1.5">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => {
-                  setCategory(cat.value);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  category === cat.value
-                    ? 'bg-[#2A2521] text-white'
-                    : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+        {/* Categories, Season, and Condition Filters in responsive grid columns */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-stone-100">
+          
+          {/* Column 1: Categories Pills */}
+          <div className="space-y-2 text-left">
+            <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Danh mục</label>
+            <div className="flex flex-wrap gap-1.5">
+              {CATEGORIES.map((cat) => (
+                <button
+                  key={cat.value}
+                  onClick={() => {
+                    setCategory(cat.value);
+                    setPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    category === cat.value
+                      ? 'bg-[#2A2521] text-white shadow-xs'
+                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Season filter */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">Mùa phù hợp</label>
-          <div className="flex flex-wrap gap-1.5">
-            {SEASONS.map((se) => (
-              <button
-                key={se.value}
-                onClick={() => {
-                  setSeason(se.value);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  season === se.value
-                    ? 'bg-[#8A9A5B] text-white'
-                    : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
-                }`}
-              >
-                {se.label}
-              </button>
-            ))}
+          {/* Column 2: Season filter */}
+          <div className="space-y-2 text-left">
+            <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Mùa phù hợp</label>
+            <div className="flex flex-wrap gap-1.5">
+              {SEASONS.map((se) => (
+                <button
+                  key={se.value}
+                  onClick={() => {
+                    setSeason(se.value);
+                    setPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    season === se.value
+                      ? 'bg-[#8A9A5B] text-white shadow-xs'
+                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                  }`}
+                >
+                  {se.label}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Condition filter */}
-        <div className="space-y-2">
-          <label className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">Tình trạng</label>
-          <div className="flex flex-wrap gap-1.5">
-            {[
-              { value: '', label: 'Tất cả' },
-              { value: 'new', label: '✨ Mới' },
-              { value: 'good', label: '👍 Tốt' },
-              { value: 'old', label: '🍂 Cũ' },
-              { value: 'damaged', label: '⚠️ Hỏng/Rách' }
-            ].map((cond) => (
-              <button
-                key={cond.value}
-                onClick={() => {
-                  setConditionFilter(cond.value);
-                  setPage(1);
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                  conditionFilter === cond.value
-                    ? 'bg-[#C4704F] text-white'
-                    : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
-                }`}
-              >
-                {cond.label}
-              </button>
-            ))}
+          {/* Column 3: Condition filter */}
+          <div className="space-y-2 text-left col-span-1 md:col-span-2 lg:col-span-1">
+            <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Tình trạng</label>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { value: '', label: 'Tất cả' },
+                { value: 'new', label: '✨ Mới' },
+                { value: 'good', label: '👍 Tốt' },
+                { value: 'old', label: '🍂 Cũ' },
+                { value: 'damaged', label: '⚠️ Hỏng/Rách' }
+              ].map((cond) => (
+                <button
+                  key={cond.value}
+                  onClick={() => {
+                    setConditionFilter(cond.value);
+                    setPage(1);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
+                    conditionFilter === cond.value
+                      ? 'bg-[#C4704F] text-white shadow-xs'
+                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                  }`}
+                >
+                  {cond.label}
+                </button>
+              ))}
+            </div>
           </div>
+
         </div>
       </div>
 
@@ -356,7 +361,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       {/* Wardrobe Grid */}
       {loading ? (
         /* Shimmer Loading state */
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
             <div key={i} className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm animate-pulse space-y-4 pb-4">
               <div className="aspect-square bg-stone-100 w-full" />
@@ -382,7 +387,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
         </div>
       ) : (
         /* Grid Display */
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
           {items.map((item) => (
             <div
               key={item.id}

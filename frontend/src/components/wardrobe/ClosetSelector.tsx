@@ -58,7 +58,7 @@ export default function ClosetSelector() {
           {/* Click outside overlay */}
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           
-          <div className="absolute right-0 mt-2 w-64 bg-white border border-stone-150 rounded-2xl shadow-xl z-50 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="absolute lg:left-0 lg:right-auto right-0 mt-2 w-64 bg-white border border-stone-150 rounded-2xl shadow-xl z-50 p-4 space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
             
             <div className="border-b border-stone-100 pb-2">
               <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider block">Chọn tủ đồ hoạt động</span>
