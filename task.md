@@ -195,10 +195,10 @@ drobe/
 - [x] Fallback API cho ảnh xử lý lỗi/kém
 
 ### Phase 4 — Outfit Builder
-- [ ] Component canvas react-konva: kéo-thả, resize, xoay, layer order
-- [ ] API lưu/đọc outfit + outfit_items
-- [ ] Export thumbnail từ canvas khi lưu outfit
-- [ ] Trang "My Outfits" xem lại danh sách
+- [x] Component canvas react-konva: kéo-thả, resize, xoay, layer order
+- [x] API lưu/đọc outfit + outfit_items
+- [x] Export thumbnail từ canvas khi lưu outfit
+- [x] Trang "My Outfits" xem lại danh sách
 
 ### Phase 5 — Polish
 - [ ] Responsive mobile
