@@ -44,6 +44,9 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
   // Image upload states
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('file');
+  const [imageUrl, setImageUrl] = useState('');
+
 
   const [loading, setLoading] = useState(false);
   const [aiAnalyzing, setAiAnalyzing] = useState(false);
@@ -115,31 +118,52 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
   const handleClearImage = () => {
     setImageFile(null);
     setImagePreview(null);
+    setImageUrl('');
   };
 
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setImageUrl(url);
+    if (url.trim().startsWith('http')) {
+      setImagePreview(url.trim());
+    } else {
+      setImagePreview(null);
+    }
+  };
+
+
   const handleAiAutofill = async () => {
-    if (!imageFile) return;
+    if (!imageFile && !imageUrl) return;
     setAiAnalyzing(true);
     setError('');
     try {
-      const formData = new FormData();
-      formData.append('image', imageFile);
-      
-      const res = await apiClient.post('/items/analyze-image', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
+      let res;
+      if (uploadMethod === 'file' && imageFile) {
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        
+        res = await apiClient.post('/items/analyze-image', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+      } else if (uploadMethod === 'url' && imageUrl) {
+        res = await apiClient.post('/items/analyze-image', {
+          imageUrl: imageUrl.trim()
+        });
+      }
+
+      if (res && res.data) {
+        const { name, category, color, brand, season, tags, condition: aiCondition } = res.data;
+        if (name) setName(name);
+        if (category) setCategory(category);
+        if (color) setColor(color);
+        if (brand) setBrand(brand);
+        if (season) setSeason(season);
+        if (aiCondition) setCondition(aiCondition);
+        if (tags) {
+          setTagsInput(Array.isArray(tags) ? tags.join(', ') : tags);
         }
-      });
-      
-      const { name, category, color, brand, season, tags, condition: aiCondition } = res.data;
-      if (name) setName(name);
-      if (category) setCategory(category);
-      if (color) setColor(color);
-      if (brand) setBrand(brand);
-      if (season) setSeason(season);
-      if (aiCondition) setCondition(aiCondition);
-      if (tags) {
-        setTagsInput(Array.isArray(tags) ? tags.join(', ') : tags);
       }
     } catch (err: any) {
       console.error('Failed to run AI autofill:', err);
@@ -148,6 +172,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
       setAiAnalyzing(false);
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,31 +200,52 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
         });
       } else {
         // Create Item
-        if (!imageFile) {
-          throw new Error('Vui lòng chọn ảnh cho món đồ');
-        }
+        if (uploadMethod === 'file') {
+          if (!imageFile) {
+            throw new Error('Vui lòng tải lên tệp ảnh cho món đồ');
+          }
 
-        const formData = new FormData();
-        formData.append('name', name);
-        formData.append('category', category);
-        formData.append('color', color);
-        formData.append('brand', brand);
-        formData.append('season', season);
-        formData.append('price', price);
-        formData.append('notes', notes);
-        formData.append('tags', JSON.stringify(tags));
-        formData.append('image', imageFile);
-        formData.append('condition', condition);
-        if (activeClosetId) {
-          formData.append('closetId', activeClosetId);
-        }
+          const formData = new FormData();
+          formData.append('name', name);
+          formData.append('category', category);
+          formData.append('color', color);
+          formData.append('brand', brand);
+          formData.append('season', season);
+          formData.append('price', price);
+          formData.append('notes', notes);
+          formData.append('tags', JSON.stringify(tags));
+          formData.append('image', imageFile);
+          formData.append('condition', condition);
+          if (activeClosetId) {
+            formData.append('closetId', activeClosetId);
+          }
 
-        await apiClient.post('/items', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
+          await apiClient.post('/items', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+        } else {
+          if (!imageUrl.trim()) {
+            throw new Error('Vui lòng nhập đường dẫn link ảnh online');
+          }
+
+          await apiClient.post('/items', {
+            name,
+            category,
+            color,
+            brand,
+            season,
+            price: price === '' ? null : parseFloat(price),
+            notes,
+            tags,
+            condition,
+            imageUrl: imageUrl.trim(),
+            closetId: activeClosetId || null
+          });
+        }
       }
+
 
       onSuccess();
     } catch (err: any) {
@@ -242,14 +288,37 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
         {/* Form body */}
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Left Sub-column: Image upload */}
-          <div className="flex flex-col items-center justify-start space-y-4">
+          <div className="flex flex-col items-center justify-start space-y-4 w-full">
             <label className="text-xs font-semibold text-stone-500 uppercase tracking-wider self-start">
               Hình ảnh quần áo
             </label>
 
+            {!isEditMode && (
+              <div className="flex w-full bg-stone-100 p-1 rounded-xl gap-1 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => { setUploadMethod('file'); handleClearImage(); }}
+                  className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                    uploadMethod === 'file' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  Tải tệp ảnh
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setUploadMethod('url'); handleClearImage(); }}
+                  className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
+                    uploadMethod === 'url' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                  }`}
+                >
+                  Dán link ảnh
+                </button>
+              </div>
+            )}
+
             {imagePreview ? (
               <div className="w-full space-y-3">
-                <div className="relative aspect-square w-full bg-[#FAF6F1]/50 border border-stone-200 rounded-xl overflow-hidden flex items-center justify-center group">
+                <div className="relative aspect-square w-full bg-[#FAF6F1]/50 border border-stone-200 rounded-xl overflow-hidden flex items-center justify-center group animate-in fade-in duration-200">
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -266,12 +335,13 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                   )}
                 </div>
                 
-                {imageFile && (
+                {(imageFile || (uploadMethod === 'url' && imageUrl.trim().startsWith('http'))) && (
+
                   <button
                     type="button"
                     disabled={loading || aiAnalyzing}
                     onClick={handleAiAutofill}
-                    className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-colors shadow-sm"
+                    className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-colors shadow-sm animate-in slide-in-from-top-1 duration-200"
                   >
                     {aiAnalyzing ? (
                       <>
@@ -287,8 +357,8 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                   </button>
                 )}
               </div>
-            ) : (
-              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 hover:bg-[#FAF6F1]/20 transition-colors cursor-pointer">
+            ) : uploadMethod === 'file' ? (
+              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 hover:bg-[#FAF6F1]/20 transition-colors cursor-pointer w-full">
                 <input
                   type="file"
                   accept="image/*"
@@ -300,8 +370,25 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                 <p className="text-sm font-medium text-stone-700">Tải lên hình ảnh</p>
                 <p className="text-xs text-stone-400 mt-1">JPEG, PNG, WEBP lên tới 5MB</p>
               </div>
+            ) : (
+              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 hover:bg-[#FAF6F1]/20 transition-all w-full gap-3">
+                <Upload className="h-10 w-10 text-stone-400 animate-bounce" />
+                <div className="w-full text-center space-y-1">
+                  <p className="text-xs font-bold text-stone-700 uppercase tracking-wider">Đường dẫn ảnh online</p>
+                  <p className="text-[10px] text-stone-400">Hỗ trợ Pinterest, Google, Imgur...</p>
+                </div>
+                <input
+                  type="url"
+                  placeholder="Dán link ảnh (e.g. https://...)"
+                  value={imageUrl}
+                  onChange={handleUrlChange}
+                  className="w-full px-3 py-2 border border-stone-200 rounded-xl text-xs bg-white text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  required={!isEditMode}
+                />
+              </div>
             )}
           </div>
+
 
           {/* Right Sub-column: Form fields */}
           <div className="space-y-4">

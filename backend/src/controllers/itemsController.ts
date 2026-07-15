@@ -28,20 +28,58 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'Image file is required' });
+    const { name, category, color, brand, season, notes, condition, imageUrl } = req.body;
+
+    if (!req.file && !imageUrl) {
+      return res.status(400).json({ error: 'Vui lòng tải lên tệp ảnh hoặc dán link ảnh online.' });
     }
 
-    const { name, category, color, brand, season, notes, condition } = req.body;
-    let tags: string[] = [];
+    let originalImageUrl = '';
 
+    if (req.file) {
+      originalImageUrl = `/uploads/${req.file.filename}`;
+    } else if (imageUrl) {
+      try {
+        console.log(`Downloading image from pasted URL: ${imageUrl}...`);
+        const response = await axios.get(imageUrl, {
+          responseType: 'arraybuffer',
+          timeout: 20000, // 20s timeout
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        });
+        const buffer = Buffer.from(response.data);
+
+        // Resolve extension (default to .jpg)
+        let ext = '.jpg';
+        try {
+          const parsedUrl = new URL(imageUrl);
+          const pathname = parsedUrl.pathname;
+          const detectedExt = path.extname(pathname);
+          if (detectedExt && ['.jpg', '.jpeg', '.png', '.webp'].includes(detectedExt.toLowerCase())) {
+            ext = detectedExt;
+          }
+        } catch (_) {}
+
+        const filename = `downloaded_${Date.now()}_${Math.round(Math.random() * 1000)}${ext}`;
+        const filePath = path.join(__dirname, '../../uploads', filename);
+
+        fs.writeFileSync(filePath, buffer);
+        originalImageUrl = `/uploads/${filename}`;
+        console.log(`Pasted image downloaded successfully to: ${filePath}`);
+      } catch (dlErr: any) {
+        console.error('Failed to download image from URL:', dlErr);
+        return res.status(400).json({ error: 'Không thể tải ảnh từ link bạn cung cấp. Vui lòng kiểm tra lại đường dẫn.' });
+      }
+    }
+
+    let tags: string[] = [];
     if (req.body.tags) {
       try {
         tags = Array.isArray(req.body.tags) 
           ? req.body.tags 
           : JSON.parse(req.body.tags);
       } catch (e) {
-        // Fallback if it is a comma separated string
         tags = req.body.tags.split(',').map((t: string) => t.trim()).filter(Boolean);
       }
     }
@@ -51,9 +89,8 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
       price = parseFloat(req.body.price);
     }
 
-    const originalImageUrl = `/uploads/${req.file.filename}`;
-
     let targetClosetId = req.body.closetId || null;
+
     if (!targetClosetId) {
       const defaultCloset = await prisma.closet.findFirst({
         where: { userId, isDefault: true }
@@ -530,8 +567,9 @@ export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Respo
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    if (!req.file) {
-      return res.status(400).json({ error: 'Vui lòng cung cấp tệp ảnh để phân tích' });
+    const { imageUrl } = req.body;
+    if (!req.file && !imageUrl) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp tệp ảnh hoặc đường dẫn link ảnh để phân tích.' });
     }
 
     const apiKey = process.env.OPENAI_API_KEY;
@@ -539,7 +577,7 @@ export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Respo
 
     if (!apiKey) {
       // Clean up uploaded file first
-      if (fs.existsSync(req.file.path)) {
+      if (req.file && fs.existsSync(req.file.path)) {
         fs.unlinkSync(req.file.path);
       }
       return res.status(500).json({ 
@@ -547,10 +585,38 @@ export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Respo
       });
     }
 
-    const filePath = req.file.path;
-    const imageBuffer = fs.readFileSync(filePath);
-    const base64Image = imageBuffer.toString('base64');
-    const mimeType = req.file.mimetype;
+    let base64Image = '';
+    let mimeType = 'image/jpeg';
+
+    if (req.file) {
+      const filePath = req.file.path;
+      const imageBuffer = fs.readFileSync(filePath);
+      base64Image = imageBuffer.toString('base64');
+      mimeType = req.file.mimetype;
+    } else if (imageUrl) {
+      try {
+        console.log(`Downloading image from URL for AI analysis: ${imageUrl}...`);
+        const response = await axios.get(imageUrl, {
+          responseType: 'arraybuffer',
+          timeout: 20000,
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+          }
+        });
+        const buffer = Buffer.from(response.data);
+        base64Image = buffer.toString('base64');
+
+        const contentType = response.headers['content-type'];
+        if (typeof contentType === 'string' && contentType.startsWith('image/')) {
+          mimeType = contentType;
+        }
+
+      } catch (dlErr) {
+        console.error('Failed to download image from URL for AI analysis:', dlErr);
+        return res.status(400).json({ error: 'Không thể tải ảnh từ link để AI nhận diện. Vui lòng kiểm tra lại đường dẫn.' });
+      }
+    }
+
 
     const makeOpenAiRequest = async (targetModel: string) => {
       return await axios.post(
@@ -607,9 +673,10 @@ Trả về ĐỊNH DẠNG JSON THUẦN TÚY, không có dấu bọc markdown hay
     }
 
     // Clean up temporary file from disk immediately
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
     }
+
 
     const content = response.data?.choices?.[0]?.message?.content;
     if (!content) {
