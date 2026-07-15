@@ -5,8 +5,9 @@ import sharp from 'sharp';
 import { prisma } from '../db';
 import { getEmbedding, checkDuplicateItem } from './similarityService';
 
-export const processImageBackground = async (itemId: string) => {
+export const processImageBackground = async (itemId: string, removeBg = true) => {
   try {
+
     // 1. Fetch item details
     const item = await prisma.clothingItem.findUnique({
       where: { id: itemId },
@@ -45,35 +46,44 @@ export const processImageBackground = async (itemId: string) => {
     // Overwrite original file with lightweight compressed JPEG
     fs.writeFileSync(originalFilePath, compressedOriginalBuffer);
 
-    // 2. Read file to a Blob to send via FormData
-    const fileBlob = new Blob([compressedOriginalBuffer], { type: 'image/jpeg' });
-
-    const formData = new FormData();
-    formData.append('file', fileBlob, filename);
-
-    console.log(`Sending image to rembg local server for item: ${item.name} (${itemId})...`);
-
-    // Call rembg s local server (running on port 5000)
-    // Timeout is set to 120 seconds to allow model downloads on first request
-    const response = await axios.post('http://127.0.0.1:5000/api/remove', formData, {
-      responseType: 'arraybuffer',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      timeout: 120000, 
-    });
-
-    // 3. Save the returned processed buffer as transparent WebP (extremely light weight)
     const processedFilename = `processed-${path.parse(filename).name}.webp`;
     const processedFilePath = path.join(__dirname, '../../uploads', processedFilename);
+    let processedWebPBuffer: Buffer;
 
-    console.log(`Converting background-removed image to transparent WebP for item: ${item.name}...`);
-    const processedWebPBuffer = await sharp(Buffer.from(response.data))
-      .webp({ quality: 80 })
-      .toBuffer();
+    if (removeBg) {
+      // 2. Read file to a Blob to send via FormData
+      const fileBlob = new Blob([compressedOriginalBuffer], { type: 'image/jpeg' });
+      const formData = new FormData();
+      formData.append('file', fileBlob, filename);
 
+      console.log(`Sending image to rembg local server for item: ${item.name} (${itemId})...`);
+
+      // Call rembg s local server (running on port 5000)
+      // Timeout is set to 120 seconds to allow model downloads on first request
+      const response = await axios.post('http://127.0.0.1:5000/api/remove', formData, {
+        responseType: 'arraybuffer',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        timeout: 120000, 
+      });
+
+      console.log(`Converting background-removed image to transparent WebP for item: ${item.name}...`);
+      processedWebPBuffer = await sharp(Buffer.from(response.data))
+        .webp({ quality: 80 })
+        .toBuffer();
+    } else {
+      console.log(`Skipping auto background removal for item: ${item.name}. Using original image buffer...`);
+      // Simply convert compressed original image to WebP (quality 80%) for the editor
+      processedWebPBuffer = await sharp(compressedOriginalBuffer)
+        .webp({ quality: 80 })
+        .toBuffer();
+    }
+
+    // 3. Save processed image
     fs.writeFileSync(processedFilePath, processedWebPBuffer);
     const processedImageUrl = `/uploads/${processedFilename}`;
+
 
 
     // 4. Extract visual embedding and check for duplicate uploads using MobileNet

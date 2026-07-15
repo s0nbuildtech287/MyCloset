@@ -46,6 +46,8 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [uploadMethod, setUploadMethod] = useState<'file' | 'url'>('file');
   const [imageUrl, setImageUrl] = useState('');
+  const [removeBg, setRemoveBg] = useState(true);
+
 
 
   const [loading, setLoading] = useState(false);
@@ -216,6 +218,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
           formData.append('tags', JSON.stringify(tags));
           formData.append('image', imageFile);
           formData.append('condition', condition);
+          formData.append('removeBg', removeBg.toString());
           if (activeClosetId) {
             formData.append('closetId', activeClosetId);
           }
@@ -241,10 +244,12 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
             tags,
             condition,
             imageUrl: imageUrl.trim(),
+            removeBg,
             closetId: activeClosetId || null
           });
         }
       }
+
 
 
       onSuccess();
@@ -542,8 +547,31 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
               </div>
             </div>
 
+            {!isEditMode && (
+              <div className="flex items-center justify-between p-3.5 bg-stone-50 border border-stone-100 rounded-2xl animate-in fade-in duration-200">
+                <div className="space-y-0.5">
+                  <span className="block text-xs font-bold text-[#2A2521]">Tự động tách nền bằng AI</span>
+                  <span className="block text-[10px] text-stone-400">Sử dụng AI để loại bỏ hình nền xung quanh trang phục</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setRemoveBg(!removeBg)}
+                  className={`w-11 h-6 flex items-center rounded-full p-1 transition-all ${
+                    removeBg ? 'bg-[#C4704F]' : 'bg-stone-300'
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-all ${
+                      removeBg ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+            )}
+
             <div>
               <label htmlFor="notes" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+
                 Ghi chú thêm
               </label>
               <textarea

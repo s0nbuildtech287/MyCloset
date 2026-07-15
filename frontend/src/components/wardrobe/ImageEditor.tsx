@@ -14,6 +14,8 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [brushSize, setBrushSize] = useState(15);
   const [saving, setSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [isDrawing, setIsDrawing] = useState(false);
   const [lastPos, setLastPos] = useState({ x: 0, y: 0 });
 
@@ -114,15 +116,19 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
     if (!canvas) return;
     
     setSaving(true);
+    setSaveError('');
     try {
       const dataUrl = canvas.toDataURL('image/png');
       await apiClient.patch(`/items/${itemId}`, {
         processedImageBase64: dataUrl
       });
-      onSave();
+      setSaveSuccess(true);
+      setTimeout(() => {
+        onSave();
+      }, 800);
     } catch (err) {
       console.error('Failed to save manually erased image:', err);
-      alert('Không thể lưu ảnh đã chỉnh sửa');
+      setSaveError('Không thể lưu ảnh đã chỉnh sửa. Vui lòng thử lại.');
     } finally {
       setSaving(false);
     }
@@ -166,6 +172,21 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
             className="border border-stone-200 bg-[#F6F5F3] shadow-md rounded-lg cursor-crosshair relative z-10 touch-none"
           />
         </div>
+
+        {/* Success Toast */}
+        {saveSuccess && (
+          <div className="bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-2">
+            <svg className="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+            Đã lưu thành công! Đang cập nhật...
+          </div>
+        )}
+
+        {/* Error Banner */}
+        {saveError && (
+          <div className="bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold px-4 py-2.5 rounded-xl">
+            {saveError}
+          </div>
+        )}
 
         {/* Toolbar & Sliders */}
         <div className="space-y-4">

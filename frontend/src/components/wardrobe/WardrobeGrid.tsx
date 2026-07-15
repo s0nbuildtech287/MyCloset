@@ -444,9 +444,10 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                 {(item.processingStatus === 'pending' || item.processingStatus === 'processing') && (
                   <div className="absolute inset-0 bg-stone-900/30 flex flex-col items-center justify-center text-white p-2">
                     <span className="w-5 h-5 rounded-full border-2 border-t-transparent border-white animate-spin mb-1"></span>
-                    <span className="text-[10px] font-bold tracking-wider uppercase drop-shadow-sm">Đang tách nền...</span>
+                    <span className="text-[10px] font-bold tracking-wider uppercase drop-shadow-sm">Đang xử lý...</span>
                   </div>
                 )}
+
 
                 {/* Failed Badge */}
                 {item.processingStatus === 'failed' && (
@@ -633,10 +634,10 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
             setIsEditorOpen(false);
             setSelectedEditItem(null);
           }}
-          onSave={() => {
+          onSave={async () => {
             setIsEditorOpen(false);
             setSelectedEditItem(null);
-            fetchItems();
+            await fetchItems();
             fetchStats();
           }}
         />

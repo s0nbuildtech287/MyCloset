@@ -28,7 +28,8 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { name, category, color, brand, season, notes, condition, imageUrl } = req.body;
+    const { name, category, color, brand, season, notes, condition, imageUrl, removeBg } = req.body;
+
 
     if (!req.file && !imageUrl) {
       return res.status(400).json({ error: 'Vui lòng tải lên tệp ảnh hoặc dán link ảnh online.' });
@@ -117,10 +118,13 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
       },
     });
 
+    const removeBgBool = removeBg !== 'false' && removeBg !== false;
+
     // Push the background removal job into the sequential queue
     imageQueue.push(async () => {
-      await processImageBackground(clothingItem.id);
+      await processImageBackground(clothingItem.id, removeBgBool);
     });
+
 
     return res.status(201).json(clothingItem);
   } catch (error) {
@@ -299,19 +303,24 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
       const base64Data = req.body.processedImageBase64.replace(/^data:image\/\w+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
       
-      let filename = '';
+      // Always generate a new unique filename so browser cache is busted
+      const newFilename = `processed_manual_${Date.now()}_${Math.round(Math.random() * 1000)}.png`;
+      const newFilePath = path.join(__dirname, '../../uploads', newFilename);
+      fs.writeFileSync(newFilePath, buffer);
+      
+      // Delete the old processed file to reclaim disk space
       if (item.processedImageUrl) {
-        filename = path.basename(item.processedImageUrl);
-      } else {
-        filename = `processed_${Date.now()}_${Math.round(Math.random() * 1000)}.png`;
+        const oldFilename = path.basename(item.processedImageUrl);
+        const oldFilePath = path.join(__dirname, '../../uploads', oldFilename);
+        if (fs.existsSync(oldFilePath)) {
+          fs.unlinkSync(oldFilePath);
+        }
       }
       
-      const filePath = path.join(__dirname, '../../uploads', filename);
-      fs.writeFileSync(filePath, buffer);
-      
-      updateData.processedImageUrl = `/uploads/${filename}`;
-      updateData.processingStatus = 'completed';
+      updateData.processedImageUrl = `/uploads/${newFilename}`;
+      updateData.processingStatus = 'done';
     }
+
 
     const updatedItem = await prisma.clothingItem.update({
       where: { id },
