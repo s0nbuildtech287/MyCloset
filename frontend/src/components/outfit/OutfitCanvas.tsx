@@ -86,6 +86,7 @@ const IndividualImage = ({ item, onSelect, onChange }: IndividualImageProps) => 
 export default function OutfitCanvas() {
   const [wardrobeItems, setWardrobeItems] = useState<ClothingItem[]>([]);
   const [activeCategory, setActiveCategory] = useState('');
+  const [search, setSearch] = useState('');
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
@@ -97,11 +98,12 @@ export default function OutfitCanvas() {
     if (!containerRef.current) return;
     const updateSize = () => {
       if (containerRef.current) {
-        const w = containerRef.current.offsetWidth - 24; // Account for padding
-        const finalW = Math.max(300, Math.min(800, w));
+        const w = containerRef.current.offsetWidth;
+        // Subtract container padding (12px * 2 = 24px)
+        const finalW = w - 24;
         setStageSize({
           width: finalW,
-          height: Math.max(400, Math.min(600, finalW)), // Keep aspect ratio solid
+          height: Math.max(450, Math.min(600, finalW * 0.65)), // 1.5 aspect ratio
         });
       }
     };
@@ -124,11 +126,11 @@ export default function OutfitCanvas() {
   const stageRef = useRef<any>(null);
   const transformerRef = useRef<any>(null);
 
-  // Load user closet items (filter out damaged)
+  // Load user closet items up to 1000 items to support massive wardrobes
   useEffect(() => {
     const fetchWardrobe = async () => {
       try {
-        const res = await apiClient.get('/items', { params: { limit: 100 } });
+        const res = await apiClient.get('/items', { params: { limit: 1000 } });
         setWardrobeItems(res.data.items.filter((item: any) => item.condition !== 'damaged'));
       } catch (err) {
         console.error('Failed to load wardrobe items:', err);
@@ -260,21 +262,27 @@ export default function OutfitCanvas() {
     { value: 'outerwear', label: 'Áo khoác' },
   ];
 
-  const filteredWardrobe = activeCategory
-    ? wardrobeItems.filter((i) => i.category === activeCategory)
-    : wardrobeItems;
+  // Robust Client-side filtering supporting instant search over hundreds of items
+  const filteredWardrobe = wardrobeItems.filter((item) => {
+    const matchesCategory = !activeCategory || item.category === activeCategory;
+    const matchesSearch = !search.trim() || 
+      item.name.toLowerCase().includes(search.toLowerCase()) ||
+      (item.brand && item.brand.toLowerCase().includes(search.toLowerCase())) ||
+      (item.tags && item.tags.some(tag => tag.toLowerCase().includes(search.toLowerCase())));
+    return matchesCategory && matchesSearch;
+  });
 
   return (
     <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
       
-      {/* 1. Wardrobe Selector Sidebar (Left panel - grid 4 span) */}
+      {/* 1. Wardrobe Selector Sidebar (Left panel - grid 4 span for wider item cards) */}
       <div className="lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-6 shadow-sm flex flex-col h-[580px] lg:order-1 order-2 w-full">
         <h3 className="font-bold text-sm text-[#2A2521] font-serif border-b border-stone-100 pb-2 mb-4">
           Bộ chọn sản phẩm phối đồ
         </h3>
         
         {/* Category horizontal filters */}
-        <div className="flex flex-wrap gap-1 mb-4">
+        <div className="flex flex-wrap gap-1 mb-3">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
@@ -290,10 +298,21 @@ export default function OutfitCanvas() {
           ))}
         </div>
 
-        {/* Closet grid containing cards (2-column layout to utilize space beautifully) */}
-        <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-3 pr-1">
+        {/* Dynamic client-side instant search for handling hundreds of items */}
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Tìm kiếm đồ để phối..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] bg-[#FAF6F1]/30"
+          />
+        </div>
+
+        {/* Closet grid containing cards (responsive 3 to 4 columns to utilize sidebar width) */}
+        <div className="flex-1 overflow-y-auto grid grid-cols-3 xl:grid-cols-4 gap-2 pr-1">
           {filteredWardrobe.length === 0 ? (
-            <div className="col-span-2 text-center py-12 text-stone-400 text-xs">
+            <div className="col-span-3 xl:col-span-4 text-center py-12 text-stone-400 text-xs">
               Không tìm thấy sản phẩm nào phù hợp.
             </div>
           ) : (
@@ -318,10 +337,10 @@ export default function OutfitCanvas() {
         </div>
       </div>
 
-      {/* 2. Dotted Grid Workspace (Right panel - grid 8 span) */}
-      <div ref={containerRef} className="lg:col-span-8 flex flex-col items-center gap-4 lg:order-2 order-1 w-full">
-        {/* Workspace Toolbar Header */}
-        <div className="w-full flex justify-between items-center bg-white px-4 py-3 border border-stone-100 shadow-sm rounded-2xl" style={{ maxWidth: stageSize.width + 24 }}>
+      {/* 2. Dotted Grid Workspace (Right panel - grid 8 span - stretch flush 100% width) */}
+      <div ref={containerRef} className="lg:col-span-8 flex flex-col items-stretch gap-4 lg:order-2 order-1 w-full">
+        {/* Workspace Toolbar Header (Stretches 100% width flush) */}
+        <div className="w-full flex justify-between items-center bg-white px-4 py-3 border border-stone-100 shadow-sm rounded-2xl">
           {/* Layer manipulation actions */}
           <div className="flex gap-1.5">
             <button
@@ -371,8 +390,8 @@ export default function OutfitCanvas() {
           </div>
         </div>
 
-        {/* Konva Stage Frame with beautiful dotted background */}
-        <div className="bg-white p-3 rounded-[32px] border border-stone-200 shadow-lg relative overflow-hidden" style={{ width: stageSize.width + 24, height: stageSize.height + 24 }}>
+        {/* Konva Stage Frame with beautiful dotted background (Stretches 100% width flush) */}
+        <div className="w-full bg-white p-3 rounded-[32px] border border-stone-200 shadow-lg relative overflow-hidden" style={{ height: stageSize.height + 24 }}>
           {/* Dotted Figma-like designer grid layout */}
           <div 
             className="absolute inset-3 bg-[#FAF9F6] rounded-2xl -z-10 pointer-events-none" 
