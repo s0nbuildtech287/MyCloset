@@ -11,7 +11,10 @@ import ClosetSelector from './components/wardrobe/ClosetSelector'
 import TravelTab from './components/travel/TravelTab'
 import headerLogo from './assets/drobe1_cropped.png'
 import type { ClothingItem } from '../../shared/types'
-import { LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase } from 'lucide-react'
+import { LogOut, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase, Bell, ChevronDown, Sun, Moon, Globe } from 'lucide-react'
+
+
+
 
 function App() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
@@ -29,6 +32,40 @@ function App() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [healthStatus, setHealthStatus] = useState<any>(null)
+
+  // Header and user dropdown/modal states
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isUserInfoOpen, setIsUserInfoOpen] = useState(false)
+  const [isDarkModeDemo, setIsDarkModeDemo] = useState(false)
+  const [langDemo, setLangDemo] = useState<'VI' | 'EN'>('VI')
+
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [pwdError, setPwdError] = useState('')
+  const [pwdSuccess, setPwdSuccess] = useState('')
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPwdError('');
+    setPwdSuccess('');
+
+    try {
+      const res = await apiClient.post('/auth/change-password', {
+        currentPassword,
+        newPassword
+      });
+      setPwdSuccess(res.data.message || 'Mật khẩu đã được thay đổi thành công!');
+      setCurrentPassword('');
+      new Promise(resolve => setTimeout(resolve, 1500)).then(() => {
+        setIsChangePasswordOpen(false);
+        setPwdSuccess('');
+      });
+    } catch (err: any) {
+      setPwdError(err.response?.data?.error || 'Không thể đổi mật khẩu');
+    }
+  };
+
 
   // Fetch health status and try automatic refresh on startup
   useEffect(() => {
@@ -104,10 +141,21 @@ function App() {
             <div className="flex flex-col gap-6">
               {/* Logo section */}
               <div className="p-6 pb-2">
-                <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
-                  <img src={headerLogo} alt="Drobe" className="h-10 w-auto object-contain rounded-xl shadow-xs" />
+                <div className="flex items-center gap-4 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+                  <img src={headerLogo} alt="Drobe" className="h-14 w-auto object-contain rounded-sm" />
+                  <div className="flex flex-col text-left">
+                    <span className="font-semibold text-[#2A2521] text-2xl tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
+                      Drobe
+                    </span>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.25em] leading-none mt-1.5">
+                      My Closet
+                    </span>
+                  </div>
                 </div>
+
               </div>
+
+
 
               {/* Closet Selector inside Sidebar */}
               <div className="px-6">
@@ -123,7 +171,6 @@ function App() {
                   { tab: 'my_outfits', label: 'Bộ phối', icon: Layers },
                   { tab: 'analytics', label: 'Thống kê', icon: BarChart3 },
                   { tab: 'travel', label: 'Xếp Vali', icon: Briefcase },
-                  { tab: 'profile', label: 'Hồ sơ', icon: UserIcon },
                 ].map((item) => {
                   const Icon = item.icon;
                   const isActive = activeTab === item.tab && (item.tab !== 'add_item' || !editingItem);
@@ -131,15 +178,16 @@ function App() {
                     <button
                       key={item.tab}
                       onClick={() => { setActiveTab(item.tab as any); setEditingItem(null); }}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
+                      className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                         isActive
-                          ? 'bg-[#C4704F]/10 text-[#C4704F] shadow-xs'
+                          ? 'bg-[#C4704F]/10 text-[#C4704F] shadow-xs font-extrabold'
                           : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                       }`}
                     >
-                      <Icon className="h-4 w-4 shrink-0" />
+                      <Icon className="h-4.5 w-4.5 shrink-0" />
                       <span>{item.label}</span>
                     </button>
+
                   );
                 })}
               </nav>
@@ -166,14 +214,6 @@ function App() {
             </div>
           </aside>
 
-          {/* Mobile Top Header (Visible on screen < lg) */}
-          <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-stone-100 px-4 flex items-center justify-between z-40 shadow-xs">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
-              <img src={headerLogo} alt="Drobe" className="h-10 w-auto object-contain rounded-lg" />
-            </div>
-            <ClosetSelector />
-          </header>
-
           {/* Mobile Bottom Tabbar Navigation (Visible on screen < lg) */}
           <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-stone-150 flex items-center justify-around z-40 px-2 shadow-lg">
             {[
@@ -181,7 +221,7 @@ function App() {
               { tab: 'outfit_canvas', label: 'Ghép', icon: Sparkles },
               { tab: 'add_item', label: 'Thêm', icon: PlusCircle },
               { tab: 'travel', label: 'Vali', icon: Briefcase },
-              { tab: 'profile', label: 'Hồ sơ', icon: UserIcon },
+              { tab: 'analytics', label: 'Báo cáo', icon: BarChart3 },
             ].map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.tab && (item.tab !== 'add_item' || !editingItem);
@@ -189,13 +229,14 @@ function App() {
                 <button
                   key={item.tab}
                   onClick={() => { setActiveTab(item.tab as any); setEditingItem(null); }}
-                  className={`flex flex-col items-center gap-1 py-1 px-3 text-[10px] font-bold transition-all ${
-                    isActive ? 'text-[#C4704F]' : 'text-stone-400 hover:text-stone-600'
+                  className={`flex flex-col items-center gap-1 py-1 px-3 text-[11px] font-bold transition-all ${
+                    isActive ? 'text-[#C4704F] font-extrabold' : 'text-stone-400 hover:text-stone-600'
                   }`}
                 >
-                  <Icon className="h-4.5 w-4.5 shrink-0" />
+                  <Icon className="h-5 w-5 shrink-0" />
                   <span>{item.label}</span>
                 </button>
+
               );
             })}
           </nav>
@@ -203,8 +244,153 @@ function App() {
       ) : null}
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col min-w-0 ${isAuthenticated && user ? 'pt-16 pb-20 lg:pt-0 lg:pb-0' : ''}`}>
+      <main className={`flex-1 flex flex-col min-w-0 ${isAuthenticated && user ? 'pb-20 lg:pb-0 pt-0' : ''}`}>
+        
+        {/* Unified Top Header for both Desktop and Mobile */}
+        {isAuthenticated && user && (
+          <header className="sticky top-0 bg-white border-b border-stone-150 h-16 px-4 sm:px-6 flex items-center justify-between z-30 shadow-xs shrink-0 w-full">
+            {/* Left section: Tab label on Desktop, logo + closet selector on Mobile */}
+            <div className="flex items-center gap-3">
+              {/* Mobile view only logo */}
+              <div className="lg:hidden flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+                <img src={headerLogo} alt="Drobe" className="h-11 w-auto object-contain rounded-sm" />
+                <div className="flex flex-col text-left hidden min-[375px]:flex">
+                  <span className="font-semibold text-[#2A2521] text-lg tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
+                    Drobe
+                  </span>
+                  <span className="text-[8.5px] font-bold text-stone-400 uppercase tracking-[0.2em] leading-none mt-1">
+                    My Closet
+                  </span>
+                </div>
+              </div>
+
+
+
+              
+              {/* Mobile view only closet selector */}
+              <div className="lg:hidden scale-90 origin-left">
+                <ClosetSelector />
+              </div>
+
+              {/* Desktop view only tab label */}
+              <h2 className="hidden lg:block font-bold text-sm text-[#2A2521] uppercase tracking-wider font-serif">
+                {activeTab === 'wardrobe' ? 'Tủ đồ của bạn' :
+                 activeTab === 'add_item' ? (editingItem ? 'Chỉnh sửa món đồ' : 'Thêm món đồ mới') :
+                 activeTab === 'outfit_canvas' ? 'Studio ghép đồ' :
+                 activeTab === 'my_outfits' ? 'Bộ phối đồ đã lưu' :
+                 activeTab === 'analytics' ? 'Báo cáo thống kê' :
+                 activeTab === 'travel' ? 'Xếp đồ du lịch Vali' : 'Hồ sơ cá nhân'}
+              </h2>
+            </div>
+
+            {/* Right section: Live Server Status dot, Notification bell, FaceBook Profile dropdown */}
+            <div className="flex items-center gap-2.5 sm:gap-4">
+              
+              {/* Server Live Status Dot indicator */}
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 border border-stone-100 rounded-full" title="Trạng thái máy chủ">
+                <span className={`w-1.5 h-1.5 rounded-full ${healthStatus ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'} inline-block`}></span>
+                <span className="hidden sm:inline-block text-[9px] font-bold text-stone-500 uppercase tracking-wider">Live</span>
+              </div>
+
+              {/* Notification icon */}
+              <button className="relative p-1.5 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all" title="Thông báo">
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#C4704F] rounded-full"></span>
+                <Bell className="h-4.5 w-4.5" />
+              </button>
+
+              {/* Light/Dark mode placeholder switcher */}
+              <button 
+                onClick={() => {
+                  setIsDarkModeDemo(!isDarkModeDemo);
+                  alert(!isDarkModeDemo ? 'Chuyển sang chế độ tối (Demo - Chức năng đang phát triển)' : 'Chuyển sang chế độ sáng (Demo)');
+                }} 
+                className="p-1.5 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all" 
+                title="Chuyển chế độ sáng/tối"
+              >
+                {isDarkModeDemo ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+              </button>
+
+              {/* Language switcher placeholder */}
+              <button 
+                onClick={() => {
+                  const nextLang = langDemo === 'VI' ? 'EN' : 'VI';
+                  setLangDemo(nextLang);
+                  alert(`Đã đổi ngôn ngữ sang: ${nextLang === 'VI' ? 'Tiếng Việt' : 'Tiếng Anh'} (Demo)`);
+                }}
+                className="flex items-center gap-1 px-2 py-1 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all border border-stone-200 text-[10px] font-bold"
+                title="Đổi ngôn ngữ"
+              >
+                <Globe className="h-3.5 w-3.5" />
+                <span>{langDemo}</span>
+              </button>
+
+
+              {/* Facebook default avatar & User Name Dropdown */}
+              <div className="relative">
+                <button 
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
+                  className="flex items-center gap-2 p-1 hover:bg-stone-50 rounded-full transition-all border border-transparent hover:border-stone-100"
+                >
+                  <img 
+                    src="https://www.facebook.com/images/assets_files/yis/r/45x45/default_profile_pic.png" 
+                    alt="Facebook Avatar" 
+                    className="w-7 h-7 rounded-full border border-stone-200"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://i.stack.imgur.com/34AD2.jpg";
+                    }}
+                  />
+                  <span className="hidden sm:inline-block text-xs font-bold text-stone-700 max-w-[100px] truncate">
+                    {user.name || 'Người dùng'}
+                  </span>
+                  <ChevronDown className="h-3 w-3 text-stone-400 shrink-0" />
+                </button>
+
+                {/* Dropdown Menu Popup */}
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white border border-stone-150 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                    <div className="px-4 py-2 border-b border-stone-100">
+                      <p className="text-xs font-bold text-stone-700">{user.name || 'Người dùng'}</p>
+                      <p className="text-[10px] text-stone-400 truncate mt-0.5">{user.email}</p>
+                    </div>
+                    
+                    <button 
+                      onClick={() => { setIsUserInfoOpen(true); setIsDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                    >
+                      Thông tin người dùng
+                    </button>
+                    <button 
+                      onClick={() => { setIsUserInfoOpen(true); setIsDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                    >
+                      Thông tin tài khoản
+                    </button>
+                    <button 
+                      onClick={() => { setIsChangePasswordOpen(true); setIsDropdownOpen(false); }}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                    >
+                      Đổi mật khẩu
+                    </button>
+                    
+                    <div className="border-t border-stone-100 my-1"></div>
+                    
+                    <button 
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </header>
+        )}
+
         <div className="flex-grow w-full px-4 sm:px-6 lg:px-8 py-8">
+
         
         {/* Unauthenticated View: Auth Form */}
         {!isAuthenticated ? (
@@ -344,64 +530,100 @@ function App() {
               <TravelTab />
             )}
 
-            {activeTab === 'profile' && (
-              <div className="max-w-md mx-auto space-y-6">
-                <div className="bg-white border border-stone-100 rounded-2xl p-6 shadow-sm space-y-4">
-                  <h3 className="text-lg font-bold text-[#2A2521] border-b border-stone-100 pb-2 font-serif">Thông tin tài khoản</h3>
-                  <div className="space-y-2 text-sm text-stone-600 text-left">
-                    <p><span className="font-semibold text-stone-700">Tên hiển thị:</span> {user.name || 'Chưa thiết lập'}</p>
-                    <p><span className="font-semibold text-stone-700">Email:</span> {user.email}</p>
-                    <p><span className="font-semibold text-stone-700">Mã User ID:</span> {user.id}</p>
-                    <p><span className="font-semibold text-stone-700">Thời gian tạo:</span> {new Date(user.createdAt).toLocaleDateString('vi-VN')}</p>
-                  </div>
-                  
-                  <div className="border-t border-stone-100 pt-4 space-y-2 text-left">
-                    <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider">Trạng thái hệ thống</h4>
-                    {healthStatus ? (
-                      <p className="text-xs text-green-600 font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-green-500 inline-block animate-ping"></span>
-                        API Server Online ({healthStatus.status})
-                      </p>
-                    ) : (
-                      <p className="text-xs text-red-500 font-semibold flex items-center gap-1.5">
-                        <span className="w-2 h-2 rounded-full bg-red-500 inline-block"></span>
-                        API Server Offline
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Mobile/Tablet Extra Shortcuts */}
-                <div className="lg:hidden bg-white border border-stone-100 rounded-2xl p-4 shadow-sm space-y-2 text-left">
-                  <h4 className="text-xs font-bold text-stone-400 uppercase tracking-wider px-2 mb-2">Tiện ích khác</h4>
-                  <button
-                    onClick={() => setActiveTab('my_outfits')}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 text-xs font-bold text-stone-700 transition-colors"
-                  >
-                    <span className="flex items-center gap-2"><Layers className="h-4 w-4 text-[#C4704F]" /> Bộ phối đã lưu</span>
-                    <span className="text-stone-300">➔</span>
-                  </button>
-                  <button
-                    onClick={() => setActiveTab('analytics')}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-stone-50 text-xs font-bold text-stone-700 transition-colors"
-                  >
-                    <span className="flex items-center gap-2"><BarChart3 className="h-4 w-4 text-[#8A9A5B]" /> Thống kê & Báo cáo</span>
-                    <span className="text-stone-300">➔</span>
-                  </button>
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-red-50/50 text-xs font-bold text-red-600 transition-colors border-t border-stone-50 mt-2 pt-4"
-                  >
-                    <span className="flex items-center gap-2"><LogOut className="h-4 w-4" /> Đăng xuất tài khoản</span>
-                    <span className="text-stone-300">➔</span>
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
         )}
         </div>
+
+        {/* Modal: Thông tin người dùng & tài khoản */}
+        {isAuthenticated && user && isUserInfoOpen && (
+          <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200">
+              <h3 className="text-base font-bold text-[#2A2521] font-serif border-b border-stone-100 pb-2">Thông tin tài khoản</h3>
+              <div className="space-y-3.5 text-xs text-stone-600 pt-2">
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-bold text-stone-400">Họ và tên:</span>
+                  <span className="col-span-2 text-stone-800 font-semibold">{user.name || 'Chưa thiết lập'}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-bold text-stone-400">Email:</span>
+                  <span className="col-span-2 text-stone-800 font-semibold">{user.email}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-bold text-stone-400">Mã User ID:</span>
+                  <span className="col-span-2 text-stone-800 font-mono font-semibold">{user.id}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-2">
+                  <span className="font-bold text-stone-400">Thời gian tạo:</span>
+                  <span className="col-span-2 text-stone-800 font-semibold">{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
+                </div>
+              </div>
+              <div className="flex justify-end pt-4 border-t border-stone-100">
+                <button
+                  onClick={() => setIsUserInfoOpen(false)}
+                  className="px-5 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                >
+                  Đóng
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal: Đổi mật khẩu */}
+        {isAuthenticated && user && isChangePasswordOpen && (
+          <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <form
+              onSubmit={handleChangePassword}
+              className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200"
+            >
+              <h3 className="text-base font-bold text-[#2A2521] font-serif border-b border-stone-100 pb-2">Thay đổi mật khẩu</h3>
+              
+              {pwdError && <div className="bg-rose-50 text-rose-700 p-2 rounded-xl text-xs text-center border border-rose-100">{pwdError}</div>}
+              {pwdSuccess && <div className="bg-emerald-50 text-emerald-700 p-2 rounded-xl text-xs text-center border border-emerald-100">{pwdSuccess}</div>}
+
+              <div className="space-y-3 pt-2">
+                <div>
+                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Mật khẩu hiện tại</label>
+                  <input
+                    type="password"
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Mật khẩu mới</label>
+                  <input
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => { setIsChangePasswordOpen(false); setPwdError(''); setPwdSuccess(''); }}
+                  className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-500 hover:bg-stone-50 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+                >
+                  Cập nhật
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </main>
+
 
       {/* Floating AI Stylist Chatbot */}
       {isAuthenticated && <AiStylistChat />}
