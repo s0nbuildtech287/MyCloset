@@ -9,8 +9,9 @@ import AnalyticsDashboard from './components/wardrobe/AnalyticsDashboard'
 import AiStylistChat from './components/chat/AiStylistChat'
 import ClosetSelector from './components/wardrobe/ClosetSelector'
 import TravelTab from './components/travel/TravelTab'
+import headerLogo from './assets/drobe1_cropped.png'
 import type { ClothingItem } from '../../shared/types'
-import { Shirt, LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase } from 'lucide-react'
+import { LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase } from 'lucide-react'
 
 function App() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
@@ -101,8 +102,7 @@ function App() {
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
-                <Shirt className="h-6 w-6 text-[#C4704F]" />
-                <span className="text-xl font-bold font-serif text-[#2A2521] tracking-tight">Drobe.</span>
+                <img src={headerLogo} alt="Drobe" className="h-12 w-auto object-contain rounded-xl shadow-xs" />
               </div>
               <ClosetSelector />
             </div>
@@ -379,11 +379,7 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="py-6 border-t border-stone-100 bg-white">
-        <div className="max-w-6xl mx-auto px-4 text-center text-xs text-stone-400">
-          <p>© 2026 Drobe. Đã kết nối PostgreSQL local (`mycloset`).</p>
-        </div>
-      </footer>
+      <footer className="py-4 border-t border-stone-100 bg-white" />
 
       {/* Floating AI Stylist Chatbot */}
       {isAuthenticated && <AiStylistChat />}
