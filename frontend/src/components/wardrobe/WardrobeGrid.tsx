@@ -4,7 +4,8 @@ import type { ClothingItem } from '../../../../shared/types';
 import WeatherWidget from './WeatherWidget';
 import ImageEditor from './ImageEditor';
 import { useClosetStore } from '../../store/closetStore';
-import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag, Scissors } from 'lucide-react';
+import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag, Scissors, AlertTriangle } from 'lucide-react';
+
 
 interface WardrobeGridProps {
   onEditItem: (item: ClothingItem) => void;
@@ -66,6 +67,32 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
   const [selectedEditItem, setSelectedEditItem] = useState<ClothingItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
+
+  // AI duplicate warning modal states
+  const [duplicateModalItem, setDuplicateModalItem] = useState<ClothingItem | null>(null);
+
+  const handleShowDuplicateWarning = (item: ClothingItem) => {
+    setDuplicateModalItem(item);
+  };
+
+  const handleKeepDuplicate = async (id: string) => {
+    try {
+      await apiClient.patch(`/items/${id}`, {
+        duplicateWarning: null
+      });
+      // Clear warning locally to dismiss warning label
+      setItems(items.map(i => i.id === id ? { ...i, duplicateWarning: null } : i));
+      setDuplicateModalItem(null);
+    } catch (err: any) {
+      alert('Không thể giữ lại sản phẩm. Lỗi máy chủ.');
+    }
+  };
+
+  const handleDeleteDuplicate = async (id: string) => {
+    setDuplicateModalItem(null);
+    await handleDeleteItem(id);
+  };
+
 
   // Pagination states
   const [page, setPage] = useState(1);
@@ -439,6 +466,21 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   </span>
                 )}
 
+                {/* Duplicate Warning Badge */}
+                {item.duplicateWarning && (
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleShowDuplicateWarning(item);
+                    }}
+                    className="absolute bottom-3 left-3 bg-amber-500 hover:bg-amber-600 text-white px-2 py-0.5 rounded-lg text-[9px] font-bold border border-amber-600 shadow-sm z-20 flex items-center gap-1 transition-all animate-pulse"
+                    title="Phát hiện trùng lặp hình ảnh bằng AI"
+                  >
+                    <span>⚠️ Trùng lặp?</span>
+                  </button>
+                )}
+
+
                 {/* Action buttons (Visible on hover, only when not processing) */}
                 {item.processingStatus !== 'pending' && item.processingStatus !== 'processing' ? (
                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
@@ -596,6 +638,61 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           }}
         />
       )}
+
+      {/* Modal: AI Duplicate Warning Details */}
+      {duplicateModalItem && (() => {
+        let warning = { matchedItemName: 'Sản phẩm tương tự', similarity: 0.95 };
+        try {
+          if (duplicateModalItem.duplicateWarning) {
+            warning = JSON.parse(duplicateModalItem.duplicateWarning);
+          }
+        } catch (e) {
+          console.error(e);
+        }
+        return (
+          <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+            <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200">
+              <div className="flex items-center gap-2.5 text-amber-500 border-b border-stone-100 pb-3">
+                <AlertTriangle className="h-5 w-5 shrink-0" />
+                <h3 className="text-base font-bold text-[#2A2521] font-serif">Phát hiện trùng lặp bằng AI</h3>
+              </div>
+              
+              <div className="space-y-3.5 pt-2 text-xs text-stone-600">
+                <p>
+                  Hệ thống AI nhận diện hình ảnh của sản phẩm <strong className="text-stone-800">"{duplicateModalItem.name}"</strong> giống <strong className="text-amber-600 font-bold">{Math.round(warning.similarity * 100)}%</strong> so với sản phẩm <strong className="text-stone-800">"{warning.matchedItemName}"</strong> đã có sẵn trong tủ đồ của bạn.
+                </p>
+                <div className="bg-amber-50/50 border border-amber-100/60 p-3 rounded-2xl space-y-1 text-left">
+                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Thông số trùng khớp</p>
+                  <p className="font-semibold text-stone-700">Tên vật phẩm khớp: {warning.matchedItemName}</p>
+                  <p className="font-semibold text-stone-700">Độ tương thích thị giác: {(warning.similarity * 100).toFixed(0)}%</p>
+                </div>
+                <p className="text-stone-400 text-[11px] leading-relaxed">
+                  * Trùng lặp thường xảy ra khi bạn tải lên cùng một hình ảnh nhiều lần. Bạn có muốn giữ lại sản phẩm này hay xóa bỏ để giải phóng bộ nhớ?
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-stone-100">
+                <button
+                  type="button"
+                  onClick={() => handleKeepDuplicate(duplicateModalItem.id)}
+                  className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-500 hover:bg-stone-50 transition-colors"
+                >
+                  Giữ lại món này
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteDuplicate(duplicateModalItem.id)}
+                  className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Xóa sản phẩm trùng
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
+

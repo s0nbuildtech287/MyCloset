@@ -41,11 +41,14 @@ model ClothingItem {
   isFavorite         Boolean      @default(false) @map("is_favorite")
   condition          String       @default("new") @db.VarChar(20)
   notes              String?
+  embedding          String?      @db.Text
+  duplicateWarning   String?      @map("duplicate_warning") @db.Text
   closetId           String?      @map("closet_id") @db.Uuid
   createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz
   updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz
   
   user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   closet             Closet?      @relation(fields: [closetId], references: [id], onDelete: SetNull)
   outfitItems        OutfitItem[]
   tripItems          TripItem[]

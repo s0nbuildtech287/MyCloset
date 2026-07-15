@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import path from 'path';
 import { prisma } from '../db';
+import { getEmbedding, checkDuplicateItem } from './similarityService';
 
 export const processImageBackground = async (itemId: string) => {
   try {
@@ -52,19 +53,44 @@ export const processImageBackground = async (itemId: string) => {
     const processedFilename = `processed-${path.parse(filename).name}.png`;
     const processedFilePath = path.join(__dirname, '../../uploads', processedFilename);
 
-    fs.writeFileSync(processedFilePath, Buffer.from(response.data));
+    const processedBuffer = Buffer.from(response.data);
+    fs.writeFileSync(processedFilePath, processedBuffer);
     const processedImageUrl = `/uploads/${processedFilename}`;
 
-    // 4. Update item in DB
+    // 4. Extract visual embedding and check for duplicate uploads using MobileNet
+    let embeddingStr: string | null = null;
+    let duplicateWarningStr: string | null = null;
+
+    try {
+      console.log(`Extracting visual embedding for item: ${item.name} (${itemId})...`);
+      const embedding = await getEmbedding(processedBuffer);
+      if (embedding) {
+        embeddingStr = JSON.stringify(embedding);
+        
+        console.log(`Running similarity checking for duplicates in closet for item: ${item.name}...`);
+        const dupCheck = await checkDuplicateItem(item.userId, item.id, embedding);
+        if (dupCheck && dupCheck.isDuplicate) {
+          duplicateWarningStr = JSON.stringify(dupCheck);
+          console.warn(`[AI DUPLICATE DETECTED] New upload ${item.name} matches existing item with similarity: ${dupCheck.similarity}`);
+        }
+      }
+    } catch (embErr) {
+      console.error(`Failed to process visual similarity for item ${itemId}:`, embErr);
+    }
+
+    // 5. Update item in DB with processed image url, embedding, and potential duplicate warnings
     await prisma.clothingItem.update({
       where: { id: itemId },
       data: {
         processedImageUrl,
         processingStatus: 'done',
+        embedding: embeddingStr,
+        duplicateWarning: duplicateWarningStr,
       },
     });
 
-    console.log(`Successfully completed background removal for item: ${item.name}`);
+    console.log(`Successfully completed background removal and duplicate detection for item: ${item.name}`);
+
 
   } catch (error: any) {
     console.error(`Failed background removal for item ${itemId}:`, error);

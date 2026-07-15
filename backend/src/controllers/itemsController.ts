@@ -232,7 +232,7 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ error: 'Item not found' });
     }
 
-    const { name, category, color, brand, season, notes, tags, isFavorite, condition } = req.body;
+    const { name, category, color, brand, season, notes, tags, isFavorite, condition, duplicateWarning } = req.body;
     const updateData: any = {};
 
     if (name !== undefined) updateData.name = name;
@@ -243,6 +243,8 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
     if (notes !== undefined) updateData.notes = notes || null;
     if (isFavorite !== undefined) updateData.isFavorite = !!isFavorite;
     if (condition !== undefined) updateData.condition = condition;
+    if (duplicateWarning !== undefined) updateData.duplicateWarning = duplicateWarning;
+
 
     if (tags !== undefined) {
       try {

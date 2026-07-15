@@ -25,9 +25,12 @@ export interface ClothingItem {
   condition: 'new' | 'good' | 'old' | 'damaged';
   notes: string | null;
   closetId: string | null;
+  embedding?: string | null;
+  duplicateWarning?: string | null;
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface Outfit {
   id: string;
