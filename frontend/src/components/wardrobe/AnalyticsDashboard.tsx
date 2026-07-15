@@ -22,7 +22,7 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  top: '#C4704F',      // Brownish-Beige base
+  top: '#C4704F',      // Terracotta
   bottom: '#8A9A5B',   // Moss Green
   shoes: '#4A6B82',    // Slate Blue
   accessory: '#D4AF37',// Gold
@@ -108,9 +108,8 @@ export default function AnalyticsDashboard() {
     return val.toLocaleString('vi-VN') + ' ₫';
   };
 
-  // 1. Math for Donut Chart (byCategory counts)
   const donutRadius = 40;
-  const donutCirc = 2 * Math.PI * donutRadius; // 251.327
+  const donutCirc = 2 * Math.PI * donutRadius;
   const validCategories = Object.entries(stats.byCategory).filter(([_, count]) => count > 0);
   const totalCategoryCount = validCategories.reduce((sum, [_, count]) => sum + count, 0);
 
@@ -130,97 +129,104 @@ export default function AnalyticsDashboard() {
     };
   });
 
-  // 2. Math for Bar Chart (byCategoryValue investments)
   const barChartMax = Math.max(...Object.values(stats.byCategoryValue), 1);
   const barChartEntries = Object.entries(stats.byCategoryValue).map(([cat, val]) => ({
     category: cat,
     value: val,
-    heightPercent: (val / barChartMax) * 80, // scale to max 80% height
+    heightPercent: (val / barChartMax) * 80,
     color: CATEGORY_COLORS[cat] || '#cbd5e1',
   }));
 
   return (
-    <div className="space-y-8 max-w-6xl mx-auto px-4 select-none">
+    <div className="w-full space-y-8 select-none">
       
       {/* Header Banner */}
-      <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm text-left">
-        <h2 className="text-lg font-bold text-[#2A2521] font-serif">Báo cáo tủ đồ</h2>
-        <p className="text-xs text-stone-500 mt-1">Phân tích giá trị đầu tư và phân phối phong cách thời trang của bạn</p>
+      <div className="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm text-left">
+        <h2 className="text-xl font-bold text-[#2A2521] font-serif">Báo cáo & Phân tích tủ đồ</h2>
+        <p className="text-xs text-stone-500 mt-1">Phân tích giá trị tài chính mua sắm và cơ cấu phong cách thời trang của bạn.</p>
       </div>
 
-      {/* Financial & Quantity Cards */}
+      {/* Financial & Quantity Cards (Premium visual styling) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
+        
+        {/* Card 1: Total value */}
+        <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[#C4704F]" />
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng giá trị</span>
-            <span className="p-1.5 rounded-lg bg-[#C4704F]/10 text-[#C4704F]">
+            <span className="p-2 rounded-xl bg-[#C4704F]/10 text-[#C4704F]">
               <DollarSign className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-2xl font-black text-[#2A2521] tracking-tight mt-3">
             {formatCurrency(stats.totalValue)}
           </h3>
-          <p className="text-[9px] text-stone-400 font-semibold leading-none">Toàn bộ chi phí mua sắm quần áo</p>
+          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none">Tổng chi phí đầu tư thời trang</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
+        {/* Card 2: Average price */}
+        <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[#8A9A5B]" />
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Giá trung bình</span>
-            <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+            <span className="p-2 rounded-xl bg-[#8A9A5B]/10 text-[#8A9A5B]">
               <Tag className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-2xl font-black text-[#2A2521] tracking-tight mt-3">
             {formatCurrency(stats.averagePrice)}
           </h3>
-          <p className="text-[9px] text-stone-400 font-semibold leading-none">Giá trị trung bình trên một món</p>
+          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none">Trung bình giá trị một sản phẩm</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
+        {/* Card 3: Total items */}
+        <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[#4A6B82]" />
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng sản phẩm</span>
-            <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
+            <span className="p-2 rounded-xl bg-[#4A6B82]/10 text-[#4A6B82]">
               <ShoppingBag className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-2xl font-black text-[#2A2521] tracking-tight mt-3">
             {stats.totalItems} món
           </h3>
-          <p className="text-[9px] text-stone-400 font-semibold leading-none">Trong {validCategories.length} loại sản phẩm</p>
+          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none">Phân bổ trên {validCategories.length} danh mục</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
+        {/* Card 4: Total outfits */}
+        <div className="bg-white p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-[#D4AF37]" />
           <div className="flex justify-between items-center">
             <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Số bộ phối</span>
-            <span className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
+            <span className="p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
               <Layers className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-2xl font-black text-[#2A2521] tracking-tight mt-3">
             {stats.totalOutfits} bộ
           </h3>
-          <p className="text-[9px] text-stone-400 font-semibold leading-none">Bộ phối đồ tự sáng tạo</p>
+          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none">Bộ phối đồ tự thiết kế sáng tạo</p>
         </div>
       </div>
 
-      {/* Visual Charts Grid */}
+      {/* Visual Charts Grid (Stretching across screen width dynamically) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Donut Chart: Quantity Distribution */}
-        <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm space-y-5 text-left flex flex-col justify-between">
+        <div className="bg-white p-6 rounded-[32px] border border-stone-100 shadow-sm space-y-6 text-left flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-sm text-[#2A2521] font-serif flex items-center gap-1.5">
+            <h3 className="font-bold text-base text-[#2A2521] font-serif flex items-center gap-1.5">
               <PieChart className="h-4 w-4 text-[#C4704F]" />
               Phân bổ số lượng sản phẩm
             </h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">Tỷ lệ cơ cấu các loại quần áo trong tủ đồ</p>
+            <p className="text-[10px] text-stone-400 mt-0.5">Tỷ lệ cơ cấu các loại quần áo trong tủ đồ hoạt động</p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-4">
-            
+          <div className="flex flex-col sm:flex-row items-center justify-around gap-8 py-4">
             {/* Interactive SVG Donut */}
-            <div className="relative w-40 h-40">
-              <svg className="w-full h-full transform -rotate-95" viewBox="0 0 100 100">
+            <div className="relative w-44 h-44 shrink-0">
+              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
                 <circle
                   cx="50"
                   cy="50"
@@ -252,13 +258,13 @@ export default function AnalyticsDashboard() {
               </svg>
               {/* Inner Center Label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-xl font-bold text-[#2A2521] leading-none">{stats.totalItems}</span>
-                <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mt-1">Sản phẩm</span>
+                <span className="text-2xl font-black text-[#2A2521] leading-none">{stats.totalItems}</span>
+                <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mt-1.5">Sản phẩm</span>
               </div>
             </div>
 
             {/* Labels Legend */}
-            <div className="space-y-2.5 flex-1 min-w-[140px] text-left">
+            <div className="space-y-2 flex-1 w-full text-left">
               {donutSlices.map((slice) => {
                 const isActive = activeSlice === slice.category;
                 return (
@@ -266,15 +272,15 @@ export default function AnalyticsDashboard() {
                     key={slice.category}
                     onMouseEnter={() => setActiveSlice(slice.category)}
                     onMouseLeave={() => setActiveSlice(null)}
-                    className={`flex items-center justify-between text-xs p-1.5 rounded-lg transition-colors cursor-pointer ${
-                      isActive ? 'bg-stone-50' : ''
+                    className={`flex items-center justify-between text-xs p-2 rounded-xl transition-colors cursor-pointer ${
+                      isActive ? 'bg-[#C4704F]/5 text-[#C4704F] font-bold' : 'text-stone-600'
                     }`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
-                      <span className="font-semibold text-stone-700">{CATEGORY_LABELS[slice.category] || slice.category}</span>
+                      <span className="font-semibold">{CATEGORY_LABELS[slice.category] || slice.category}</span>
                     </div>
-                    <span className="font-bold text-[#C4704F]">{slice.count} món ({Math.round(slice.percent)}%)</span>
+                    <span className="font-bold">{slice.count} món ({Math.round(slice.percent)}%)</span>
                   </div>
                 );
               })}
@@ -283,17 +289,16 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Bar Chart: Investment Distribution */}
-        <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm space-y-5 text-left">
+        <div className="bg-white p-6 rounded-[32px] border border-stone-100 shadow-sm space-y-6 text-left flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-sm text-[#2A2521] font-serif flex items-center gap-1.5">
+            <h3 className="font-bold text-base text-[#2A2521] font-serif flex items-center gap-1.5">
               <BarChart className="h-4 w-4 text-[#8A9A5B]" />
               Giá trị đầu tư thời trang
             </h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">So sánh chi phí mua sắm theo từng nhóm danh mục</p>
+            <p className="text-[10px] text-stone-400 mt-0.5">So sánh chi phí mua sắm theo từng nhóm danh mục thời trang</p>
           </div>
 
-          <div className="h-48 flex items-end gap-5 border-b border-stone-100 pb-2 relative">
-            
+          <div className="h-48 flex items-end gap-6 border-b border-stone-100 pb-2 relative mt-4">
             {/* Bars */}
             {barChartEntries.map((bar) => {
               const isActive = activeBar === bar.category;
@@ -306,13 +311,13 @@ export default function AnalyticsDashboard() {
                 >
                   {/* Tooltip on hover */}
                   {isActive && (
-                    <div className="absolute -top-10 bg-stone-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md z-10 whitespace-nowrap animate-in fade-in duration-100">
+                    <div className="absolute -top-10 bg-stone-900 text-white text-[10px] font-bold px-2 py-1.5 rounded-xl shadow-md z-10 whitespace-nowrap animate-in fade-in duration-100">
                       {formatCurrency(bar.value)}
                     </div>
                   )}
 
                   <div
-                    className="w-full rounded-t-xl transition-all duration-500"
+                    className="w-full rounded-t-xl transition-all duration-300"
                     style={{
                       height: `${bar.heightPercent}%`,
                       backgroundColor: bar.color,
@@ -330,18 +335,18 @@ export default function AnalyticsDashboard() {
 
           {/* Bar Chart Value Info */}
           <div className="pt-2 flex justify-between items-center text-xs font-bold text-stone-600">
-            <span>Tổng chi tiêu:</span>
-            <span className="text-[#8A9A5B]">{formatCurrency(stats.totalValue)}</span>
+            <span>Tổng vốn đầu tư:</span>
+            <span className="text-[#8A9A5B] font-extrabold text-sm">{formatCurrency(stats.totalValue)}</span>
           </div>
         </div>
 
       </div>
 
       {/* Color Palette List (Full Width styling) */}
-      <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm space-y-4 text-left">
+      <div className="bg-white p-6 rounded-[32px] border border-stone-100 shadow-sm space-y-4 text-left">
         <div>
-          <h3 className="font-bold text-sm text-[#2A2521] font-serif">Phân bổ màu sắc yêu thích</h3>
-          <p className="text-[10px] text-stone-400 mt-0.5">Bản đồ phân phối màu sắc trang phục thực tế của bạn</p>
+          <h3 className="font-bold text-sm text-[#2A2521] font-serif">Phân bổ màu sắc trang phục</h3>
+          <p className="text-[10px] text-stone-400 mt-0.5">Bản đồ phân phối màu sắc quần áo thực tế đang sở hữu</p>
         </div>
 
         <div className="flex flex-wrap gap-4 pt-2">
@@ -357,15 +362,15 @@ export default function AnalyticsDashboard() {
               return (
                 <div
                   key={col.color}
-                  className="flex items-center gap-3.5 bg-stone-50 border border-stone-100 px-4 py-2.5 rounded-2xl text-xs font-bold text-stone-700 shadow-xs hover:border-stone-200 transition-colors"
+                  className="flex items-center gap-3 bg-stone-50 border border-stone-100 px-4 py-2.5 rounded-2xl text-xs font-bold text-stone-700 shadow-xs hover:border-stone-200 transition-colors"
                 >
                   <span
-                    className="w-5 h-5 rounded-full border border-stone-200 shadow-inner shrink-0"
+                    className="w-4 h-4 rounded-full border border-stone-200 shadow-inner shrink-0"
                     style={{ backgroundColor: renderedHex }}
                   />
                   <div>
-                    <p className="capitalize leading-none">{col.color}</p>
-                    <p className="text-[9px] text-[#C4704F] mt-1 font-semibold leading-none">
+                    <p className="capitalize leading-none text-xs">{col.color}</p>
+                    <p className="text-[9px] text-[#C4704F] mt-1 font-bold leading-none">
                       {col.count} món ({Math.round(percent)}%)
                     </p>
                   </div>

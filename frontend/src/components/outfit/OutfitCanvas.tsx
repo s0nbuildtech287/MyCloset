@@ -16,7 +16,7 @@ interface CanvasItem {
   zIndex: number;
 }
 
-// Custom hook to load HTML Image from URL string safely
+// Custom hook to load HTML Image safely
 function useImage(src: string) {
   const [image, setImage] = useState<HTMLImageElement | null>(null);
 
@@ -24,7 +24,7 @@ function useImage(src: string) {
     if (!src) return;
     const img = new window.Image();
     img.src = src;
-    img.crossOrigin = 'anonymous'; // Support cross-origin images if needed
+    img.crossOrigin = 'anonymous';
     img.onload = () => {
       setImage(img);
     };
@@ -33,7 +33,7 @@ function useImage(src: string) {
   return image;
 }
 
-// Sub-component to render Konva Image with custom properties
+// Sub-component for individual Konva images
 interface IndividualImageProps {
   item: CanvasItem;
   onSelect: () => void;
@@ -57,11 +57,10 @@ const IndividualImage = ({ item, onSelect, onChange }: IndividualImageProps) => 
       draggable
       onClick={onSelect}
       onTap={onSelect}
-      // Width and Height are set to a default bounding size, let Konva scale it
       width={130}
       height={130}
-      offsetX={65} // center pivot
-      offsetY={65} // center pivot
+      offsetX={65}
+      offsetY={65}
       onDragEnd={(e) => {
         onChange({
           x: e.target.x(),
@@ -69,7 +68,6 @@ const IndividualImage = ({ item, onSelect, onChange }: IndividualImageProps) => 
         });
       }}
       onTransformEnd={() => {
-        // transformer changes scale and rotation
         const node = shapeRef.current;
         if (node) {
           onChange({
@@ -91,25 +89,34 @@ export default function OutfitCanvas() {
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Responsive stage size state
-  const [stageSize, setStageSize] = useState({
-    width: window.innerWidth < 640 ? 320 : 500,
-    height: window.innerWidth < 640 ? 320 : 500,
-  });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [stageSize, setStageSize] = useState({ width: 500, height: 500 });
 
+  // Responsive stage measurement
   useEffect(() => {
-    const handleResize = () => {
-      const isMobile = window.innerWidth < 640;
-      setStageSize({
-        width: isMobile ? 320 : 500,
-        height: isMobile ? 320 : 500,
-      });
+    if (!containerRef.current) return;
+    const updateSize = () => {
+      if (containerRef.current) {
+        const w = containerRef.current.offsetWidth - 24; // Account for padding
+        const finalW = Math.max(300, Math.min(800, w));
+        setStageSize({
+          width: finalW,
+          height: Math.max(400, Math.min(600, finalW)), // Keep aspect ratio solid
+        });
+      }
     };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    updateSize();
+    const observer = new ResizeObserver(() => updateSize());
+    observer.observe(containerRef.current);
+    window.addEventListener('resize', updateSize);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
   }, []);
-  
-  // Save modal states
+
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [outfitName, setOutfitName] = useState('');
   const [saving, setSaving] = useState(false);
@@ -117,7 +124,7 @@ export default function OutfitCanvas() {
   const stageRef = useRef<any>(null);
   const transformerRef = useRef<any>(null);
 
-  // Load user closet items
+  // Load user closet items (filter out damaged)
   useEffect(() => {
     const fetchWardrobe = async () => {
       try {
@@ -130,7 +137,7 @@ export default function OutfitCanvas() {
     fetchWardrobe();
   }, []);
 
-  // Update Konva Transformer nodes when selection changes
+  // Update Transformer node selections
   useEffect(() => {
     if (transformerRef.current) {
       if (selectedId) {
@@ -147,7 +154,6 @@ export default function OutfitCanvas() {
     }
   }, [selectedId, canvasItems]);
 
-  // Click handler to deselect when clicking on stage background
   const handleStageClick = (e: any) => {
     const clickedOnEmpty = e.target === e.target.getStage();
     if (clickedOnEmpty) {
@@ -155,7 +161,6 @@ export default function OutfitCanvas() {
     }
   };
 
-  // Add item from sidebar to Canvas
   const handleAddItemToCanvas = (wardrobeItem: ClothingItem) => {
     const imageUrl = wardrobeItem.processedImageUrl || wardrobeItem.originalImageUrl;
     const maxZIndex = canvasItems.reduce((max, item) => (item.zIndex > max ? item.zIndex : max), 0);
@@ -173,15 +178,13 @@ export default function OutfitCanvas() {
     };
 
     setCanvasItems([...canvasItems, newItem]);
-    setSelectedId(newItem.id); // auto-select newly added item
+    setSelectedId(newItem.id);
   };
 
-  // Handle item attributes changes (from drags/transforms)
   const handleItemChange = (id: string, newAttrs: Partial<CanvasItem>) => {
     setCanvasItems(canvasItems.map((item) => (item.id === id ? { ...item, ...newAttrs } : item)));
   };
 
-  // Layer ordering actions
   const bringToFront = () => {
     if (!selectedId) return;
     const maxZIndex = canvasItems.reduce((max, item) => (item.zIndex > max ? item.zIndex : max), 0);
@@ -194,14 +197,12 @@ export default function OutfitCanvas() {
     handleItemChange(selectedId, { zIndex: minZIndex - 1 });
   };
 
-  // Delete selected item from canvas
   const deleteSelected = () => {
     if (!selectedId) return;
     setCanvasItems(canvasItems.filter((item) => item.id !== selectedId));
     setSelectedId(null);
   };
 
-  // Clear all items on canvas
   const clearCanvas = () => {
     if (window.confirm('Xóa sạch toàn bộ sản phẩm trên canvas?')) {
       setCanvasItems([]);
@@ -209,10 +210,8 @@ export default function OutfitCanvas() {
     }
   };
 
-  // Sort canvas items by zIndex before rendering so they draw in correct stack order
   const sortedCanvasItems = [...canvasItems].sort((a, b) => a.zIndex - b.zIndex);
 
-  // Save Outfit
   const handleSaveOutfit = async () => {
     if (!outfitName.trim()) {
       alert('Vui lòng nhập tên cho bộ phối!');
@@ -221,26 +220,20 @@ export default function OutfitCanvas() {
 
     setSaving(true);
     try {
-      // 1. Deselect any active item so transformer box doesn't appear in thumbnail
       setSelectedId(null);
-      
-      // Allow state update to repaint canvas without transformer box
       await new Promise((resolve) => setTimeout(resolve, 100));
 
-      // 2. Export Stage to dataURL (base64 PNG)
-      const dataUrl = stageRef.current.toDataURL({ pixelRatio: 2 }); // Double resolution for crisp thumbnail
+      const dataUrl = stageRef.current.toDataURL({ pixelRatio: 2 });
 
-      // 3. Prepare payload mapping canvas attributes to DB schema
       const itemsPayload = canvasItems.map((item) => ({
         clothingItemId: item.clothingItemId,
         positionX: item.x,
         positionY: item.y,
-        scale: item.scaleX, // scaleX and scaleY are similar in uniform scale
+        scale: item.scaleX,
         rotation: item.rotation,
         zIndex: item.zIndex,
       }));
 
-      // 4. Send API POST request
       await apiClient.post('/outfits', {
         name: outfitName,
         items: itemsPayload,
@@ -250,7 +243,7 @@ export default function OutfitCanvas() {
       alert('Đã lưu bộ phối thành công!');
       setIsSaveModalOpen(false);
       setOutfitName('');
-      setCanvasItems([]); // clear canvas
+      setCanvasItems([]);
     } catch (err: any) {
       alert(err.response?.data?.error || 'Lưu bộ phối thất bại. Vui lòng thử lại.');
     } finally {
@@ -272,22 +265,23 @@ export default function OutfitCanvas() {
     : wardrobeItems;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-      {/* 1. Wardrobe Sidebar (Left column) */}
-      <div className="lg:col-span-4 bg-white rounded-2xl border border-stone-100 p-4 shadow-sm flex flex-col h-[560px] lg:order-1 order-2 w-full">
-        <h3 className="font-bold text-sm text-[#2A2521] font-serif border-b border-stone-100 pb-2 mb-3">
-          Tủ đồ của bạn
+    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
+      
+      {/* 1. Wardrobe Selector Sidebar (Left panel - grid 4 span) */}
+      <div className="lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-6 shadow-sm flex flex-col h-[580px] lg:order-1 order-2 w-full">
+        <h3 className="font-bold text-sm text-[#2A2521] font-serif border-b border-stone-100 pb-2 mb-4">
+          Bộ chọn sản phẩm phối đồ
         </h3>
         
-        {/* Category filters */}
-        <div className="flex flex-wrap gap-1 mb-3">
+        {/* Category horizontal filters */}
+        <div className="flex flex-wrap gap-1 mb-4">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.value}
               onClick={() => setActiveCategory(cat.value)}
-              className={`px-2 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+              className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
                 activeCategory === cat.value
-                  ? 'bg-[#C4704F] text-white'
+                  ? 'bg-[#C4704F] text-white shadow-xs'
                   : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
               }`}
             >
@@ -296,26 +290,26 @@ export default function OutfitCanvas() {
           ))}
         </div>
 
-        {/* Closet Grid */}
-        <div className="flex-1 overflow-y-auto grid grid-cols-3 gap-2 pr-1">
+        {/* Closet grid containing cards (2-column layout to utilize space beautifully) */}
+        <div className="flex-1 overflow-y-auto grid grid-cols-2 gap-3 pr-1">
           {filteredWardrobe.length === 0 ? (
-            <div className="col-span-3 text-center py-12 text-stone-400 text-xs">
-              Không có sản phẩm nào
+            <div className="col-span-2 text-center py-12 text-stone-400 text-xs">
+              Không tìm thấy sản phẩm nào phù hợp.
             </div>
           ) : (
             filteredWardrobe.map((wItem) => (
               <div
                 key={wItem.id}
                 onClick={() => handleAddItemToCanvas(wItem)}
-                className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-xl p-1.5 flex items-center justify-center cursor-pointer hover:border-[#C4704F] hover:bg-[#FAF6F1] transition-all group relative"
-                title="Bấm để thêm vào Canvas"
+                className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-2xl p-2 flex items-center justify-center cursor-pointer hover:border-[#C4704F] hover:bg-[#FAF6F1] transition-all group relative shadow-xs"
+                title="Bấm để thêm vào Studio"
               >
                 <img
                   src={wItem.processedImageUrl || wItem.originalImageUrl}
                   alt={wItem.name}
                   className="object-contain max-h-full max-w-full p-1"
                 />
-                <span className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-100 bg-[#C4704F] text-white text-[8px] font-bold px-1 rounded transition-opacity">
+                <span className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 bg-[#C4704F] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-lg transition-opacity shadow-sm">
                   + Thêm
                 </span>
               </div>
@@ -324,16 +318,16 @@ export default function OutfitCanvas() {
         </div>
       </div>
 
-      {/* 2. Canvas Panel (Center column) */}
-      <div className="lg:col-span-8 flex flex-col items-center gap-4 lg:order-2 order-1 w-full">
-        {/* Toolbar header */}
-        <div className="w-full flex justify-between items-center bg-white px-4 py-2 border border-stone-100 shadow-sm rounded-xl" style={{ maxWidth: stageSize.width + 16 }}>
-          {/* Layer Actions */}
+      {/* 2. Dotted Grid Workspace (Right panel - grid 8 span) */}
+      <div ref={containerRef} className="lg:col-span-8 flex flex-col items-center gap-4 lg:order-2 order-1 w-full">
+        {/* Workspace Toolbar Header */}
+        <div className="w-full flex justify-between items-center bg-white px-4 py-3 border border-stone-100 shadow-sm rounded-2xl" style={{ maxWidth: stageSize.width + 24 }}>
+          {/* Layer manipulation actions */}
           <div className="flex gap-1.5">
             <button
               disabled={!selectedId}
               onClick={bringToFront}
-              className="p-2 border border-stone-200 rounded-lg text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
+              className="p-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
               title="Đưa lên trên cùng (Z-Index)"
             >
               <ArrowUp className="h-4 w-4" />
@@ -341,7 +335,7 @@ export default function OutfitCanvas() {
             <button
               disabled={!selectedId}
               onClick={sendToBack}
-              className="p-2 border border-stone-200 rounded-lg text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
+              className="p-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
               title="Đưa xuống dưới cùng (Z-Index)"
             >
               <ArrowDown className="h-4 w-4" />
@@ -349,7 +343,7 @@ export default function OutfitCanvas() {
             <button
               disabled={!selectedId}
               onClick={deleteSelected}
-              className="p-2 border border-stone-200 rounded-lg text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors border-l-2"
+              className="p-2 border border-stone-200 rounded-xl text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors border-l-2 ml-1"
               title="Xóa món đồ đang chọn"
             >
               <Trash2 className="h-4 w-4" />
@@ -361,7 +355,7 @@ export default function OutfitCanvas() {
             <button
               onClick={clearCanvas}
               disabled={canvasItems.length === 0}
-              className="flex items-center gap-1 px-3 py-2 border border-stone-200 rounded-lg text-xs font-semibold text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Làm mới
@@ -369,18 +363,24 @@ export default function OutfitCanvas() {
             <button
               onClick={() => setIsSaveModalOpen(true)}
               disabled={canvasItems.length === 0}
-              className="flex items-center gap-1 px-4 py-2 border border-transparent rounded-lg text-xs font-semibold text-white bg-[#C4704F] hover:bg-[#b05f3f] disabled:opacity-50 disabled:pointer-events-none transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-4 py-2 border border-transparent rounded-xl text-xs font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] disabled:opacity-50 disabled:pointer-events-none transition-colors shadow-sm"
             >
               <Save className="h-3.5 w-3.5" />
-              Lưu Outfit
+              Lưu bộ phối
             </button>
           </div>
         </div>
 
-        {/* Konva Stage Frame */}
-        <div className="bg-white p-2 rounded-3xl border border-stone-200 shadow-lg relative overflow-hidden" style={{ width: stageSize.width + 16, height: stageSize.height + 16 }}>
-          {/* Subtle canvas helpers / grid dot background */}
-          <div className="absolute inset-2 bg-[#F6F5F3] dotted-grid rounded-2xl -z-10 pointer-events-none" />
+        {/* Konva Stage Frame with beautiful dotted background */}
+        <div className="bg-white p-3 rounded-[32px] border border-stone-200 shadow-lg relative overflow-hidden" style={{ width: stageSize.width + 24, height: stageSize.height + 24 }}>
+          {/* Dotted Figma-like designer grid layout */}
+          <div 
+            className="absolute inset-3 bg-[#FAF9F6] rounded-2xl -z-10 pointer-events-none" 
+            style={{ 
+              backgroundImage: 'radial-gradient(#e5e7eb 1.5px, transparent 1.5px)', 
+              backgroundSize: '16px 16px' 
+            }} 
+          />
 
           <Stage
             width={stageSize.width}
@@ -401,7 +401,6 @@ export default function OutfitCanvas() {
               <Transformer
                 ref={transformerRef}
                 boundBoxFunc={(oldBox, newBox) => {
-                  // limit resize to minimum width/height of 30px
                   if (Math.abs(newBox.width) < 30 || Math.abs(newBox.height) < 30) {
                     return oldBox;
                   }
@@ -413,9 +412,9 @@ export default function OutfitCanvas() {
 
           {canvasItems.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
-              <Layers className="h-12 w-12 text-stone-300 mb-2" />
-              <p className="text-sm font-semibold text-stone-600">Canvas ghép đồ trống</p>
-              <p className="text-xs text-stone-400 mt-0.5">Click vào các bức ảnh ở cột trái để bắt đầu phối đồ</p>
+              <Layers className="h-10 w-10 text-stone-300 mb-2" />
+              <p className="text-sm font-bold text-stone-600 font-serif">Studio ghép đồ trống</p>
+              <p className="text-[11px] text-stone-400 mt-1">Bấm các bức ảnh ở cột trái để thêm đồ vào canvas</p>
             </div>
           )}
         </div>
@@ -424,16 +423,16 @@ export default function OutfitCanvas() {
       {/* 3. Save Outfit Modal */}
       {isSaveModalOpen && (
         <div className="fixed inset-0 bg-stone-900/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white max-w-sm w-full p-6 rounded-2xl shadow-xl space-y-4 border border-stone-100 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4 border border-stone-100 animate-in fade-in zoom-in-95 duration-200">
             <div>
-              <h3 className="text-lg font-bold text-[#2A2521] font-serif">Lưu bộ trang phục</h3>
+              <h3 className="text-base font-bold text-[#2A2521] font-serif">Lưu bộ trang phục</h3>
               <p className="text-xs text-stone-500 mt-0.5">
                 Đặt tên cho bộ trang phục phối đồ này để lưu lại trong kho lưu trữ của bạn.
               </p>
             </div>
 
             <div>
-              <label htmlFor="outfitName" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+              <label htmlFor="outfitName" className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">
                 Tên bộ phối
               </label>
               <input
@@ -443,7 +442,7 @@ export default function OutfitCanvas() {
                 onChange={(e) => setOutfitName(e.target.value)}
                 placeholder="Ví dụ: Outfit đi chơi hè 2026"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
               />
             </div>
 
@@ -452,7 +451,7 @@ export default function OutfitCanvas() {
                 type="button"
                 disabled={saving}
                 onClick={() => setIsSaveModalOpen(false)}
-                className="px-4 py-2 border border-stone-200 rounded-lg text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
               >
                 Hủy bỏ
               </button>
@@ -460,7 +459,7 @@ export default function OutfitCanvas() {
                 type="button"
                 disabled={saving}
                 onClick={handleSaveOutfit}
-                className="px-4 py-2 border border-transparent rounded-lg text-xs font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] transition-colors"
+                className="px-4 py-2 border border-transparent rounded-xl text-xs font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] transition-colors shadow-sm"
               >
                 {saving ? 'Đang lưu...' : 'Lưu lại'}
               </button>
