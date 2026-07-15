@@ -30,6 +30,27 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // Stats state
+  const [stats, setStats] = useState<{
+    totalItems: number;
+    favoritesCount: number;
+    totalOutfits: number;
+    byCategory: Record<string, number>;
+  } | null>(null);
+
+  const fetchStats = async () => {
+    try {
+      const res = await apiClient.get('/items/stats');
+      setStats(res.data);
+    } catch (err) {
+      console.error('Failed to fetch statistics', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
   // Filter states
   const [category, setCategory] = useState('');
   const [season, setSeason] = useState('');
@@ -68,6 +89,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       const res = await apiClient.get('/items', { params });
       setItems(res.data.items);
       setTotalPages(res.data.pagination.totalPages);
+      fetchStats();
     } catch (err: any) {
       setError(err.response?.data?.error || 'Không thể tải danh sách tủ đồ');
     } finally {
@@ -101,6 +123,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       });
       // Update local state
       setItems(items.map((i) => (i.id === item.id ? res.data : i)));
+      fetchStats();
     } catch (err: any) {
       alert('Không thể cập nhật trạng thái yêu thích');
     }
@@ -113,6 +136,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
     try {
       await apiClient.delete(`/items/${id}`);
       setItems(items.filter((i) => i.id !== id));
+      fetchStats();
     } catch (err: any) {
       alert(err.response?.data?.error || 'Xóa món đồ thất bại');
     }
@@ -120,6 +144,69 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
   return (
     <div className="space-y-6">
+      {/* Dashboard Statistics */}
+      {stats && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
+          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#C4704F]/10 flex items-center justify-center text-[#C4704F]">
+              <ShoppingBag className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng sản phẩm</p>
+              <h3 className="text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalItems}</h3>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
+              <Heart className="h-5 w-5 fill-red-500 stroke-red-500" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Yêu thích</p>
+              <h3 className="text-xl font-bold text-[#2A2521] mt-0.5">{stats.favoritesCount}</h3>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+              <Tag className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Bộ phối đồ</p>
+              <h3 className="text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalOutfits}</h3>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex flex-col justify-center gap-1 col-span-2 lg:col-span-1">
+            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tỉ lệ phân loại</p>
+            <div className="flex gap-1.5 items-center mt-1">
+              <div className="flex-1 h-2 rounded bg-stone-100 overflow-hidden flex">
+                {Object.entries(stats.byCategory).map(([cat, count]) => {
+                  if (count === 0 || stats.totalItems === 0) return null;
+                  const pct = (count / stats.totalItems) * 100;
+                  const bg = 
+                    cat === 'top' ? 'bg-[#C4704F]' :
+                    cat === 'bottom' ? 'bg-amber-500' :
+                    cat === 'shoes' ? 'bg-emerald-500' :
+                    cat === 'outerwear' ? 'bg-blue-500' : 'bg-stone-400';
+                  return (
+                    <div 
+                      key={cat} 
+                      className={`${bg} h-full`} 
+                      style={{ width: `${pct}%` }} 
+                      title={`${cat}: ${count} món (${Math.round(pct)}%)`} 
+                    />
+                  );
+                })}
+              </div>
+              <span className="text-[10px] font-bold text-stone-500 shrink-0">
+                {Object.values(stats.byCategory).filter(c => c > 0).length} loại
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Filters Toolbar */}
       <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-4">
         {/* Search and Favorite toggle */}

@@ -90,6 +90,24 @@ export default function OutfitCanvas() {
   const [activeCategory, setActiveCategory] = useState('');
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  // Responsive stage size state
+  const [stageSize, setStageSize] = useState({
+    width: window.innerWidth < 640 ? 320 : 500,
+    height: window.innerWidth < 640 ? 320 : 500,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 640;
+      setStageSize({
+        width: isMobile ? 320 : 500,
+        height: isMobile ? 320 : 500,
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   
   // Save modal states
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
@@ -146,8 +164,8 @@ export default function OutfitCanvas() {
       id: `canvas-${Date.now()}-${Math.round(Math.random() * 1000)}`,
       clothingItemId: wardrobeItem.id,
       imageUrl,
-      x: 250, // center of 500x500 canvas
-      y: 250,
+      x: stageSize.width / 2,
+      y: stageSize.height / 2,
       scaleX: 1,
       scaleY: 1,
       rotation: 0,
@@ -256,7 +274,7 @@ export default function OutfitCanvas() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
       {/* 1. Wardrobe Sidebar (Left column) */}
-      <div className="lg:col-span-4 bg-white rounded-2xl border border-stone-100 p-4 shadow-sm flex flex-col h-[560px]">
+      <div className="lg:col-span-4 bg-white rounded-2xl border border-stone-100 p-4 shadow-sm flex flex-col h-[560px] lg:order-1 order-2 w-full">
         <h3 className="font-bold text-sm text-[#2A2521] font-serif border-b border-stone-100 pb-2 mb-3">
           Tủ đồ của bạn
         </h3>
@@ -307,9 +325,9 @@ export default function OutfitCanvas() {
       </div>
 
       {/* 2. Canvas Panel (Center column) */}
-      <div className="lg:col-span-8 flex flex-col items-center gap-4">
+      <div className="lg:col-span-8 flex flex-col items-center gap-4 lg:order-2 order-1 w-full">
         {/* Toolbar header */}
-        <div className="w-full max-w-[500px] flex justify-between items-center bg-white px-4 py-2 border border-stone-100 shadow-sm rounded-xl">
+        <div className="w-full flex justify-between items-center bg-white px-4 py-2 border border-stone-100 shadow-sm rounded-xl" style={{ maxWidth: stageSize.width + 16 }}>
           {/* Layer Actions */}
           <div className="flex gap-1.5">
             <button
@@ -360,13 +378,13 @@ export default function OutfitCanvas() {
         </div>
 
         {/* Konva Stage Frame */}
-        <div className="bg-white p-2 rounded-3xl border border-stone-200 shadow-lg relative overflow-hidden">
+        <div className="bg-white p-2 rounded-3xl border border-stone-200 shadow-lg relative overflow-hidden" style={{ width: stageSize.width + 16, height: stageSize.height + 16 }}>
           {/* Subtle canvas helpers / grid dot background */}
           <div className="absolute inset-2 bg-[#F6F5F3] dotted-grid rounded-2xl -z-10 pointer-events-none" />
 
           <Stage
-            width={500}
-            height={500}
+            width={stageSize.width}
+            height={stageSize.height}
             ref={stageRef}
             onClick={handleStageClick}
             className="rounded-2xl overflow-hidden bg-transparent"

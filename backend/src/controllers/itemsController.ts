@@ -251,12 +251,66 @@ export const deleteItem = async (req: AuthenticatedRequest, res: Response) => {
 
     // Delete record from DB
     await prisma.clothingItem.delete({
-      where: { id },
+      where: { id: id },
     });
 
     return res.json({ message: 'Item deleted successfully' });
   } catch (error) {
     console.error('Delete item error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getItemsStats = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Run queries in parallel
+    const [totalItems, favoritesCount, totalOutfits, categoryGroups] = await Promise.all([
+      prisma.clothingItem.count({
+        where: { userId }
+      }),
+      prisma.clothingItem.count({
+        where: { userId, isFavorite: true }
+      }),
+      prisma.outfit.count({
+        where: { userId }
+      }),
+      prisma.clothingItem.groupBy({
+        by: ['category'],
+        where: { userId },
+        _count: {
+          category: true
+        }
+      })
+    ]);
+
+    // Format category details
+    const byCategory: Record<string, number> = {
+      top: 0,
+      bottom: 0,
+      shoes: 0,
+      accessory: 0,
+      outerwear: 0
+    };
+
+    categoryGroups.forEach((group: any) => {
+      if (group.category) {
+        byCategory[group.category] = group._count.category;
+      }
+    });
+
+    return res.json({
+      totalItems,
+      favoritesCount,
+      totalOutfits,
+      byCategory
+    });
+  } catch (error) {
+    console.error('Get items stats error:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };

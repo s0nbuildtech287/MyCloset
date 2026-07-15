@@ -101,65 +101,65 @@ function App() {
             </div>
             
             {/* Tabs */}
-            <nav className="flex gap-1">
+            <nav className="flex gap-0.5 sm:gap-1">
               <button
                 onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === 'wardrobe' && !editingItem
                     ? 'bg-[#C4704F]/10 text-[#C4704F]'
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <LayoutGrid className="h-4 w-4" />
-                Tủ đồ
+                <span className="hidden sm:inline">Tủ đồ</span>
               </button>
 
               <button
                 onClick={() => { setActiveTab('add_item'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === 'add_item' && !editingItem
                     ? 'bg-[#C4704F]/10 text-[#C4704F]'
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <PlusCircle className="h-4 w-4" />
-                Thêm đồ
+                <span className="hidden sm:inline">Thêm đồ</span>
               </button>
 
               <button
                 onClick={() => { setActiveTab('outfit_canvas'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === 'outfit_canvas' && !editingItem
                     ? 'bg-[#C4704F]/10 text-[#C4704F]'
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <Sparkles className="h-4 w-4" />
-                Ghép đồ
+                <span className="hidden sm:inline">Ghép đồ</span>
               </button>
 
               <button
                 onClick={() => { setActiveTab('my_outfits'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === 'my_outfits' && !editingItem
                     ? 'bg-[#C4704F]/10 text-[#C4704F]'
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <Layers className="h-4 w-4" />
-                Bộ phối
+                <span className="hidden sm:inline">Bộ phối</span>
               </button>
 
               <button
                 onClick={() => { setActiveTab('profile'); setEditingItem(null); }}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
                   activeTab === 'profile'
                     ? 'bg-[#C4704F]/10 text-[#C4704F]'
                     : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                 }`}
               >
                 <UserIcon className="h-4 w-4" />
-                Hồ sơ
+                <span className="hidden sm:inline">Hồ sơ</span>
               </button>
             </nav>
 

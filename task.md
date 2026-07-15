@@ -201,9 +201,9 @@ drobe/
 - [x] Trang "My Outfits" xem lại danh sách
 
 ### Phase 5 — Polish
-- [ ] Responsive mobile
-- [ ] Dashboard thống kê cơ bản (tổng số món, tổng tiền, theo category)
-- [ ] Empty states, error handling, loading skeletons đồng bộ toàn app
+- [x] Responsive mobile
+- [x] Dashboard thống kê cơ bản (tổng số món, tổng tiền, theo category)
+- [x] Empty states, error handling, loading skeletons đồng bộ toàn app
 
 ### Phase 6 — Deploy (CHƯA LÀM VỘI — chỉ tính đến khi Phase 1-5 chạy ổn định local)
 - [ ] Quyết định hạ tầng (VM/Railway/Render cho backend, Vercel/Cloudflare Pages cho frontend, storage cloud cho ảnh)
