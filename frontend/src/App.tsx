@@ -82,7 +82,28 @@ function App() {
       })
   }, [setAuth])
 
+  // Auto-clear success message after 3 seconds
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        setSuccess('');
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
+
+  // Auto-clear error message after 5 seconds
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError('');
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault()
     setError('')
     setSuccess('')
