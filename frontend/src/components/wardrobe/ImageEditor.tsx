@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { apiClient } from '../../api/client';
-import { X, RefreshCw, Save, Loader2 } from 'lucide-react';
+import { X, RefreshCw, Save, Loader2, Sparkles } from 'lucide-react';
 
 interface ImageEditorProps {
   itemId: string;
@@ -14,6 +14,7 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [brushSize, setBrushSize] = useState(15);
   const [saving, setSaving] = useState(false);
+  const [rembging, setRembging] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [isDrawing, setIsDrawing] = useState(false);
@@ -110,6 +111,35 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
     setIsDrawing(false);
   };
 
+  // AI Remove Background — send canvas to rembg server, draw result back onto canvas
+  const handleRembg = async () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    setRembging(true);
+    setSaveError('');
+    try {
+      const dataUrl = canvas.toDataURL('image/png');
+      const res = await apiClient.post('/items/rembg', { imageBase64: dataUrl });
+      const resultDataUrl: string = res.data.imageBase64;
+
+      // Draw the rembg result back onto the same canvas
+      const img = new Image();
+      img.onload = () => {
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      };
+      img.src = resultDataUrl;
+    } catch (err: any) {
+      console.error('Rembg inline error:', err);
+      setSaveError(err.response?.data?.error || 'AI tách nền thất bại. Kiểm tra rembg server có đang chạy không.');
+    } finally {
+      setRembging(false);
+    }
+  };
+
   // Save changes
   const handleSave = async () => {
     const canvas = canvasRef.current;
@@ -142,7 +172,7 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
         <div className="flex justify-between items-center pb-3 border-b border-stone-100">
           <div>
             <h4 className="font-bold text-md text-[#2A2521] font-serif">Tẩy nền ảnh thủ công</h4>
-            <p className="text-[10px] text-stone-400 mt-0.5">Dùng cọ tẩy để xóa các vùng thừa chưa sạch</p>
+            <p className="text-[10px] text-stone-400 mt-0.5">Dùng cọ tẩy để xóa các vùng thừa, rồi nhấn AI để làm sạch tiếp</p>
           </div>
           <button
             onClick={onClose}
@@ -160,6 +190,14 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
           {/* Dot helper background */}
           <div className="absolute inset-0 dotted-grid pointer-events-none opacity-40" />
           
+          {/* AI processing overlay */}
+          {rembging && (
+            <div className="absolute inset-0 bg-stone-900/50 flex flex-col items-center justify-center rounded-2xl z-20">
+              <Loader2 className="h-7 w-7 text-white animate-spin mb-2" />
+              <span className="text-white text-xs font-bold tracking-wider">AI đang tách nền...</span>
+            </div>
+          )}
+
           <canvas
             ref={canvasRef}
             onMouseDown={handleStart}
@@ -207,13 +245,33 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
 
           {/* Action buttons */}
           <div className="flex justify-between items-center pt-2">
-            <button
-              onClick={initCanvas}
-              className="flex items-center gap-1.5 px-3.5 py-2 border border-stone-200 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-50 transition-colors"
-            >
-              <RefreshCw className="h-3.5 w-3.5" />
-              Làm lại từ đầu
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={initCanvas}
+                className="flex items-center gap-1.5 px-3.5 py-2 border border-stone-200 rounded-xl text-xs font-semibold text-stone-600 hover:bg-stone-50 transition-colors"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+                Làm lại
+              </button>
+
+              <button
+                onClick={handleRembg}
+                disabled={rembging || saving}
+                className="flex items-center gap-1.5 px-3.5 py-2 bg-violet-50 border border-violet-200 text-violet-700 rounded-xl text-xs font-bold hover:bg-violet-100 disabled:opacity-50 transition-colors"
+              >
+                {rembging ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    Đang xử lý...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-3.5 w-3.5" />
+                    AI Tách nền
+                  </>
+                )}
+              </button>
+            </div>
 
             <div className="flex gap-2">
               <button
@@ -224,7 +282,7 @@ export default function ImageEditor({ itemId, imageUrl, onSave, onClose }: Image
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || rembging}
                 className="flex items-center gap-1.5 px-5 py-2 bg-[#C4704F] text-white rounded-xl text-xs font-semibold hover:bg-[#b05f3f] disabled:opacity-50 transition-colors shadow-sm"
               >
                 {saving ? (

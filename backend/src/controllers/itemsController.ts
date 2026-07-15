@@ -704,3 +704,33 @@ Trả về ĐỊNH DẠNG JSON THUẦN TÚY, không có dấu bọc markdown hay
     return res.status(500).json({ error: `Lỗi phân tích AI: ${apiError}` });
   }
 };
+
+// POST /items/rembg - Remove background from a base64 canvas image (for ImageEditor in-place AI)
+export const rembgImage = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const { imageBase64 } = req.body;
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'imageBase64 is required' });
+    }
+
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const fileBlob = new Blob([buffer], { type: 'image/png' });
+    const formData = new FormData();
+    formData.append('file', fileBlob, 'canvas.png');
+
+    const response = await axios.post('http://127.0.0.1:5000/api/remove', formData, {
+      responseType: 'arraybuffer',
+      headers: { 'Content-Type': 'multipart/form-data' },
+      timeout: 120000,
+    });
+
+    const resultBase64 = Buffer.from(response.data).toString('base64');
+    return res.json({ imageBase64: `data:image/png;base64,${resultBase64}` });
+  } catch (error: any) {
+    console.error('rembg inline error:', error.message);
+    return res.status(500).json({ error: 'Không thể kết nối đến máy chủ tách nền AI. Hãy đảm bảo rembg đang chạy.' });
+  }
+};
+
