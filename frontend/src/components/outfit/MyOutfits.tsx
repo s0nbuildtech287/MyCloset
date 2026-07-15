@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
 import { Trash2, ShoppingBag, Calendar, Eye, X } from 'lucide-react';
+import OutfitCalendar from './OutfitCalendar';
 
 interface OutfitItemDetail {
   id: string;
@@ -21,6 +22,7 @@ interface OutfitDetail {
 }
 
 export default function MyOutfits() {
+  const [subTab, setSubTab] = useState<'saved' | 'planner'>('saved');
   const [outfits, setOutfits] = useState<OutfitDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -69,11 +71,39 @@ export default function MyOutfits() {
         </div>
       </div>
 
-      {error && (
-        <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl text-center text-sm">
-          {error}
-        </div>
-      )}
+      {/* Sub tabs switch */}
+      <div className="flex gap-2 border-b border-stone-200 pb-px">
+        <button
+          onClick={() => setSubTab('saved')}
+          className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+            subTab === 'saved'
+              ? 'border-[#C4704F] text-[#C4704F]'
+              : 'border-transparent text-stone-500 hover:text-stone-700'
+          }`}
+        >
+          Bộ phối đã lưu
+        </button>
+        <button
+          onClick={() => setSubTab('planner')}
+          className={`pb-3 px-4 text-xs font-semibold border-b-2 transition-all ${
+            subTab === 'planner'
+              ? 'border-[#C4704F] text-[#C4704F]'
+              : 'border-transparent text-stone-500 hover:text-stone-700'
+          }`}
+        >
+          Lịch phối đồ (Planner)
+        </button>
+      </div>
+
+      {subTab === 'planner' ? (
+        <OutfitCalendar />
+      ) : (
+        <>
+          {error && (
+            <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl text-center text-sm">
+              {error}
+            </div>
+          )}
 
       {loading ? (
         /* Shimmer Loading */
@@ -225,6 +255,8 @@ export default function MyOutfits() {
             </div>
           </div>
         </div>
+      )}
+        </>
       )}
     </div>
   );

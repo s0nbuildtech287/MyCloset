@@ -5,8 +5,10 @@ import WardrobeGrid from './components/wardrobe/WardrobeGrid'
 import ItemForm from './components/wardrobe/ItemForm'
 import OutfitCanvas from './components/outfit/OutfitCanvas'
 import MyOutfits from './components/outfit/MyOutfits'
+import AnalyticsDashboard from './components/wardrobe/AnalyticsDashboard'
+import AiStylistChat from './components/chat/AiStylistChat'
 import type { ClothingItem } from '../../shared/types'
-import { Shirt, LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers } from 'lucide-react'
+import { Shirt, LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3 } from 'lucide-react'
 
 function App() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
@@ -18,7 +20,7 @@ function App() {
   const [name, setName] = useState('')
   
   // App navigation and edit states
-  const [activeTab, setActiveTab] = useState<'wardrobe' | 'add_item' | 'outfit_canvas' | 'my_outfits' | 'profile'>('wardrobe')
+  const [activeTab, setActiveTab] = useState<'wardrobe' | 'add_item' | 'outfit_canvas' | 'my_outfits' | 'analytics' | 'profile'>('wardrobe')
   const [editingItem, setEditingItem] = useState<ClothingItem | null>(null)
   
   const [error, setError] = useState('')
@@ -148,6 +150,18 @@ function App() {
               >
                 <Layers className="h-4 w-4" />
                 <span className="hidden sm:inline">Bộ phối</span>
+              </button>
+
+              <button
+                onClick={() => { setActiveTab('analytics'); setEditingItem(null); }}
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === 'analytics' && !editingItem
+                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
+                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                }`}
+              >
+                <BarChart3 className="h-4 w-4" />
+                <span className="hidden sm:inline">Thống kê</span>
               </button>
 
               <button
@@ -309,6 +323,10 @@ function App() {
               <MyOutfits />
             )}
 
+            {activeTab === 'analytics' && (
+              <AnalyticsDashboard />
+            )}
+
             {activeTab === 'profile' && (
               <div className="max-w-md mx-auto bg-white border border-stone-100 rounded-2xl p-6 shadow-sm space-y-4">
                 <h3 className="text-lg font-bold text-[#2A2521] border-b border-stone-100 pb-2 font-serif">Thông tin tài khoản</h3>
@@ -345,6 +363,9 @@ function App() {
           <p>© 2026 Drobe. Đã kết nối PostgreSQL local (`mycloset`).</p>
         </div>
       </footer>
+
+      {/* Floating AI Stylist Chatbot */}
+      {isAuthenticated && <AiStylistChat />}
 
     </div>
   )

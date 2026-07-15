@@ -16,6 +16,7 @@ model User {
   createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
   items        ClothingItem[]
   outfits      Outfit[]
+  outfitDiaries OutfitDiary[]
 
   @@map("users")
 }
@@ -47,14 +48,15 @@ model ClothingItem {
 }
 
 model Outfit {
-  id           String       @id @default(uuid()) @db.Uuid
-  userId       String       @map("user_id") @db.Uuid
-  name         String?      @db.VarChar(150)
-  thumbnailUrl String?      @map("thumbnail_url")
-  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  id           String        @id @default(uuid()) @db.Uuid
+  userId       String        @map("user_id") @db.Uuid
+  name         String?       @db.VarChar(150)
+  thumbnailUrl String?       @map("thumbnail_url")
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz
 
-  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   items        OutfitItem[]
+  outfitDiaries OutfitDiary[]
 
   @@map("outfits")
 }
@@ -73,4 +75,18 @@ model OutfitItem {
   clothingItem   ClothingItem @relation(fields: [clothingItemId], references: [id], onDelete: Cascade)
 
   @@map("outfit_items")
+}
+
+model OutfitDiary {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  outfitId  String   @map("outfit_id") @db.Uuid
+  wearDate  DateTime @map("wear_date") @db.Date
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfit    Outfit   @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, wearDate])
+  @@map("outfit_diary")
 }

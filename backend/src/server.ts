@@ -8,6 +8,8 @@ import { prisma } from './db';
 import authRoutes from './routes/auth';
 import itemsRoutes from './routes/items';
 import outfitsRoutes from './routes/outfits';
+import diaryRoutes from './routes/diary';
+import aiRoutes from './routes/ai';
 
 dotenv.config();
 
@@ -29,6 +31,8 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemsRoutes);
 app.use('/api/outfits', outfitsRoutes);
+app.use('/api/diary', diaryRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });

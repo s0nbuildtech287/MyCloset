@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
-import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag } from 'lucide-react';
+import WeatherWidget from './WeatherWidget';
+import ImageEditor from './ImageEditor';
+import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag, Scissors } from 'lucide-react';
 
 interface WardrobeGridProps {
   onEditItem: (item: ClothingItem) => void;
@@ -57,6 +59,9 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
   const [isFavorite, setIsFavorite] = useState<boolean | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const [selectedEditItem, setSelectedEditItem] = useState<ClothingItem | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
 
   // Pagination states
   const [page, setPage] = useState(1);
@@ -207,6 +212,9 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
         </div>
       )}
 
+      {/* Weather Recommendations Widget */}
+      <WeatherWidget />
+
       {/* Filters Toolbar */}
       <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-4">
         {/* Search and Favorite toggle */}
@@ -331,7 +339,14 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
               className="group bg-white rounded-2xl overflow-hidden border border-stone-100 hover:border-stone-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
             >
               {/* Image card header */}
-              <div className="relative aspect-square w-full bg-[#FAF6F1]/50 overflow-hidden flex items-center justify-center border-b border-stone-50">
+              <div 
+                className="relative aspect-square w-full overflow-hidden flex items-center justify-center border-b border-stone-50"
+                style={{
+                  backgroundColor: item.color && item.color.startsWith('#') && item.color.length === 7
+                    ? `${item.color}0d`
+                    : '#FAF6F180'
+                }}
+              >
                 <img
                   src={item.processingStatus === 'done' && item.processedImageUrl ? item.processedImageUrl : item.originalImageUrl}
                   alt={item.name}
@@ -371,6 +386,16 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                       title={item.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
                     >
                       <Heart className={`h-4 w-4 ${item.isFavorite ? 'fill-[#C4704F]' : ''}`} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedEditItem(item);
+                        setIsEditorOpen(true);
+                      }}
+                      className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-[#C4704F] transition-colors"
+                      title="Tẩy nền thủ công"
+                    >
+                      <Scissors className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => onEditItem(item)}
@@ -478,6 +503,23 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
             Sau
           </button>
         </div>
+      )}
+
+      {isEditorOpen && selectedEditItem && (
+        <ImageEditor
+          itemId={selectedEditItem.id}
+          imageUrl={selectedEditItem.processedImageUrl || selectedEditItem.originalImageUrl}
+          onClose={() => {
+            setIsEditorOpen(false);
+            setSelectedEditItem(null);
+          }}
+          onSave={() => {
+            setIsEditorOpen(false);
+            setSelectedEditItem(null);
+            fetchItems();
+            fetchStats();
+          }}
+        />
       )}
     </div>
   );

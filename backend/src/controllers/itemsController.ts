@@ -3,8 +3,10 @@ import { AuthenticatedRequest } from '../middleware/auth';
 import { prisma } from '../db';
 import { imageQueue } from '../services/queue';
 import { processImageBackground } from '../services/imageProcessing';
+import { fetchWeather } from '../services/weatherService';
 import path from 'path';
 import fs from 'fs';
+import axios from 'axios';
 
 // Helper to delete a file from disk safely
 const deleteDiskFile = (imageUrl: string) => {
@@ -212,6 +214,24 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
       updateData.price = req.body.price === '' || req.body.price === null ? null : parseFloat(req.body.price);
     }
 
+    if (req.body.processedImageBase64) {
+      const base64Data = req.body.processedImageBase64.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      let filename = '';
+      if (item.processedImageUrl) {
+        filename = path.basename(item.processedImageUrl);
+      } else {
+        filename = `processed_${Date.now()}_${Math.round(Math.random() * 1000)}.png`;
+      }
+      
+      const filePath = path.join(__dirname, '../../uploads', filename);
+      fs.writeFileSync(filePath, buffer);
+      
+      updateData.processedImageUrl = `/uploads/${filename}`;
+      updateData.processingStatus = 'completed';
+    }
+
     const updatedItem = await prisma.clothingItem.update({
       where: { id },
       data: updateData,
@@ -269,7 +289,16 @@ export const getItemsStats = async (req: AuthenticatedRequest, res: Response) =>
     }
 
     // Run queries in parallel
-    const [totalItems, favoritesCount, totalOutfits, categoryGroups] = await Promise.all([
+    const [
+      totalItems,
+      favoritesCount,
+      totalOutfits,
+      categoryGroups,
+      totalValueAggregate,
+      avgPriceAggregate,
+      categoryValueGroups,
+      colorGroups
+    ] = await Promise.all([
       prisma.clothingItem.count({
         where: { userId }
       }),
@@ -284,6 +313,32 @@ export const getItemsStats = async (req: AuthenticatedRequest, res: Response) =>
         where: { userId },
         _count: {
           category: true
+        }
+      }),
+      prisma.clothingItem.aggregate({
+        where: { userId },
+        _sum: {
+          price: true
+        }
+      }),
+      prisma.clothingItem.aggregate({
+        where: { userId, NOT: { price: null } },
+        _avg: {
+          price: true
+        }
+      }),
+      prisma.clothingItem.groupBy({
+        by: ['category'],
+        where: { userId },
+        _sum: {
+          price: true
+        }
+      }),
+      prisma.clothingItem.groupBy({
+        by: ['color'],
+        where: { userId, NOT: { color: null } },
+        _count: {
+          color: true
         }
       })
     ]);
@@ -303,14 +358,226 @@ export const getItemsStats = async (req: AuthenticatedRequest, res: Response) =>
       }
     });
 
+    // Format category values
+    const byCategoryValue: Record<string, number> = {
+      top: 0,
+      bottom: 0,
+      shoes: 0,
+      accessory: 0,
+      outerwear: 0
+    };
+
+    categoryValueGroups.forEach((group: any) => {
+      if (group.category) {
+        byCategoryValue[group.category] = Number(group._sum.price || 0);
+      }
+    });
+
+    // Format color distribution
+    const colorDistribution = colorGroups
+      .map((group: any) => ({
+        color: group.color,
+        count: group._count.color
+      }))
+      .sort((a: any, b: any) => b.count - a.count);
+
     return res.json({
       totalItems,
       favoritesCount,
       totalOutfits,
-      byCategory
+      totalValue: Number(totalValueAggregate._sum.price || 0),
+      averagePrice: Number(avgPriceAggregate._avg.price || 0),
+      byCategory,
+      byCategoryValue,
+      colorDistribution
     });
   } catch (error) {
     console.error('Get items stats error:', error);
     return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const getWeatherSuggestions = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    // Default to Hanoi coordinates if not provided
+    const lat = req.body.latitude ? parseFloat(req.body.latitude) : 21.0285;
+    const lon = req.body.longitude ? parseFloat(req.body.longitude) : 105.8542;
+
+    const weather = await fetchWeather(lat, lon);
+    const temp = weather.temperature;
+
+    let suggestedSeasons: string[] = ['all'];
+    let recommendation = '';
+
+    if (temp < 18) {
+      suggestedSeasons.push('winter', 'fall');
+      recommendation = 'Thời tiết khá lạnh. Hãy mặc đồ dày dặn, nhiều lớp và nhớ khoác thêm áo nhé!';
+    } else if (temp >= 18 && temp <= 25) {
+      suggestedSeasons.push('spring', 'fall');
+      recommendation = 'Thời tiết mát mẻ dễ chịu. Một chiếc áo mỏng nhẹ hoặc blazer thời trang là lựa chọn hoàn hảo.';
+    } else {
+      suggestedSeasons.push('summer');
+      recommendation = 'Trời khá nóng bức. Hãy chọn những trang phục mỏng nhẹ, cộc tay và thoáng mát nhé!';
+    }
+
+    if (weather.isRainy) {
+      recommendation += ' Ngoài ra trời có mưa dông, hãy mang theo ô/áo mưa và đi giày chống trơn trượt.';
+    }
+
+    // 1. Fetch matching items
+    const suggestedItems = await prisma.clothingItem.findMany({
+      where: {
+        userId,
+        season: {
+          in: suggestedSeasons
+        }
+      },
+      take: 8,
+      orderBy: { isFavorite: 'desc' } // prioritize favorites
+    });
+
+    // 2. Fetch matching outfits
+    const suggestedOutfits = await prisma.outfit.findMany({
+      where: {
+        userId,
+        items: {
+          some: {
+            clothingItem: {
+              season: {
+                in: suggestedSeasons
+              }
+            }
+          }
+        }
+      },
+      include: {
+        items: {
+          include: {
+            clothingItem: true
+          }
+        }
+      },
+      take: 3
+    });
+
+    return res.json({
+      weather,
+      recommendation,
+      suggestedItems,
+      suggestedOutfits
+    });
+  } catch (error) {
+    console.error('Get weather suggestions error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+};
+
+export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ error: 'Vui lòng cung cấp tệp ảnh để phân tích' });
+    }
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    const model = process.env.OPENAI_MODEL || 'gpt-5.4';
+
+    if (!apiKey) {
+      // Clean up uploaded file first
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      return res.status(500).json({ 
+        error: 'Cấu hình API Key bị thiếu. Vui lòng điền OPENAI_API_KEY trong file backend/.env.' 
+      });
+    }
+
+    const filePath = req.file.path;
+    const imageBuffer = fs.readFileSync(filePath);
+    const base64Image = imageBuffer.toString('base64');
+    const mimeType = req.file.mimetype;
+
+    const makeOpenAiRequest = async (targetModel: string) => {
+      return await axios.post(
+        'https://api.openai.com/v1/chat/completions',
+        {
+          model: targetModel,
+          messages: [
+            {
+              role: 'user',
+              content: [
+                {
+                  type: 'text',
+                  text: `Hãy phân tích hình ảnh trang phục này và trả về dữ liệu JSON mô tả trang phục với các trường:
+- "name": Tên món đồ tiếng Việt súc tích (ví dụ: Áo phông trắng Uniqlo, Quần tây đen công sở)
+- "category": chỉ chọn 1 trong các giá trị sau: 'top', 'bottom', 'shoes', 'accessory', 'outerwear'
+- "color": mã màu Hex đại diện chính xác nhất của trang phục dạng #RRGGBB (ví dụ: #FAF6F1)
+- "brand": thương hiệu nếu có, nếu không có để chuỗi rỗng
+- "season": chỉ chọn 1 trong các giá trị sau: 'spring', 'summer', 'fall', 'winter', 'all'
+- "tags": mảng các tag tiếng Việt liên quan mô tả phong cách/hoàn cảnh (ví dụ: ['công sở', 'năng động', 'lịch sự'])
+Trả về ĐỊNH DẠNG JSON THUẦN TÚY, không có dấu bọc markdown hay bất kỳ ký tự nào bên ngoài chuỗi JSON.`
+                },
+                {
+                  type: 'image_url',
+                  image_url: {
+                    url: `data:${mimeType};base64,${base64Image}`
+                  }
+                }
+              ]
+            }
+          ],
+          response_format: { type: "json_object" }
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          timeout: 20000 // 20s timeout for vision API
+        }
+      );
+    };
+
+    let response;
+    try {
+      response = await makeOpenAiRequest(model);
+    } catch (err) {
+      console.warn(`Model ${model} failed, attempting fallback to gpt-4o...`);
+      if (model !== 'gpt-4o') {
+        response = await makeOpenAiRequest('gpt-4o');
+      } else {
+        throw err;
+      }
+    }
+
+    // Clean up temporary file from disk immediately
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    const content = response.data?.choices?.[0]?.message?.content;
+    if (!content) {
+      throw new Error('Empty response from OpenAI Vision API');
+    }
+
+    const parsedData = JSON.parse(content);
+    return res.json(parsedData);
+  } catch (error: any) {
+    // Make sure we delete the file on error
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    console.error('Analyze image error:', error.response?.data || error.message);
+    const apiError = error.response?.data?.error?.message || error.message;
+    return res.status(500).json({ error: `Lỗi phân tích AI: ${apiError}` });
   }
 };

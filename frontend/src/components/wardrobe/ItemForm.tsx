@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
-import { Upload, X, ArrowLeft, Loader2 } from 'lucide-react';
+import { Upload, X, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
 
 interface ItemFormProps {
   initialItem?: ClothingItem | null;
@@ -43,6 +43,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const [aiAnalyzing, setAiAnalyzing] = useState(false);
   const [error, setError] = useState('');
 
   // Populate data in edit mode
@@ -84,6 +85,37 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
   const handleClearImage = () => {
     setImageFile(null);
     setImagePreview(null);
+  };
+
+  const handleAiAutofill = async () => {
+    if (!imageFile) return;
+    setAiAnalyzing(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      
+      const res = await apiClient.post('/items/analyze-image', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      
+      const { name, category, color, brand, season, tags } = res.data;
+      if (name) setName(name);
+      if (category) setCategory(category);
+      if (color) setColor(color);
+      if (brand) setBrand(brand);
+      if (season) setSeason(season);
+      if (tags) {
+        setTagsInput(Array.isArray(tags) ? tags.join(', ') : tags);
+      }
+    } catch (err: any) {
+      console.error('Failed to run AI autofill:', err);
+      setError(err.response?.data?.error || 'Lỗi phân tích nhận diện ảnh từ OpenAI.');
+    } finally {
+      setAiAnalyzing(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -209,19 +241,42 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
           </label>
 
           {imagePreview ? (
-            <div className="relative aspect-square w-full bg-[#FAF6F1]/50 border border-stone-200 rounded-xl overflow-hidden flex items-center justify-center group">
-              <img
-                src={imagePreview}
-                alt="Preview"
-                className="object-contain w-full h-full p-2"
-              />
-              {!isEditMode && (
+            <div className="w-full space-y-3">
+              <div className="relative aspect-square w-full bg-[#FAF6F1]/50 border border-stone-200 rounded-xl overflow-hidden flex items-center justify-center group">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="object-contain w-full h-full p-2"
+                />
+                {!isEditMode && (
+                  <button
+                    type="button"
+                    onClick={handleClearImage}
+                    className="absolute top-2 right-2 bg-stone-900/80 hover:bg-stone-900 text-white p-1.5 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              
+              {imageFile && (
                 <button
                   type="button"
-                  onClick={handleClearImage}
-                  className="absolute top-2 right-2 bg-stone-900/80 hover:bg-stone-900 text-white p-1.5 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                  disabled={loading || aiAnalyzing}
+                  onClick={handleAiAutofill}
+                  className="flex items-center justify-center gap-1.5 w-full py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white rounded-xl text-xs font-bold disabled:opacity-50 transition-colors shadow-sm"
                 >
-                  <X className="h-4 w-4" />
+                  {aiAnalyzing ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      AI đang nhận diện...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3.5 w-3.5" />
+                      AI tự động điền thông tin
+                    </>
+                  )}
                 </button>
               )}
             </div>
@@ -301,14 +356,23 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
               <label htmlFor="color" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
                 Màu sắc
               </label>
-              <input
-                id="color"
-                type="text"
-                value={color}
-                onChange={(e) => setColor(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
-                placeholder="Ví dụ: Đen, Beige"
-              />
+              <div className="flex gap-2 mt-1">
+                <input
+                  type="color"
+                  value={color.startsWith('#') && color.length === 7 ? color : '#FAF6F1'}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="w-10 h-9 p-0.5 border border-stone-200 rounded-lg cursor-pointer bg-white"
+                  title="Chọn mã màu thực tế"
+                />
+                <input
+                  id="color"
+                  type="text"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="flex-1 w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  placeholder="Mã màu hoặc tên màu"
+                />
+              </div>
             </div>
 
             <div>
