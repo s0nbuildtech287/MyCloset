@@ -7,8 +7,10 @@ import OutfitCanvas from './components/outfit/OutfitCanvas'
 import MyOutfits from './components/outfit/MyOutfits'
 import AnalyticsDashboard from './components/wardrobe/AnalyticsDashboard'
 import AiStylistChat from './components/chat/AiStylistChat'
+import ClosetSelector from './components/wardrobe/ClosetSelector'
+import TravelTab from './components/travel/TravelTab'
 import type { ClothingItem } from '../../shared/types'
-import { Shirt, LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3 } from 'lucide-react'
+import { Shirt, LogOut, User as UserIcon, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase } from 'lucide-react'
 
 function App() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
@@ -20,7 +22,7 @@ function App() {
   const [name, setName] = useState('')
   
   // App navigation and edit states
-  const [activeTab, setActiveTab] = useState<'wardrobe' | 'add_item' | 'outfit_canvas' | 'my_outfits' | 'analytics' | 'profile'>('wardrobe')
+  const [activeTab, setActiveTab] = useState<'wardrobe' | 'add_item' | 'outfit_canvas' | 'my_outfits' | 'analytics' | 'travel' | 'profile'>('wardrobe')
   const [editingItem, setEditingItem] = useState<ClothingItem | null>(null)
   
   const [error, setError] = useState('')
@@ -97,9 +99,12 @@ function App() {
       {isAuthenticated && user && (
         <header className="bg-white border-b border-stone-100 shadow-sm sticky top-0 z-50">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
-              <Shirt className="h-6 w-6 text-[#C4704F]" />
-              <span className="text-xl font-bold font-serif text-[#2A2521] tracking-tight">Drobe.</span>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+                <Shirt className="h-6 w-6 text-[#C4704F]" />
+                <span className="text-xl font-bold font-serif text-[#2A2521] tracking-tight">Drobe.</span>
+              </div>
+              <ClosetSelector />
             </div>
             
             {/* Tabs */}
@@ -162,6 +167,18 @@ function App() {
               >
                 <BarChart3 className="h-4 w-4" />
                 <span className="hidden sm:inline">Thống kê</span>
+              </button>
+
+              <button
+                onClick={() => { setActiveTab('travel'); setEditingItem(null); }}
+                className={`flex items-center gap-1.5 px-2 sm:px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === 'travel' && !editingItem
+                    ? 'bg-[#C4704F]/10 text-[#C4704F]'
+                    : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                }`}
+              >
+                <Briefcase className="h-4 w-4" />
+                <span className="hidden sm:inline">Xếp Vali</span>
               </button>
 
               <button
@@ -325,6 +342,10 @@ function App() {
 
             {activeTab === 'analytics' && (
               <AnalyticsDashboard />
+            )}
+
+            {activeTab === 'travel' && (
+              <TravelTab />
             )}
 
             {activeTab === 'profile' && (

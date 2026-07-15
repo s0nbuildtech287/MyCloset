@@ -122,7 +122,7 @@ export default function OutfitCanvas() {
     const fetchWardrobe = async () => {
       try {
         const res = await apiClient.get('/items', { params: { limit: 100 } });
-        setWardrobeItems(res.data.items);
+        setWardrobeItems(res.data.items.filter((item: any) => item.condition !== 'damaged'));
       } catch (err) {
         console.error('Failed to load wardrobe items:', err);
       }

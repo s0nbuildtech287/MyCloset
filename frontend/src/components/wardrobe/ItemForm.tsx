@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
 import { Upload, X, ArrowLeft, Loader2, Sparkles } from 'lucide-react';
+import { useClosetStore } from '../../store/closetStore';
 
 interface ItemFormProps {
   initialItem?: ClothingItem | null;
@@ -27,6 +28,7 @@ const SEASONS = [
 
 export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormProps) {
   const isEditMode = !!initialItem;
+  const { activeClosetId } = useClosetStore();
 
   // Form states
   const [name, setName] = useState('');
@@ -37,6 +39,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
   const [price, setPrice] = useState('');
   const [notes, setNotes] = useState('');
   const [tagsInput, setTagsInput] = useState('');
+  const [condition, setCondition] = useState('new');
   
   // Image upload states
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -58,6 +61,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
       setNotes(initialItem.notes || '');
       setTagsInput(initialItem.tags ? initialItem.tags.join(', ') : '');
       setImagePreview(initialItem.originalImageUrl);
+      setCondition(initialItem.condition || 'new');
     } else {
       // Clear forms
       setName('');
@@ -70,6 +74,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
       setTagsInput('');
       setImageFile(null);
       setImagePreview(null);
+      setCondition('new');
     }
   }, [initialItem]);
 
@@ -101,12 +106,13 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
         }
       });
       
-      const { name, category, color, brand, season, tags } = res.data;
+      const { name, category, color, brand, season, tags, condition: aiCondition } = res.data;
       if (name) setName(name);
       if (category) setCategory(category);
       if (color) setColor(color);
       if (brand) setBrand(brand);
       if (season) setSeason(season);
+      if (aiCondition) setCondition(aiCondition);
       if (tags) {
         setTagsInput(Array.isArray(tags) ? tags.join(', ') : tags);
       }
@@ -142,6 +148,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
             price: price === '' ? null : parseFloat(price),
             notes,
             tags,
+            condition,
           });
         } else {
           // If user replaced the image, we upload using FormData
@@ -155,6 +162,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
           formData.append('notes', notes);
           formData.append('tags', JSON.stringify(tags));
           formData.append('image', imageFile);
+          formData.append('condition', condition);
 
           // Standard CRUD update route handles metadata. 
           // Note: In our simple backend controllers, patching doesn't support file upload yet (only post creates a new file).
@@ -172,6 +180,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
             price: price === '' ? null : parseFloat(price),
             notes,
             tags,
+            condition,
           });
         }
       } else {
@@ -190,6 +199,10 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
         formData.append('notes', notes);
         formData.append('tags', JSON.stringify(tags));
         formData.append('image', imageFile);
+        formData.append('condition', condition);
+        if (activeClosetId) {
+          formData.append('closetId', activeClosetId);
+        }
 
         await apiClient.post('/items', formData, {
           headers: {
@@ -418,6 +431,36 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
               className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
               placeholder="ví dụ: công sở, năng động, đi tiệc"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">
+              Tình trạng trang phục
+            </label>
+            <div className="flex gap-2">
+              {[
+                { value: 'new', label: '✨ Mới', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+                { value: 'good', label: '👍 Tốt', color: 'bg-blue-50 text-blue-700 border-blue-200' },
+                { value: 'old', label: '🍂 Cũ', color: 'bg-amber-50 text-amber-700 border-amber-200' },
+                { value: 'damaged', label: '⚠️ Hỏng/Rách', color: 'bg-rose-50 text-rose-700 border-rose-200' }
+              ].map((cond) => {
+                const isSelected = condition === cond.value;
+                return (
+                  <button
+                    key={cond.value}
+                    type="button"
+                    onClick={() => setCondition(cond.value)}
+                    className={`flex-1 py-2 px-1 border text-[11px] sm:text-xs font-semibold rounded-xl text-center transition-all ${
+                      isSelected
+                        ? cond.color + ' border-current scale-[1.02] shadow-sm'
+                        : 'border-stone-200 text-stone-500 hover:bg-stone-50'
+                    }`}
+                  >
+                    {cond.label}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           <div>

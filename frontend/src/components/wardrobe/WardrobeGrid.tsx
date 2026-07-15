@@ -3,6 +3,7 @@ import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
 import WeatherWidget from './WeatherWidget';
 import ImageEditor from './ImageEditor';
+import { useClosetStore } from '../../store/closetStore';
 import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag, Scissors } from 'lucide-react';
 
 interface WardrobeGridProps {
@@ -59,6 +60,9 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
   const [isFavorite, setIsFavorite] = useState<boolean | null>(null);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [conditionFilter, setConditionFilter] = useState('');
+  const { activeClosetId } = useClosetStore();
+  const [orderBy, setOrderBy] = useState('createdAt_desc');
 
   const [selectedEditItem, setSelectedEditItem] = useState<ClothingItem | null>(null);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
@@ -90,6 +94,9 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       if (season) params.season = season;
       if (isFavorite !== null) params.isFavorite = isFavorite.toString();
       if (debouncedSearch) params.search = debouncedSearch;
+      if (conditionFilter) params.condition = conditionFilter;
+      if (activeClosetId) params.closetId = activeClosetId;
+      if (orderBy) params.orderBy = orderBy;
 
       const res = await apiClient.get('/items', { params });
       setItems(res.data.items);
@@ -104,7 +111,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
   useEffect(() => {
     fetchItems();
-  }, [category, season, isFavorite, debouncedSearch, page]);
+  }, [category, season, isFavorite, debouncedSearch, conditionFilter, activeClosetId, orderBy, page]);
 
   // Smart polling for items in processing or pending status
   useEffect(() => {
@@ -233,6 +240,20 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           </div>
 
           <div className="flex items-center gap-2">
+            <select
+              value={orderBy}
+              onChange={(e) => {
+                setOrderBy(e.target.value);
+                setPage(1);
+              }}
+              className="px-3 py-2 text-xs font-semibold border border-stone-200 rounded-xl text-stone-600 focus:outline-none bg-white focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+            >
+              <option value="createdAt_desc">Mới nhất</option>
+              <option value="createdAt_asc">Cũ nhất</option>
+              <option value="price_asc">Giá: Thấp đến Cao</option>
+              <option value="price_desc">Giá: Cao đến Thấp</option>
+            </select>
+
             <button
               onClick={() => {
                 setIsFavorite(isFavorite === true ? null : true);
@@ -291,6 +312,35 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                 }`}
               >
                 {se.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Condition filter */}
+        <div className="space-y-2">
+          <label className="text-[11px] font-semibold text-stone-400 uppercase tracking-wider block">Tình trạng</label>
+          <div className="flex flex-wrap gap-1.5">
+            {[
+              { value: '', label: 'Tất cả' },
+              { value: 'new', label: '✨ Mới' },
+              { value: 'good', label: '👍 Tốt' },
+              { value: 'old', label: '🍂 Cũ' },
+              { value: 'damaged', label: '⚠️ Hỏng/Rách' }
+            ].map((cond) => (
+              <button
+                key={cond.value}
+                onClick={() => {
+                  setConditionFilter(cond.value);
+                  setPage(1);
+                }}
+                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                  conditionFilter === cond.value
+                    ? 'bg-[#C4704F] text-white'
+                    : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                }`}
+              >
+                {cond.label}
               </button>
             ))}
           </div>
@@ -377,6 +427,13 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   </span>
                 )}
 
+                {/* Damaged Warning Badge */}
+                {item.condition === 'damaged' && (
+                  <span className="absolute top-3 right-3 bg-rose-500 text-white px-2 py-0.5 rounded-lg text-[9px] font-bold border border-rose-600 shadow-sm z-20 animate-pulse">
+                    ⚠️ Hỏng/Rách
+                  </span>
+                )}
+
                 {/* Action buttons (Visible on hover, only when not processing) */}
                 {item.processingStatus !== 'pending' && item.processingStatus !== 'processing' ? (
                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
@@ -452,6 +509,19 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                     {item.price && (
                       <span className="font-semibold text-[#8A9A5B]">
                         {Number(item.price).toLocaleString('vi-VN')} đ
+                      </span>
+                    )}
+                    {item.condition && (
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                        item.condition === 'new' ? 'bg-emerald-50 text-emerald-700' :
+                        item.condition === 'good' ? 'bg-blue-50 text-blue-700' :
+                        item.condition === 'old' ? 'bg-amber-50 text-amber-700' :
+                        'bg-rose-50 text-rose-700'
+                      }`}>
+                        {item.condition === 'new' ? 'Mới' :
+                         item.condition === 'good' ? 'Tốt' :
+                         item.condition === 'old' ? 'Cũ' :
+                         'Hỏng'}
                       </span>
                     )}
                   </div>

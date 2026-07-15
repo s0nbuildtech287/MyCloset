@@ -22,7 +22,9 @@ export interface ClothingItem {
   price: number | null;
   purchasedAt: string | null;
   isFavorite: boolean;
+  condition: 'new' | 'good' | 'old' | 'damaged';
   notes: string | null;
+  closetId: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -51,4 +53,31 @@ export interface OutfitItem {
 export interface AuthResponse {
   accessToken: string;
   user: User;
+}
+
+export interface Closet {
+  id: string;
+  userId: string;
+  name: string;
+  isDefault: boolean;
+  createdAt: string;
+}
+
+export interface TravelTrip {
+  id: string;
+  userId: string;
+  name: string;
+  startDate: string;
+  endDate: string;
+  destination: string;
+  createdAt: string;
+  items?: TripItem[];
+}
+
+export interface TripItem {
+  id: string;
+  tripId: string;
+  clothingItemId: string;
+  packed: boolean;
+  clothingItem?: ClothingItem;
 }

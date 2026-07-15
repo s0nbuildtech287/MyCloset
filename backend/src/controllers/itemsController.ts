@@ -32,7 +32,7 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(400).json({ error: 'Image file is required' });
     }
 
-    const { name, category, color, brand, season, notes } = req.body;
+    const { name, category, color, brand, season, notes, condition } = req.body;
     let tags: string[] = [];
 
     if (req.body.tags) {
@@ -53,6 +53,16 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
 
     const originalImageUrl = `/uploads/${req.file.filename}`;
 
+    let targetClosetId = req.body.closetId || null;
+    if (!targetClosetId) {
+      const defaultCloset = await prisma.closet.findFirst({
+        where: { userId, isDefault: true }
+      });
+      if (defaultCloset) {
+        targetClosetId = defaultCloset.id;
+      }
+    }
+
     const clothingItem = await prisma.clothingItem.create({
       data: {
         userId,
@@ -65,6 +75,8 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
         originalImageUrl,
         notes: notes || null,
         price,
+        condition: condition || 'new',
+        closetId: targetClosetId,
       },
     });
 
@@ -87,7 +99,7 @@ export const getItems = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(401).json({ error: 'Unauthorized' });
     }
 
-    const { category, season, isFavorite, search, tag, page = 1, limit = 20 } = req.query;
+    const { category, season, isFavorite, search, tag, condition, closetId, orderBy, page = 1, limit = 20 } = req.query;
 
     const pageNum = parseInt(page as string) || 1;
     const limitNum = parseInt(limit as string) || 20;
@@ -112,6 +124,35 @@ export const getItems = async (req: AuthenticatedRequest, res: Response) => {
       where.isFavorite = false;
     }
 
+    if (condition) {
+      where.condition = condition as string;
+    }
+
+    let targetClosetId = closetId as string | undefined;
+    if (!targetClosetId && closetId !== 'all') {
+      const defaultCloset = await prisma.closet.findFirst({
+        where: { userId, isDefault: true }
+      });
+      if (defaultCloset) {
+        targetClosetId = defaultCloset.id;
+      }
+    }
+
+    if (targetClosetId && closetId !== 'all') {
+      where.closetId = targetClosetId;
+    }
+
+    let prismaOrderBy: any = { createdAt: 'desc' };
+    if (orderBy === 'price_asc') {
+      prismaOrderBy = { price: 'asc' };
+    } else if (orderBy === 'price_desc') {
+      prismaOrderBy = { price: 'desc' };
+    } else if (orderBy === 'createdAt_asc') {
+      prismaOrderBy = { createdAt: 'asc' };
+    } else if (orderBy === 'createdAt_desc') {
+      prismaOrderBy = { createdAt: 'desc' };
+    }
+
     if (tag) {
       where.tags = {
         has: tag as string,
@@ -130,7 +171,7 @@ export const getItems = async (req: AuthenticatedRequest, res: Response) => {
         where,
         skip,
         take: limitNum,
-        orderBy: { createdAt: 'desc' },
+        orderBy: prismaOrderBy,
       }),
       prisma.clothingItem.count({ where }),
     ]);
@@ -191,7 +232,7 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ error: 'Item not found' });
     }
 
-    const { name, category, color, brand, season, notes, tags, isFavorite } = req.body;
+    const { name, category, color, brand, season, notes, tags, isFavorite, condition } = req.body;
     const updateData: any = {};
 
     if (name !== undefined) updateData.name = name;
@@ -201,6 +242,7 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
     if (season !== undefined) updateData.season = season || null;
     if (notes !== undefined) updateData.notes = notes || null;
     if (isFavorite !== undefined) updateData.isFavorite = !!isFavorite;
+    if (condition !== undefined) updateData.condition = condition;
 
     if (tags !== undefined) {
       try {
@@ -433,6 +475,7 @@ export const getWeatherSuggestions = async (req: AuthenticatedRequest, res: Resp
     const suggestedItems = await prisma.clothingItem.findMany({
       where: {
         userId,
+        condition: { not: 'damaged' },
         season: {
           in: suggestedSeasons
         }
@@ -448,6 +491,7 @@ export const getWeatherSuggestions = async (req: AuthenticatedRequest, res: Resp
         items: {
           some: {
             clothingItem: {
+              condition: { not: 'damaged' },
               season: {
                 in: suggestedSeasons
               }
@@ -523,6 +567,7 @@ export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Respo
 - "color": mã màu Hex đại diện chính xác nhất của trang phục dạng #RRGGBB (ví dụ: #FAF6F1)
 - "brand": thương hiệu nếu có, nếu không có để chuỗi rỗng
 - "season": chỉ chọn 1 trong các giá trị sau: 'spring', 'summer', 'fall', 'winter', 'all'
+- "condition": tình trạng của đồ, chỉ chọn 1 trong: 'new' (nếu trông rất mới/chưa mặc), 'good' (trông còn tốt/đã sử dụng), 'old' (trông cũ/sờn), 'damaged' (trông hỏng/rách)
 - "tags": mảng các tag tiếng Việt liên quan mô tả phong cách/hoàn cảnh (ví dụ: ['công sở', 'năng động', 'lịch sự'])
 Trả về ĐỊNH DẠNG JSON THUẦN TÚY, không có dấu bọc markdown hay bất kỳ ký tự nào bên ngoài chuỗi JSON.`
                 },

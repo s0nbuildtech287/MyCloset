@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { apiClient } from '../../api/client';
-import { DollarSign, Tag, ShoppingBag, Layers } from 'lucide-react';
+import { DollarSign, Tag, ShoppingBag, Layers, BarChart, PieChart } from 'lucide-react';
 
 interface StatsData {
   totalItems: number;
@@ -21,7 +21,14 @@ const CATEGORY_LABELS: Record<string, string> = {
   outerwear: 'Áo khoác',
 };
 
-// Clever helper to translate color name string into actual Hex code for rendering circles
+const CATEGORY_COLORS: Record<string, string> = {
+  top: '#C4704F',      // Brownish-Beige base
+  bottom: '#8A9A5B',   // Moss Green
+  shoes: '#4A6B82',    // Slate Blue
+  accessory: '#D4AF37',// Gold
+  outerwear: '#696969',// Dim Gray
+};
+
 const getHexColor = (col: string) => {
   if (!col) return '#e2e8f0';
   if (col.startsWith('#') && col.length === 7) return col;
@@ -53,13 +60,15 @@ const getHexColor = (col: string) => {
     'brown': '#78350f',
   };
   
-  return colorMap[lower] || '#cbd5e1'; // fallback slate color
+  return colorMap[lower] || '#cbd5e1';
 };
 
 export default function AnalyticsDashboard() {
   const [stats, setStats] = useState<StatsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [activeSlice, setActiveSlice] = useState<string | null>(null);
+  const [activeBar, setActiveBar] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -95,157 +104,278 @@ export default function AnalyticsDashboard() {
     );
   }
 
-  // Format currency helper
   const formatCurrency = (val: number) => {
     return val.toLocaleString('vi-VN') + ' ₫';
   };
 
+  // 1. Math for Donut Chart (byCategory counts)
+  const donutRadius = 40;
+  const donutCirc = 2 * Math.PI * donutRadius; // 251.327
+  const validCategories = Object.entries(stats.byCategory).filter(([_, count]) => count > 0);
+  const totalCategoryCount = validCategories.reduce((sum, [_, count]) => sum + count, 0);
+
+  let accumulatedPercent = 0;
+  const donutSlices = validCategories.map(([cat, count]) => {
+    const percent = totalCategoryCount > 0 ? (count / totalCategoryCount) * 100 : 0;
+    const strokeDasharray = `${(percent * donutCirc) / 100} ${donutCirc}`;
+    const strokeDashoffset = -((accumulatedPercent * donutCirc) / 100);
+    accumulatedPercent += percent;
+    return {
+      category: cat,
+      count,
+      percent,
+      strokeDasharray,
+      strokeDashoffset,
+      color: CATEGORY_COLORS[cat] || '#cbd5e1',
+    };
+  });
+
+  // 2. Math for Bar Chart (byCategoryValue investments)
+  const barChartMax = Math.max(...Object.values(stats.byCategoryValue), 1);
+  const barChartEntries = Object.entries(stats.byCategoryValue).map(([cat, val]) => ({
+    category: cat,
+    value: val,
+    heightPercent: (val / barChartMax) * 80, // scale to max 80% height
+    color: CATEGORY_COLORS[cat] || '#cbd5e1',
+  }));
+
   return (
-    <div className="space-y-8 max-w-6xl mx-auto">
-      {/* 1. Header Banner */}
-      <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm">
+    <div className="space-y-8 max-w-6xl mx-auto px-4 select-none">
+      
+      {/* Header Banner */}
+      <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm text-left">
         <h2 className="text-lg font-bold text-[#2A2521] font-serif">Báo cáo tủ đồ</h2>
-        <p className="text-xs text-stone-500">Phân tích giá trị đầu tư và phân phối phong cách thời trang của bạn</p>
+        <p className="text-xs text-stone-500 mt-1">Phân tích giá trị đầu tư và phân phối phong cách thời trang của bạn</p>
       </div>
 
-      {/* 2. Key Finance & Quantity Metrics Cards */}
+      {/* Financial & Quantity Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2">
+        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng giá trị tủ đồ</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng giá trị</span>
             <span className="p-1.5 rounded-lg bg-[#C4704F]/10 text-[#C4704F]">
               <DollarSign className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
             {formatCurrency(stats.totalValue)}
           </h3>
-          <p className="text-[10px] text-stone-400 font-medium">Toàn bộ chi phí mua sắm quần áo</p>
+          <p className="text-[9px] text-stone-400 font-semibold leading-none">Toàn bộ chi phí mua sắm quần áo</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2">
+        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Giá trung bình món</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Giá trung bình</span>
             <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
               <Tag className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
             {formatCurrency(stats.averagePrice)}
           </h3>
-          <p className="text-[10px] text-stone-400 font-medium">Giá trị trung bình trên một sản phẩm</p>
+          <p className="text-[9px] text-stone-400 font-semibold leading-none">Giá trị trung bình trên một món</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2">
+        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Số lượng sản phẩm</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng sản phẩm</span>
             <span className="p-1.5 rounded-lg bg-indigo-50 text-indigo-600">
               <ShoppingBag className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
             {stats.totalItems} món
           </h3>
-          <p className="text-[10px] text-stone-400 font-medium">Phân chia theo {Object.values(stats.byCategory).filter(c => c > 0).length} loại mặt hàng</p>
+          <p className="text-[9px] text-stone-400 font-semibold leading-none">Trong {validCategories.length} loại sản phẩm</p>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2">
+        <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-2 text-left">
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Bộ phối đã ghép</span>
+            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Số bộ phối</span>
             <span className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
               <Layers className="h-4 w-4" />
             </span>
           </div>
-          <h3 className="text-xl sm:text-2xl font-bold text-[#2A2521] tracking-tight">
+          <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] tracking-tight">
             {stats.totalOutfits} bộ
           </h3>
-          <p className="text-[10px] text-stone-400 font-medium">Các outfit do bạn sáng tạo</p>
+          <p className="text-[9px] text-stone-400 font-semibold leading-none">Bộ phối đồ tự sáng tạo</p>
         </div>
       </div>
 
-      {/* 3. Detailed Breakdown Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-        {/* Category Financial Breakdown (Left Column) */}
-        <div className="md:col-span-7 bg-white p-6 rounded-2xl border border-stone-100 shadow-sm space-y-5">
+      {/* Visual Charts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        {/* Donut Chart: Quantity Distribution */}
+        <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm space-y-5 text-left flex flex-col justify-between">
           <div>
-            <h3 className="font-bold text-sm text-[#2A2521] font-serif">Đầu tư theo danh mục</h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">Giá trị tài sản chi tiết của từng phân loại sản phẩm</p>
+            <h3 className="font-bold text-sm text-[#2A2521] font-serif flex items-center gap-1.5">
+              <PieChart className="h-4 w-4 text-[#C4704F]" />
+              Phân bổ số lượng sản phẩm
+            </h3>
+            <p className="text-[10px] text-stone-400 mt-0.5">Tỷ lệ cơ cấu các loại quần áo trong tủ đồ</p>
           </div>
 
-          <div className="space-y-4">
-            {Object.entries(stats.byCategoryValue).map(([cat, val]) => {
-              const count = stats.byCategory[cat] || 0;
-              const percent = stats.totalValue > 0 ? (val / stats.totalValue) * 100 : 0;
-              
-              return (
-                <div key={cat} className="space-y-1.5">
-                  <div className="flex justify-between text-xs font-semibold text-stone-700">
-                    <span className="flex items-center gap-1.5">
-                      {CATEGORY_LABELS[cat] || cat}
-                      <span className="text-[9px] font-bold bg-stone-100 px-1 py-0.2 rounded text-stone-400">
-                        {count} món
-                      </span>
-                    </span>
-                    <span>
-                      {formatCurrency(val)} ({Math.round(percent)}%)
-                    </span>
-                  </div>
-                  {/* Visual Progress Bar */}
-                  <div className="w-full h-2 rounded-full bg-stone-50 overflow-hidden border border-stone-100">
-                    <div
-                      className="h-full bg-[#C4704F] rounded-full transition-all duration-500"
-                      style={{ width: `${percent}%` }}
+          <div className="flex flex-col sm:flex-row items-center justify-around gap-6 py-4">
+            
+            {/* Interactive SVG Donut */}
+            <div className="relative w-40 h-40">
+              <svg className="w-full h-full transform -rotate-95" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r={donutRadius}
+                  fill="transparent"
+                  stroke="#FAF6F1"
+                  strokeWidth="10"
+                />
+                {donutSlices.map((slice) => {
+                  const isActive = activeSlice === slice.category;
+                  return (
+                    <circle
+                      key={slice.category}
+                      cx="50"
+                      cy="50"
+                      r={donutRadius}
+                      fill="transparent"
+                      stroke={slice.color}
+                      strokeWidth={isActive ? '13' : '10'}
+                      strokeDasharray={slice.strokeDasharray}
+                      strokeDashoffset={slice.strokeDashoffset}
+                      strokeLinecap="round"
+                      onMouseEnter={() => setActiveSlice(slice.category)}
+                      onMouseLeave={() => setActiveSlice(null)}
+                      className="cursor-pointer transition-all duration-300 origin-center"
                     />
+                  );
+                })}
+              </svg>
+              {/* Inner Center Label */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-xl font-bold text-[#2A2521] leading-none">{stats.totalItems}</span>
+                <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mt-1">Sản phẩm</span>
+              </div>
+            </div>
+
+            {/* Labels Legend */}
+            <div className="space-y-2.5 flex-1 min-w-[140px] text-left">
+              {donutSlices.map((slice) => {
+                const isActive = activeSlice === slice.category;
+                return (
+                  <div
+                    key={slice.category}
+                    onMouseEnter={() => setActiveSlice(slice.category)}
+                    onMouseLeave={() => setActiveSlice(null)}
+                    className={`flex items-center justify-between text-xs p-1.5 rounded-lg transition-colors cursor-pointer ${
+                      isActive ? 'bg-stone-50' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: slice.color }} />
+                      <span className="font-semibold text-stone-700">{CATEGORY_LABELS[slice.category] || slice.category}</span>
+                    </div>
+                    <span className="font-bold text-[#C4704F]">{slice.count} món ({Math.round(slice.percent)}%)</span>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Bar Chart: Investment Distribution */}
+        <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm space-y-5 text-left">
+          <div>
+            <h3 className="font-bold text-sm text-[#2A2521] font-serif flex items-center gap-1.5">
+              <BarChart className="h-4 w-4 text-[#8A9A5B]" />
+              Giá trị đầu tư thời trang
+            </h3>
+            <p className="text-[10px] text-stone-400 mt-0.5">So sánh chi phí mua sắm theo từng nhóm danh mục</p>
+          </div>
+
+          <div className="h-48 flex items-end gap-5 border-b border-stone-100 pb-2 relative">
+            
+            {/* Bars */}
+            {barChartEntries.map((bar) => {
+              const isActive = activeBar === bar.category;
+              return (
+                <div
+                  key={bar.category}
+                  className="flex-1 flex flex-col items-center justify-end h-full relative group cursor-pointer"
+                  onMouseEnter={() => setActiveBar(bar.category)}
+                  onMouseLeave={() => setActiveBar(null)}
+                >
+                  {/* Tooltip on hover */}
+                  {isActive && (
+                    <div className="absolute -top-10 bg-stone-900 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-md z-10 whitespace-nowrap animate-in fade-in duration-100">
+                      {formatCurrency(bar.value)}
+                    </div>
+                  )}
+
+                  <div
+                    className="w-full rounded-t-xl transition-all duration-500"
+                    style={{
+                      height: `${bar.heightPercent}%`,
+                      backgroundColor: bar.color,
+                      opacity: activeBar && !isActive ? 0.4 : 1,
+                    }}
+                  />
+                  
+                  <span className="text-[10px] font-bold text-stone-400 mt-2 truncate w-full text-center">
+                    {CATEGORY_LABELS[bar.category] || bar.category}
+                  </span>
                 </div>
               );
             })}
           </div>
+
+          {/* Bar Chart Value Info */}
+          <div className="pt-2 flex justify-between items-center text-xs font-bold text-stone-600">
+            <span>Tổng chi tiêu:</span>
+            <span className="text-[#8A9A5B]">{formatCurrency(stats.totalValue)}</span>
+          </div>
         </div>
 
-        {/* Color Palette Distribution (Right Column) */}
-        <div className="md:col-span-5 bg-white p-6 rounded-2xl border border-stone-100 shadow-sm space-y-5">
-          <div>
-            <h3 className="font-bold text-sm text-[#2A2521] font-serif">Bảng màu sắc yêu thích</h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">Tỷ lệ phân phối các tông màu có trong tủ quần áo</p>
-          </div>
+      </div>
 
-          <div className="space-y-3.5 max-h-[300px] overflow-y-auto pr-1">
-            {stats.colorDistribution.length === 0 ? (
-              <div className="text-center py-12 text-stone-400 text-xs">
-                Chưa có dữ liệu màu sắc
-              </div>
-            ) : (
-              stats.colorDistribution.map((col) => {
-                const percent = stats.totalItems > 0 ? (col.count / stats.totalItems) * 100 : 0;
-                const renderedHex = getHexColor(col.color);
+      {/* Color Palette List (Full Width styling) */}
+      <div className="bg-white p-6 rounded-3xl border border-stone-150 shadow-sm space-y-4 text-left">
+        <div>
+          <h3 className="font-bold text-sm text-[#2A2521] font-serif">Phân bổ màu sắc yêu thích</h3>
+          <p className="text-[10px] text-stone-400 mt-0.5">Bản đồ phân phối màu sắc trang phục thực tế của bạn</p>
+        </div>
 
-                return (
-                  <div key={col.color} className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3">
-                      {/* Color Circle */}
-                      <span
-                        className="w-5 h-5 rounded-full border border-stone-200 shadow-inner flex shrink-0"
-                        style={{ backgroundColor: renderedHex }}
-                      />
-                      <span className="font-semibold text-stone-700 capitalize">
-                        {col.color}
-                      </span>
-                    </div>
+        <div className="flex flex-wrap gap-4 pt-2">
+          {stats.colorDistribution.length === 0 ? (
+            <div className="text-center py-6 text-stone-400 text-xs w-full">
+              Chưa có dữ liệu màu sắc
+            </div>
+          ) : (
+            stats.colorDistribution.map((col) => {
+              const percent = stats.totalItems > 0 ? (col.count / stats.totalItems) * 100 : 0;
+              const renderedHex = getHexColor(col.color);
 
-                    <div className="flex items-center gap-3 font-semibold text-stone-500 text-right">
-                      <span>{col.count} món</span>
-                      <span className="text-stone-400 text-[10px] font-bold">
-                        {Math.round(percent)}%
-                      </span>
-                    </div>
+              return (
+                <div
+                  key={col.color}
+                  className="flex items-center gap-3.5 bg-stone-50 border border-stone-100 px-4 py-2.5 rounded-2xl text-xs font-bold text-stone-700 shadow-xs hover:border-stone-200 transition-colors"
+                >
+                  <span
+                    className="w-5 h-5 rounded-full border border-stone-200 shadow-inner shrink-0"
+                    style={{ backgroundColor: renderedHex }}
+                  />
+                  <div>
+                    <p className="capitalize leading-none">{col.color}</p>
+                    <p className="text-[9px] text-[#C4704F] mt-1 font-semibold leading-none">
+                      {col.count} món ({Math.round(percent)}%)
+                    </p>
                   </div>
-                );
-              })
-            )}
-          </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
+
     </div>
   );
 }

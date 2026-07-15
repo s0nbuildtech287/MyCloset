@@ -10,6 +10,8 @@ import itemsRoutes from './routes/items';
 import outfitsRoutes from './routes/outfits';
 import diaryRoutes from './routes/diary';
 import aiRoutes from './routes/ai';
+import closetRoutes from './routes/closets';
+import tripRoutes from './routes/trips';
 
 dotenv.config();
 
@@ -33,6 +35,8 @@ app.use('/api/items', itemsRoutes);
 app.use('/api/outfits', outfitsRoutes);
 app.use('/api/diary', diaryRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/closets', closetRoutes);
+app.use('/api/trips', tripRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date() });
