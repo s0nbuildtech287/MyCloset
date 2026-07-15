@@ -55,7 +55,7 @@ export const createOutfit = async (req: AuthenticatedRequest, res: Response) => 
     }
 
     // 2. Save in database (transaction)
-    const outfit = await prisma.$transaction(async (tx) => {
+    const outfit = await prisma.$transaction(async (tx: any) => {
       const newOutfit = await tx.outfit.create({
         data: {
           userId,
