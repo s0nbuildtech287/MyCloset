@@ -1,0 +1,76 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String         @id @default(uuid()) @db.Uuid
+  email        String         @unique @db.VarChar(255)
+  passwordHash String         @map("password_hash")
+  name         String?        @db.VarChar(100)
+  avatarUrl    String?        @map("avatar_url")
+  createdAt    DateTime       @default(now()) @map("created_at") @db.Timestamptz
+  items        ClothingItem[]
+  outfits      Outfit[]
+
+  @@map("users")
+}
+
+model ClothingItem {
+  id                 String       @id @default(uuid()) @db.Uuid
+  userId             String       @map("user_id") @db.Uuid
+  name               String       @db.VarChar(150)
+  category           String       @db.VarChar(50)
+  color              String?      @db.VarChar(50)
+  brand              String?      @db.VarChar(100)
+  season             String?      @db.VarChar(20)
+  tags               String[]
+  originalImageUrl   String       @map("original_image_url")
+  processedImageUrl  String?      @map("processed_image_url")
+  processingStatus   String       @default("pending") @map("processing_status") @db.VarChar(20)
+  purchaseUrl        String?      @map("purchase_url")
+  price              Decimal?     @db.Decimal(12, 2)
+  purchasedAt        DateTime?    @map("purchased_at") @db.Date
+  isFavorite         Boolean      @default(false) @map("is_favorite")
+  notes              String?
+  createdAt          DateTime     @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt          DateTime     @updatedAt @map("updated_at") @db.Timestamptz
+  
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  outfitItems        OutfitItem[]
+
+  @@map("clothing_items")
+}
+
+model Outfit {
+  id           String       @id @default(uuid()) @db.Uuid
+  userId       String       @map("user_id") @db.Uuid
+  name         String?      @db.VarChar(150)
+  thumbnailUrl String?      @map("thumbnail_url")
+  createdAt    DateTime     @default(now()) @map("created_at") @db.Timestamptz
+
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items        OutfitItem[]
+
+  @@map("outfits")
+}
+
+model OutfitItem {
+  id             String       @id @default(uuid()) @db.Uuid
+  outfitId       String       @map("outfit_id") @db.Uuid
+  clothingItemId String       @map("clothing_item_id") @db.Uuid
+  positionX      Float        @map("position_x")
+  positionY      Float        @map("position_y")
+  scale          Float        @default(1)
+  rotation       Float        @default(0)
+  zIndex         Int          @default(0) @map("z_index")
+
+  outfit         Outfit       @relation(fields: [outfitId], references: [id], onDelete: Cascade)
+  clothingItem   ClothingItem @relation(fields: [clothingItemId], references: [id], onDelete: Cascade)
+
+  @@map("outfit_items")
+}
