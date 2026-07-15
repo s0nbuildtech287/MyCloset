@@ -103,7 +103,41 @@ function App() {
     }
   }, [error]);
 
+  // Hash routing listener to synchronize activeTab state with URL hash
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const handleHashChange = () => {
+      const hash = window.location.hash.replace('#/', '');
+      const validTabs = ['wardrobe', 'add_item', 'outfit_canvas', 'my_outfits', 'analytics', 'travel'];
+      if (validTabs.includes(hash)) {
+        setActiveTab(hash as any);
+      } else {
+        // Redirect to wardrobe if hash is empty or invalid
+        if (!window.location.hash || window.location.hash === '#/') {
+          window.location.hash = '#/wardrobe';
+        }
+      }
+    };
+
+    // Initialize or load hash
+    if (!window.location.hash || window.location.hash === '#/') {
+      window.location.hash = '#/wardrobe';
+    } else {
+      handleHashChange();
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [isAuthenticated]);
+
+  // Wrapper function to change tab while updating the URL hash
+  const navigateToTab = (tab: string) => {
+    window.location.hash = `#/${tab}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
+
 
     e.preventDefault()
     setError('')
@@ -129,7 +163,8 @@ function App() {
       clearAuth()
       setSuccess('Đã đăng xuất thành công')
       setError('')
-      setActiveTab('wardrobe')
+      // Clear hash on logout to reset route
+      window.location.hash = '';
       setEditingItem(null)
     } catch (err: any) {
       setError('Đăng xuất thất bại')
@@ -138,19 +173,20 @@ function App() {
 
   const handleEditItem = (item: ClothingItem) => {
     setEditingItem(item)
-    setActiveTab('add_item')
+    navigateToTab('add_item')
   };
 
   const handleFormSuccess = () => {
     setSuccess(editingItem ? 'Cập nhật món đồ thành công' : 'Thêm món đồ thành công');
     setEditingItem(null);
-    setActiveTab('wardrobe');
+    navigateToTab('wardrobe');
   };
 
   const handleFormCancel = () => {
     setEditingItem(null);
-    setActiveTab('wardrobe');
+    navigateToTab('wardrobe');
   };
+
 
 
   if (!isAuthenticated || !user) {
@@ -277,7 +313,7 @@ function App() {
             <div className="flex flex-col gap-6">
               {/* Logo section */}
               <div className="p-6 pb-2">
-                <div className="flex items-center gap-4 cursor-pointer" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+                <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigateToTab('wardrobe'); setEditingItem(null); }}>
                   <img src={headerLogo} alt="Drobe" className="h-14 w-auto object-contain rounded-sm" />
                   <div className="flex flex-col text-left">
                     <span className="font-semibold text-[#2A2521] text-2xl tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
@@ -313,10 +349,11 @@ function App() {
                   return (
                     <button
                       key={item.tab}
-                      onClick={() => { setActiveTab(item.tab as any); setEditingItem(null); }}
+                      onClick={() => { navigateToTab(item.tab); setEditingItem(null); }}
                       className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                         isActive
                           ? 'bg-[#C4704F]/10 text-[#C4704F] shadow-xs font-extrabold'
+
                           : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
                       }`}
                     >
@@ -364,7 +401,7 @@ function App() {
               return (
                 <button
                   key={item.tab}
-                  onClick={() => { setActiveTab(item.tab as any); setEditingItem(null); }}
+                  onClick={() => { navigateToTab(item.tab); setEditingItem(null); }}
                   className={`flex flex-col items-center gap-1 py-1 px-3 text-[11px] font-bold transition-all ${
                     isActive ? 'text-[#C4704F] font-extrabold' : 'text-stone-400 hover:text-stone-600'
                   }`}
@@ -388,7 +425,7 @@ function App() {
             {/* Left section: Tab label on Desktop, logo + closet selector on Mobile */}
             <div className="flex items-center gap-3">
               {/* Mobile view only logo */}
-              <div className="lg:hidden flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => { setActiveTab('wardrobe'); setEditingItem(null); }}>
+              <div className="lg:hidden flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => { navigateToTab('wardrobe'); setEditingItem(null); }}>
                 <img src={headerLogo} alt="Drobe" className="h-11 w-auto object-contain rounded-sm" />
                 <div className="flex flex-col text-left hidden min-[375px]:flex">
                   <span className="font-semibold text-[#2A2521] text-lg tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
@@ -399,6 +436,7 @@ function App() {
                   </span>
                 </div>
               </div>
+
 
 
 
