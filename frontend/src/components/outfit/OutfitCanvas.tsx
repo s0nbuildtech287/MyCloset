@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Transformer } from 'react-konva';
 import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
-import { Trash2, ArrowUp, ArrowDown, Save, RefreshCw, Layers, Sparkles } from 'lucide-react';
 import ConfirmModal from '../common/ConfirmModal';
+import StatusModal from '../common/StatusModal';
+import { Trash2, ArrowUp, ArrowDown, Save, RefreshCw, Layers, Sparkles } from 'lucide-react';
 
 
 interface CanvasItem {
@@ -94,6 +95,21 @@ export default function OutfitCanvas() {
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
   // Mobile tab: 'canvas' shows the Konva studio, 'selector' shows the wardrobe picker
   const [mobilePaneView, setMobilePaneView] = useState<'canvas' | 'selector'>('canvas');
+  const [statusModal, setStatusModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    type: 'success' | 'error' | 'info';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success',
+  });
+
+  const showStatus = (title: string, message: string, type: 'success' | 'error' | 'info') => {
+    setStatusModal({ isOpen: true, title, message, type });
+  };
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -300,7 +316,7 @@ export default function OutfitCanvas() {
 
   const handleSaveOutfit = async () => {
     if (!outfitName.trim()) {
-      alert('Vui lòng nhập tên cho bộ phối!');
+      showStatus('Lỗi nhập liệu', 'Vui lòng nhập tên cho bộ phối trang phục!', 'error');
       return;
     }
 
@@ -326,12 +342,12 @@ export default function OutfitCanvas() {
         thumbnail: dataUrl,
       });
 
-      alert('Đã lưu bộ phối thành công!');
+      showStatus('Lưu thành công', 'Đã lưu bộ phối trang phục của bạn thành công!', 'success');
       setIsSaveModalOpen(false);
       setOutfitName('');
       setCanvasItems([]);
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Lưu bộ phối thất bại. Vui lòng thử lại.');
+      showStatus('Lưu thất bại', err.response?.data?.error || 'Lưu bộ phối thất bại. Vui lòng thử lại.', 'error');
     } finally {
       setSaving(false);
     }
@@ -483,10 +499,18 @@ export default function OutfitCanvas() {
           <div className="flex gap-2">
             <button
               onClick={() => {
+                const hour = new Date().getHours();
+                let promptText = "Gợi ý phối cho tôi một bộ đi chơi tối nay từ các trang phục trong tủ đồ nhé!";
+                if (hour >= 5 && hour < 12) {
+                  promptText = "Gợi ý phối cho tôi một bộ đồ đi làm hoặc đi chơi trưa nay từ các trang phục trong tủ đồ nhé!";
+                } else if (hour >= 18 || hour < 5) {
+                  promptText = "Gợi ý phối cho tôi một bộ đồ phù hợp cho ngày mai từ các trang phục trong tủ đồ nhé!";
+                }
+
                 window.dispatchEvent(new CustomEvent('open-ai-chat', {
                   detail: {
-                    query: "Gợi ý phối cho tôi một bộ đi chơi tối nay từ các trang phục trong tủ đồ nhé!",
-                    autoSend: true
+                    query: promptText,
+                    autoSend: false
                   }
                 }));
               }}
@@ -621,6 +645,14 @@ export default function OutfitCanvas() {
           setIsConfirmClearOpen(false);
         }}
         onCancel={() => setIsConfirmClearOpen(false)}
+      />
+
+      <StatusModal
+        isOpen={statusModal.isOpen}
+        title={statusModal.title}
+        message={statusModal.message}
+        type={statusModal.type}
+        onClose={() => setStatusModal({ ...statusModal, isOpen: false })}
       />
     </div>
     </div>

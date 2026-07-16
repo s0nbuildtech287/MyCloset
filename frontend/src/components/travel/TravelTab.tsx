@@ -324,7 +324,7 @@ export default function TravelTab() {
                     window.dispatchEvent(new CustomEvent('open-ai-chat', {
                       detail: {
                         query: activeTrip ? `Tôi chuẩn bị đi chuyến đi ${activeTrip.name} tới ${activeTrip.destination}. Hãy gợi ý cho tôi danh sách các trang phục phù hợp để xếp vào Vali từ tủ đồ hiện có của tôi.` : undefined,
-                        autoSend: true
+                        autoSend: false
                       }
                     }));
                   }}
