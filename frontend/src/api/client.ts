@@ -1,8 +1,14 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/authStore';
 
+const getApiBaseUrl = () => {
+  // If VITE_API_URL is set, use it (e.g. https://your-backend.onrender.com).
+  // Otherwise, default to empty string so it falls back to relative path in dev proxy.
+  return import.meta.env.VITE_API_URL || '';
+};
+
 export const apiClient = axios.create({
-  baseURL: '/api',
+  baseURL: `${getApiBaseUrl()}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -63,7 +69,7 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const refreshResponse = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        const refreshResponse = await axios.post(`${getApiBaseUrl()}/api/auth/refresh`, {}, { withCredentials: true });
         const { accessToken, user } = refreshResponse.data;
 
         useAuthStore.getState().setAuth(user, accessToken);
