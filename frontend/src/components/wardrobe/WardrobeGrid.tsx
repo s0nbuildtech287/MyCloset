@@ -189,37 +189,37 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       {/* Dashboard Statistics */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
-          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[#C4704F]/10 flex items-center justify-center text-[#C4704F]">
               <ShoppingBag className="h-5 w-5" />
             </div>
             <div>
               <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng sản phẩm</p>
-              <h3 className="text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalItems}</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalItems}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
               <Heart className="h-5 w-5 fill-red-500 stroke-red-500" />
             </div>
             <div>
               <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Yêu thích</p>
-              <h3 className="text-xl font-bold text-[#2A2521] mt-0.5">{stats.favoritesCount}</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] mt-0.5">{stats.favoritesCount}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
               <Tag className="h-5 w-5" />
             </div>
             <div>
               <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Bộ phối đồ</p>
-              <h3 className="text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalOutfits}</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalOutfits}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-2xl border border-stone-100 shadow-sm flex flex-col justify-center gap-1 col-span-2 lg:col-span-1">
+          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex flex-col justify-center gap-1 col-span-2 lg:col-span-1">
             <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tỉ lệ phân loại</p>
             <div className="flex gap-1.5 items-center mt-1">
               <div className="flex-1 h-2 rounded bg-stone-100 overflow-hidden flex">
@@ -253,7 +253,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       <WeatherWidget />
 
       {/* Filters Toolbar */}
-      <div className="bg-white p-5 rounded-2xl border border-stone-100 shadow-sm space-y-4">
+      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-100 shadow-sm space-y-4">
         {/* Search and Favorite toggle */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
           <div className="relative flex-1">
@@ -269,7 +269,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
             />
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <select
               value={orderBy}
               onChange={(e) => {
@@ -307,7 +307,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           {/* Column 1: Categories Pills */}
           <div className="space-y-2 text-left">
             <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Danh mục</label>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 flex-nowrap scrollbar-hide">
               {CATEGORIES.map((cat) => (
                 <button
                   key={cat.value}
@@ -330,7 +330,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           {/* Column 2: Season filter */}
           <div className="space-y-2 text-left">
             <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Mùa phù hợp</label>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 flex-nowrap scrollbar-hide">
               {SEASONS.map((se) => (
                 <button
                   key={se.value}
@@ -353,7 +353,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           {/* Column 3: Condition filter */}
           <div className="space-y-2 text-left col-span-1 md:col-span-2 lg:col-span-1">
             <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Tình trạng</label>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex gap-1.5 overflow-x-auto pb-1 flex-nowrap scrollbar-hide">
               {[
                 { value: '', label: 'Tất cả' },
                 { value: 'new', label: '✨ Mới' },

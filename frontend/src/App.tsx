@@ -391,7 +391,7 @@ function App() {
         
         {/* Unified Top Header for both Desktop and Mobile */}
         {isAuthenticated && user && (
-          <header className="sticky top-0 bg-white border-b border-stone-150 h-16 px-4 sm:px-6 flex items-center justify-between z-30 shadow-xs shrink-0 w-full">
+          <header className="sticky top-0 bg-white border-b border-stone-150 h-16 px-6 sm:px-6 flex items-center justify-between z-30 shadow-xs shrink-0 w-full">
             {/* Left section: Tab label on Desktop, logo + closet selector on Mobile */}
             <div className="flex items-center gap-3">
               {/* Mobile view only logo */}
@@ -412,7 +412,7 @@ function App() {
 
               
               {/* Mobile view only closet selector */}
-              <div className="lg:hidden scale-90 origin-left">
+              <div className="lg:hidden scale-90 origin-left max-w-[160px] overflow-hidden">
                 <ClosetSelector />
               </div>
 
@@ -442,26 +442,26 @@ function App() {
                 <Bell className="h-4.5 w-4.5" />
               </button>
 
-              {/* Light/Dark mode placeholder switcher */}
+              {/* Light/Dark mode placeholder switcher - hidden on xs screens */}
               <button 
                 onClick={() => {
                   setIsDarkModeDemo(!isDarkModeDemo);
                   alert(!isDarkModeDemo ? 'Chuyển sang chế độ tối (Demo - Chức năng đang phát triển)' : 'Chuyển sang chế độ sáng (Demo)');
                 }} 
-                className="p-1.5 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all" 
+                className="hidden sm:flex p-1.5 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all" 
                 title="Chuyển chế độ sáng/tối"
               >
                 {isDarkModeDemo ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
               </button>
 
-              {/* Language switcher placeholder */}
+              {/* Language switcher placeholder - hidden on xs screens */}
               <button 
                 onClick={() => {
                   const nextLang = langDemo === 'VI' ? 'EN' : 'VI';
                   setLangDemo(nextLang);
                   alert(`Đã đổi ngôn ngữ sang: ${nextLang === 'VI' ? 'Tiếng Việt' : 'Tiếng Anh'} (Demo)`);
                 }}
-                className="flex items-center gap-1 px-2 py-1 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all border border-stone-200 text-[10px] font-bold"
+                className="hidden sm:flex items-center gap-1 px-2 py-1 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all border border-stone-200 text-[10px] font-bold"
                 title="Đổi ngôn ngữ"
               >
                 <Globe className="h-3.5 w-3.5" />
@@ -533,7 +533,7 @@ function App() {
           </header>
         )}
 
-        <div className="flex-grow w-full px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex-grow w-full px-6 sm:px-6 lg:px-8 py-6 sm:py-8">
           {/* Authenticated Pages View */}
           <div className="space-y-6">
             {/* Floating Success Toast */}

@@ -21,6 +21,8 @@ export default function TravelTab() {
   // Selected trip details
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
   const [confirmDeleteTripId, setConfirmDeleteTripId] = useState<string | null>(null);
+  // Mobile tab: 'list' shows trips sidebar, 'detail' shows packing checklist
+  const [mobilePaneView, setMobilePaneView] = useState<'list' | 'detail'>('list');
 
 
   // Wardrobe items selector state
@@ -180,10 +182,34 @@ export default function TravelTab() {
   const progressPercent = tripItems.length > 0 ? Math.round((packedCount / tripItems.length) * 100) : 0;
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
+    <div className="w-full space-y-0 text-left">
+
+      {/* Mobile Tab Toggle (only visible on < lg) */}
+      <div className="lg:hidden flex bg-stone-100 p-1 rounded-2xl gap-1 mb-4">
+        <button
+          onClick={() => setMobilePaneView('list')}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            mobilePaneView === 'list' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+          }`}
+        >
+          ✈️ Hành trình ({trips.length})
+        </button>
+        <button
+          onClick={() => setMobilePaneView('detail')}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            mobilePaneView === 'detail' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+          }`}
+        >
+          🧳 Checklist Vali
+        </button>
+      </div>
+
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
       
       {/* 1. Left Column: Trips List Sidebar (4 Grid Columns) */}
-      <div className="lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-6 shadow-sm flex flex-col h-[580px] w-full lg:order-1 order-2">
+      <div className={`lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-4 sm:p-6 shadow-sm flex flex-col min-h-[300px] lg:h-[580px] w-full lg:order-1 order-2 ${
+        mobilePaneView === 'list' ? 'flex' : 'hidden lg:flex'
+      }`}>
         {error && (
           <div className="bg-rose-50 border border-rose-100 text-rose-700 p-3 rounded-xl text-center text-xs mb-3">
             {error}
@@ -266,12 +292,14 @@ export default function TravelTab() {
       </div>
 
       {/* 2. Right Column: Packing Checklist Details Workspace (8 Grid Columns) */}
-      <div className="lg:col-span-8 w-full h-[580px] flex flex-col lg:order-2 order-1">
+      <div className={`lg:col-span-8 w-full flex flex-col lg:order-2 order-1 min-h-[360px] lg:h-[580px] ${
+        mobilePaneView === 'detail' ? 'flex' : 'hidden lg:flex'
+      }`}>
         {activeTrip ? (
           <div className="bg-white rounded-3xl border border-stone-100 p-6 space-y-6 shadow-sm h-full flex flex-col overflow-hidden">
             
             {/* Details Header info */}
-            <div className="flex justify-between items-start border-b border-stone-100 pb-4 shrink-0">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-100 pb-4 shrink-0 gap-3">
               <div className="space-y-1">
                 <span className="text-[9px] bg-stone-100 text-stone-500 font-bold uppercase px-2 py-0.5 rounded tracking-wide">
                   Chi tiết đóng gói Vali
@@ -569,8 +597,10 @@ export default function TravelTab() {
         onCancel={() => setConfirmDeleteTripId(null)}
       />
     </div>
+    </div>
   );
 }
+
 
 // Inline custom implementation for X icon since we missed importing it
 const X = ({ className, onClick }: { className?: string; onClick?: () => void }) => (

@@ -127,7 +127,7 @@ export default function WeatherWidget() {
         </div>
 
         {/* Suggestion Text */}
-        <div className="flex-1 max-w-xl text-left bg-white p-3 rounded-xl border border-stone-100 shadow-inner flex gap-2 items-start">
+        <div className="flex-1 text-left bg-white p-3 rounded-xl border border-stone-100 shadow-inner flex gap-2 items-start">
           <span className="p-1 rounded bg-[#C4704F]/10 text-[#C4704F] shrink-0 mt-0.5">
             <Sparkles className="h-3.5 w-3.5" />
           </span>
@@ -144,7 +144,7 @@ export default function WeatherWidget() {
           {suggestedOutfits.length > 0 && (
             <div className="space-y-2">
               <h5 className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Gợi ý bộ phối hợp thời tiết:</h5>
-              <div className="flex gap-4 overflow-x-auto pb-2 pr-1 select-none">
+              <div className="flex gap-4 overflow-x-auto pb-2 pr-1 select-none" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {suggestedOutfits.map((outfit) => (
                   <div key={outfit.id} className="w-[120px] shrink-0 space-y-1 group">
                     <div className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-xl p-1 overflow-hidden flex items-center justify-center relative">
@@ -167,7 +167,7 @@ export default function WeatherWidget() {
           {suggestedItems.length > 0 && (
             <div className="space-y-2">
               <h5 className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Quần áo khuyên dùng trong ngày:</h5>
-              <div className="flex gap-4 overflow-x-auto pb-2 pr-1 select-none">
+              <div className="flex gap-4 overflow-x-auto pb-2 pr-1 select-none" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {suggestedItems.map((item) => (
                   <div key={item.id} className="w-[80px] shrink-0 space-y-1 text-center group">
                     <div className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-xl p-1 overflow-hidden flex items-center justify-center">

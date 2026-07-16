@@ -92,6 +92,8 @@ export default function OutfitCanvas() {
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isConfirmClearOpen, setIsConfirmClearOpen] = useState(false);
+  // Mobile tab: 'canvas' shows the Konva studio, 'selector' shows the wardrobe picker
+  const [mobilePaneView, setMobilePaneView] = useState<'canvas' | 'selector'>('canvas');
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -284,10 +286,34 @@ export default function OutfitCanvas() {
   });
 
   return (
-    <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start text-left">
+    <div className="w-full space-y-0 text-left">
+
+      {/* Mobile Tab Toggle (only visible on < lg) */}
+      <div className="lg:hidden flex bg-stone-100 p-1 rounded-2xl gap-1 mb-4">
+        <button
+          onClick={() => setMobilePaneView('canvas')}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            mobilePaneView === 'canvas' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+          }`}
+        >
+          🎨 Studio ghép đồ
+        </button>
+        <button
+          onClick={() => setMobilePaneView('selector')}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+            mobilePaneView === 'selector' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+          }`}
+        >
+          👗 Chọn đồ ({wardrobeItems.length})
+        </button>
+      </div>
+
+      <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
       
       {/* 1. Wardrobe Selector Sidebar (Left panel - grid 4 span for wider item cards) */}
-      <div className="lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-6 shadow-sm flex flex-col h-[580px] lg:order-1 order-2 w-full">
+      <div className={`lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-4 sm:p-6 shadow-sm flex flex-col h-[420px] sm:h-[500px] lg:h-[580px] lg:order-1 order-2 w-full ${
+        mobilePaneView === 'selector' ? 'block' : 'hidden lg:flex'
+      }`}>
         <h3 className="font-bold text-sm text-[#2A2521] font-serif border-b border-stone-100 pb-2 mb-4">
           Bộ chọn sản phẩm phối đồ
         </h3>
@@ -349,7 +375,9 @@ export default function OutfitCanvas() {
       </div>
 
       {/* 2. Dotted Grid Workspace (Right panel - grid 8 span - stretch flush 100% width) */}
-      <div ref={containerRef} className="lg:col-span-8 flex flex-col items-stretch gap-4 lg:order-2 order-1 w-full">
+      <div ref={containerRef} className={`lg:col-span-8 flex flex-col items-stretch gap-4 lg:order-2 order-1 w-full ${
+        mobilePaneView === 'canvas' ? 'block' : 'hidden lg:flex'
+      }`}>
         {/* Workspace Toolbar Header (Stretches 100% width flush) */}
         <div className="w-full flex justify-between items-center bg-white px-4 py-3 border border-stone-100 shadow-sm rounded-2xl">
           {/* Layer manipulation actions */}
@@ -509,6 +537,7 @@ export default function OutfitCanvas() {
         }}
         onCancel={() => setIsConfirmClearOpen(false)}
       />
+    </div>
     </div>
   );
 }
