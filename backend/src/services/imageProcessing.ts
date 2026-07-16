@@ -1,13 +1,12 @@
 import axios from 'axios';
-import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 import { prisma } from '../db';
 import { getEmbedding, checkDuplicateItem } from './similarityService';
+import { uploadToStorage } from './storageService';
 
 export const processImageBackground = async (itemId: string, removeBg = true) => {
   try {
-
     // 1. Fetch item details
     const item = await prisma.clothingItem.findUnique({
       where: { id: itemId },
@@ -24,48 +23,39 @@ export const processImageBackground = async (itemId: string, removeBg = true) =>
       data: { processingStatus: 'processing' },
     });
 
-    // Resolve physical path of the original image
-    const filename = path.basename(item.originalImageUrl);
-    const originalFilePath = path.join(__dirname, '../../uploads', filename);
+    // 2. Download original image from Supabase Storage
+    console.log(`Downloading original image for processing: ${item.name}...`);
+    const originalResponse = await axios.get(item.originalImageUrl, {
+      responseType: 'arraybuffer',
+      timeout: 30000,
+    });
+    const fileBuffer = Buffer.from(originalResponse.data);
 
-    if (!fs.existsSync(originalFilePath)) {
-      throw new Error(`Original image file does not exist: ${originalFilePath}`);
-    }
-
-    // Read original file buffer
-    const fileBuffer = fs.readFileSync(originalFilePath);
-
-    // Compress and resize original image to max 1000px width/height and JPEG 70% quality
-    // This reduces storage space from ~5MB down to ~50KB while retaining editor capabilities
+    // 3. Compress and resize original image to max 1000px, JPEG 70%
     console.log(`Compressing original raw image for item: ${item.name}...`);
     const compressedOriginalBuffer = await sharp(fileBuffer)
       .resize(1000, 1000, { fit: 'inside', withoutEnlargement: true })
       .jpeg({ quality: 70 })
       .toBuffer();
 
-    // Overwrite original file with lightweight compressed JPEG
-    fs.writeFileSync(originalFilePath, compressedOriginalBuffer);
+    // Overwrite original in storage with compressed version
+    const originalFilename = item.originalImageUrl.split('/').pop()!;
+    await uploadToStorage(compressedOriginalBuffer, originalFilename, 'image/jpeg');
 
-    const processedFilename = `processed-${path.parse(filename).name}.webp`;
-    const processedFilePath = path.join(__dirname, '../../uploads', processedFilename);
+    // 4. Process: remove background or just convert to WebP
     let processedWebPBuffer: Buffer;
+    const processedFilename = `processed-${path.parse(originalFilename).name}.webp`;
 
     if (removeBg) {
-      // 2. Read file to a Blob to send via FormData
       const fileBlob = new Blob([compressedOriginalBuffer], { type: 'image/jpeg' });
       const formData = new FormData();
-      formData.append('file', fileBlob, filename);
+      formData.append('file', fileBlob, originalFilename);
 
       console.log(`Sending image to rembg local server for item: ${item.name} (${itemId})...`);
-
-      // Call rembg s local server (running on port 5000)
-      // Timeout is set to 120 seconds to allow model downloads on first request
       const response = await axios.post('http://127.0.0.1:5000/api/remove', formData, {
         responseType: 'arraybuffer',
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        timeout: 120000, 
+        headers: { 'Content-Type': 'multipart/form-data' },
+        timeout: 120000,
       });
 
       console.log(`Converting background-removed image to transparent WebP for item: ${item.name}...`);
@@ -73,20 +63,21 @@ export const processImageBackground = async (itemId: string, removeBg = true) =>
         .webp({ quality: 80 })
         .toBuffer();
     } else {
-      console.log(`Skipping auto background removal for item: ${item.name}. Using original image buffer...`);
-      // Simply convert compressed original image to WebP (quality 80%) for the editor
+      console.log(`Skipping background removal for item: ${item.name}. Converting to WebP...`);
       processedWebPBuffer = await sharp(compressedOriginalBuffer)
         .webp({ quality: 80 })
         .toBuffer();
     }
 
-    // 3. Save processed image
-    fs.writeFileSync(processedFilePath, processedWebPBuffer);
-    const processedImageUrl = `/uploads/${processedFilename}`;
+    // 5. Upload processed image to Supabase Storage
+    const processedImageUrl = await uploadToStorage(
+      processedWebPBuffer,
+      processedFilename,
+      'image/webp'
+    );
+    console.log(`Uploaded processed image to storage: ${processedImageUrl}`);
 
-
-
-    // 4. Extract visual embedding and check for duplicate uploads using MobileNet
+    // 6. Extract visual embedding and check for duplicates
     let embeddingStr: string | null = null;
     let duplicateWarningStr: string | null = null;
 
@@ -96,19 +87,19 @@ export const processImageBackground = async (itemId: string, removeBg = true) =>
 
       if (embedding) {
         embeddingStr = JSON.stringify(embedding);
-        
-        console.log(`Running similarity checking for duplicates in closet for item: ${item.name}...`);
+
+        console.log(`Running similarity checking for duplicates for item: ${item.name}...`);
         const dupCheck = await checkDuplicateItem(item.userId, item.id, embedding);
         if (dupCheck && dupCheck.isDuplicate) {
           duplicateWarningStr = JSON.stringify(dupCheck);
-          console.warn(`[AI DUPLICATE DETECTED] New upload ${item.name} matches existing item with similarity: ${dupCheck.similarity}`);
+          console.warn(`[AI DUPLICATE DETECTED] ${item.name} matches existing item with similarity: ${dupCheck.similarity}`);
         }
       }
     } catch (embErr) {
       console.error(`Failed to process visual similarity for item ${itemId}:`, embErr);
     }
 
-    // 5. Update item in DB with processed image url, embedding, and potential duplicate warnings
+    // 7. Update DB
     await prisma.clothingItem.update({
       where: { id: itemId },
       data: {
@@ -119,13 +110,11 @@ export const processImageBackground = async (itemId: string, removeBg = true) =>
       },
     });
 
-    console.log(`Successfully completed background removal and duplicate detection for item: ${item.name}`);
-
+    console.log(`Successfully completed processing for item: ${item.name}`);
 
   } catch (error: any) {
     console.error(`Failed background removal for item ${itemId}:`, error);
 
-    // Update status to failed
     await prisma.clothingItem.update({
       where: { id: itemId },
       data: { processingStatus: 'failed' },

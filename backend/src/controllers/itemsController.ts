@@ -4,18 +4,14 @@ import { prisma } from '../db';
 import { imageQueue } from '../services/queue';
 import { processImageBackground } from '../services/imageProcessing';
 import { fetchWeather } from '../services/weatherService';
+import { uploadToStorage, deleteFromStorage } from '../services/storageService';
 import path from 'path';
-import fs from 'fs';
 import axios from 'axios';
 
-// Helper to delete a file from disk safely
-const deleteDiskFile = (imageUrl: string) => {
+// Helper to delete a file from storage safely (handles both Supabase URLs and legacy local paths)
+const deleteStorageFile = async (imageUrl: string) => {
   try {
-    const filename = path.basename(imageUrl);
-    const filePath = path.join(__dirname, '../../uploads', filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    await deleteFromStorage(imageUrl);
   } catch (error) {
     console.error(`Failed to delete file: ${imageUrl}`, error);
   }
@@ -38,7 +34,10 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
     let originalImageUrl = '';
 
     if (req.file) {
-      originalImageUrl = `/uploads/${req.file.filename}`;
+      const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+      const ext = path.extname(req.file.originalname) || '.jpg';
+      const filename = `item-${uniqueSuffix}${ext}`;
+      originalImageUrl = await uploadToStorage(req.file.buffer, filename, req.file.mimetype);
     } else if (imageUrl) {
       try {
         console.log(`Downloading image from pasted URL: ${imageUrl}...`);
@@ -63,11 +62,9 @@ export const createItem = async (req: AuthenticatedRequest, res: Response) => {
         } catch (_) {}
 
         const filename = `downloaded_${Date.now()}_${Math.round(Math.random() * 1000)}${ext}`;
-        const filePath = path.join(__dirname, '../../uploads', filename);
-
-        fs.writeFileSync(filePath, buffer);
-        originalImageUrl = `/uploads/${filename}`;
-        console.log(`Pasted image downloaded successfully to: ${filePath}`);
+        const mimeType = ext === '.png' ? 'image/png' : ext === '.webp' ? 'image/webp' : 'image/jpeg';
+        originalImageUrl = await uploadToStorage(buffer, filename, mimeType);
+        console.log(`Pasted image uploaded to storage: ${originalImageUrl}`);
       } catch (dlErr: any) {
         console.error('Failed to download image from URL:', dlErr);
         return res.status(400).json({ error: 'Không thể tải ảnh từ link bạn cung cấp. Vui lòng kiểm tra lại đường dẫn.' });
@@ -302,22 +299,16 @@ export const updateItem = async (req: AuthenticatedRequest, res: Response) => {
     if (req.body.processedImageBase64) {
       const base64Data = req.body.processedImageBase64.replace(/^data:image\/\w+;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
-      
-      // Always generate a new unique filename so browser cache is busted
+
       const newFilename = `processed_manual_${Date.now()}_${Math.round(Math.random() * 1000)}.png`;
-      const newFilePath = path.join(__dirname, '../../uploads', newFilename);
-      fs.writeFileSync(newFilePath, buffer);
-      
-      // Delete the old processed file to reclaim disk space
+      const newUrl = await uploadToStorage(buffer, newFilename, 'image/png');
+
+      // Delete the old processed file from storage
       if (item.processedImageUrl) {
-        const oldFilename = path.basename(item.processedImageUrl);
-        const oldFilePath = path.join(__dirname, '../../uploads', oldFilename);
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
-        }
+        await deleteStorageFile(item.processedImageUrl);
       }
-      
-      updateData.processedImageUrl = `/uploads/${newFilename}`;
+
+      updateData.processedImageUrl = newUrl;
       updateData.processingStatus = 'done';
     }
 
@@ -351,12 +342,12 @@ export const deleteItem = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(404).json({ error: 'Item not found' });
     }
 
-    // Delete image files from disk
+    // Delete image files from storage
     if (item.originalImageUrl) {
-      deleteDiskFile(item.originalImageUrl);
+      await deleteStorageFile(item.originalImageUrl);
     }
     if (item.processedImageUrl) {
-      deleteDiskFile(item.processedImageUrl);
+      await deleteStorageFile(item.processedImageUrl);
     }
 
     // Delete record from DB
@@ -585,10 +576,6 @@ export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Respo
     const model = process.env.OPENAI_MODEL || 'gpt-5.4';
 
     if (!apiKey) {
-      // Clean up uploaded file first
-      if (req.file && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       return res.status(500).json({ 
         error: 'Cấu hình API Key bị thiếu. Vui lòng điền OPENAI_API_KEY trong file backend/.env.' 
       });
@@ -598,9 +585,8 @@ export const analyzeImageMetadata = async (req: AuthenticatedRequest, res: Respo
     let mimeType = 'image/jpeg';
 
     if (req.file) {
-      const filePath = req.file.path;
-      const imageBuffer = fs.readFileSync(filePath);
-      base64Image = imageBuffer.toString('base64');
+      // Memory storage: use buffer directly
+      base64Image = req.file.buffer.toString('base64');
       mimeType = req.file.mimetype;
     } else if (imageUrl) {
       try {
@@ -681,11 +667,7 @@ Trả về ĐỊNH DẠNG JSON THUẦN TÚY, không có dấu bọc markdown hay
       }
     }
 
-    // Clean up temporary file from disk immediately
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
-
+    // Clean up temporary file from disk immediately — no longer needed (memory storage)
 
     const content = response.data?.choices?.[0]?.message?.content;
     if (!content) {
@@ -695,10 +677,6 @@ Trả về ĐỊNH DẠNG JSON THUẦN TÚY, không có dấu bọc markdown hay
     const parsedData = JSON.parse(content);
     return res.json(parsedData);
   } catch (error: any) {
-    // Make sure we delete the file on error
-    if (req.file && fs.existsSync(req.file.path)) {
-      fs.unlinkSync(req.file.path);
-    }
     console.error('Analyze image error:', error.response?.data || error.message);
     const apiError = error.response?.data?.error?.message || error.message;
     return res.status(500).json({ error: `Lỗi phân tích AI: ${apiError}` });

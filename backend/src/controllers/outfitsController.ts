@@ -1,21 +1,7 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { prisma } from '../db';
-import path from 'path';
-import fs from 'fs';
-
-// Helper to delete physical file from disk
-const deleteDiskFile = (imageUrl: string) => {
-  try {
-    const filename = path.basename(imageUrl);
-    const filePath = path.join(__dirname, '../../uploads', filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  } catch (error) {
-    console.error(`Failed to delete file: ${imageUrl}`, error);
-  }
-};
+import { uploadToStorage, deleteFromStorage } from '../services/storageService';
 
 export const createOutfit = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -34,23 +20,15 @@ export const createOutfit = async (req: AuthenticatedRequest, res: Response) => 
       return res.status(400).json({ error: 'Outfit thumbnail is required' });
     }
 
-    // 1. Process base64 thumbnail
+    // 1. Process base64 thumbnail — upload to Supabase Storage
     let thumbnailUrl = null;
     try {
       const base64Data = thumbnail.replace(/^data:image\/png;base64,/, '');
       const buffer = Buffer.from(base64Data, 'base64');
       const filename = `outfit-${Date.now()}-${Math.round(Math.random() * 1e9)}.png`;
-      const uploadDir = path.join(__dirname, '../../uploads');
-
-      if (!fs.existsSync(uploadDir)) {
-        fs.mkdirSync(uploadDir, { recursive: true });
-      }
-
-      const filePath = path.join(uploadDir, filename);
-      fs.writeFileSync(filePath, buffer);
-      thumbnailUrl = `/uploads/${filename}`;
+      thumbnailUrl = await uploadToStorage(buffer, filename, 'image/png');
     } catch (err) {
-      console.error('Failed to save outfit thumbnail:', err);
+      console.error('Failed to upload outfit thumbnail:', err);
       return res.status(500).json({ error: 'Failed to save outfit thumbnail image' });
     }
 
@@ -177,9 +155,9 @@ export const deleteOutfit = async (req: AuthenticatedRequest, res: Response) => 
       return res.status(404).json({ error: 'Outfit not found' });
     }
 
-    // Delete thumbnail file from disk
+    // Delete thumbnail file from storage
     if (outfit.thumbnailUrl) {
-      deleteDiskFile(outfit.thumbnailUrl);
+      await deleteFromStorage(outfit.thumbnailUrl);
     }
 
     // Delete record from DB
