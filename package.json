@@ -8,7 +8,7 @@
     "shared"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\"",
+    "dev": "concurrently --kill-others \"npm run dev --workspace=backend\" \"npm run dev --workspace=frontend\" \".\\venv\\Scripts\\rembg.exe s --host 0.0.0.0 --port 5000\"",
     "build": "npm run build --workspaces",
     "start": "npm run start --workspace=backend"
   },

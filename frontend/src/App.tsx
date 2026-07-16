@@ -19,12 +19,10 @@ import { LogOut, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase,
 
 function App() {
   const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
-  const [isLoginMode, setIsLoginMode] = useState(true)
-  
   // Form states - prefilled for internal testing as requested
   const [email, setEmail] = useState('xu4ns0n@drobe.com')
   const [password, setPassword] = useState('123456')
-  const [name, setName] = useState('')
+
   
   // App navigation and edit states
   const [activeTab, setActiveTab] = useState<'wardrobe' | 'add_item' | 'outfit_canvas' | 'my_outfits' | 'analytics' | 'travel' | 'profile'>('wardrobe')
@@ -137,14 +135,12 @@ function App() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-
-
     e.preventDefault()
     setError('')
     setSuccess('')
     
-    const endpoint = isLoginMode ? '/auth/login' : '/auth/register'
-    const payload = isLoginMode ? { email, password } : { email, password, name }
+    const endpoint = '/auth/login'
+    const payload = { email, password }
     
     try {
       const response = await apiClient.post(endpoint, payload)
@@ -225,23 +221,6 @@ function App() {
 
           <form className="space-y-5 text-left" onSubmit={handleSubmit}>
             <div className="space-y-4">
-              {!isLoginMode && (
-                <div className="animate-in fade-in duration-150">
-                  <label htmlFor="name" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
-                    Họ và tên
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white"
-                    placeholder="Nhập tên của bạn"
-                  />
-                </div>
-              )}
-
               <div>
                 <label htmlFor="email" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
                   Email đăng nhập
@@ -278,24 +257,15 @@ function App() {
                 type="submit"
                 className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] focus:outline-none transition-colors"
               >
-                {isLoginMode ? 'Đăng Nhập' : 'Đăng Ký'}
+                Đăng Nhập
               </button>
             </div>
 
-            <div className="text-center text-xs pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLoginMode(!isLoginMode)
-                  setError('')
-                  setSuccess('')
-                }}
-                className="font-bold text-[#C4704F] hover:underline bg-transparent border-none p-0 cursor-pointer"
-              >
-                {isLoginMode ? "Chưa có tài khoản? Đăng ký ngay" : 'Đã có tài khoản? Đăng nhập'}
-              </button>
+            <div className="text-center text-[10px] pt-1 text-stone-400 font-medium">
+              Hệ thống tủ đồ nội bộ cá nhân
             </div>
           </form>
+
         </div>
       </div>
     );

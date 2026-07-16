@@ -24,53 +24,9 @@ const setRefreshTokenCookie = (res: Response, token: string) => {
 };
 
 export const register = async (req: Request, res: Response) => {
-  try {
-    const { email, password, name } = req.body;
-
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email is already registered' });
-    }
-
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        name,
-      },
-    });
-
-    const accessToken = generateAccessToken(user.id);
-    const refreshToken = generateRefreshToken(user.id);
-
-    setRefreshTokenCookie(res, refreshToken);
-
-    const safeUser = {
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      avatarUrl: user.avatarUrl,
-      createdAt: user.createdAt.toISOString(),
-    };
-
-    return res.status(201).json({
-      accessToken,
-      user: safeUser,
-    });
-  } catch (error: any) {
-    console.error('Registration error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
+  return res.status(403).json({ error: 'Tính năng đăng ký tài khoản mới hiện đang bị tạm khóa. Đây là hệ thống nội bộ.' });
 };
+
 
 export const login = async (req: Request, res: Response) => {
   try {

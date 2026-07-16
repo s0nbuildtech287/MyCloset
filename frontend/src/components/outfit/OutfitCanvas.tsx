@@ -112,16 +112,20 @@ export default function OutfitCanvas() {
       }
     };
 
+    // Initial measurement
     updateSize();
-    const observer = new ResizeObserver(() => updateSize());
-    observer.observe(containerRef.current);
+
+    // Trigger update after a micro-delay to allow full page layout settlement
+    const timer = setTimeout(updateSize, 100);
+
     window.addEventListener('resize', updateSize);
 
     return () => {
-      observer.disconnect();
+      clearTimeout(timer);
       window.removeEventListener('resize', updateSize);
     };
   }, []);
+
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState(false);
   const [outfitName, setOutfitName] = useState('');

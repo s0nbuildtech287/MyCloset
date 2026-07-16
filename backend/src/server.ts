@@ -64,7 +64,19 @@ async function seedDefaultUser() {
 }
 
 seedDefaultUser().then(() => {
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
   });
+
+  const cleanExit = () => {
+    console.log('Shutting down server gracefully...');
+    server.close(() => {
+      console.log('Server closed. Exiting process.');
+      process.exit(0);
+    });
+  };
+
+  process.on('SIGINT', cleanExit);
+  process.on('SIGTERM', cleanExit);
 });
+
