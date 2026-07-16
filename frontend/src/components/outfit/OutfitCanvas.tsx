@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Stage, Layer, Image as KonvaImage, Transformer } from 'react-konva';
 import { apiClient } from '../../api/client';
 import type { ClothingItem } from '../../../../shared/types';
-import { Trash2, ArrowUp, ArrowDown, Save, RefreshCw, Layers } from 'lucide-react';
+import { Trash2, ArrowUp, ArrowDown, Save, RefreshCw, Layers, Sparkles } from 'lucide-react';
 import ConfirmModal from '../common/ConfirmModal';
 
 
@@ -148,6 +148,77 @@ export default function OutfitCanvas() {
     };
     fetchWardrobe();
   }, []);
+
+  const loadItemsOntoCanvas = (itemsToLoad: Array<{ id: string; name: string }>) => {
+    if (itemsToLoad.length === 0 || wardrobeItems.length === 0) return;
+
+    // Clear canvas
+    setCanvasItems([]);
+    setSelectedId(null);
+
+    const newCanvasItems: CanvasItem[] = [];
+    let loadedCount = 0;
+
+    itemsToLoad.forEach((recItem) => {
+      const wardrobeItem = wardrobeItems.find(w => w.id === recItem.id);
+      if (wardrobeItem) {
+        const imageUrl = wardrobeItem.processedImageUrl || wardrobeItem.originalImageUrl;
+
+        // Spread items horizontally
+        const total = itemsToLoad.length;
+        const spreadOffset = (loadedCount - (total - 1) / 2) * 90;
+
+        const newItem: CanvasItem = {
+          id: `canvas-${Date.now()}-${Math.round(Math.random() * 1000)}-${loadedCount}`,
+          clothingItemId: wardrobeItem.id,
+          imageUrl,
+          x: (stageSize.width / 2) + spreadOffset,
+          y: stageSize.height / 2,
+          scaleX: 0.85,
+          scaleY: 0.85,
+          rotation: 0,
+          zIndex: loadedCount + 1,
+        };
+        newCanvasItems.push(newItem);
+        loadedCount++;
+      }
+    });
+
+    if (newCanvasItems.length > 0) {
+      setCanvasItems(newCanvasItems);
+      setSelectedId(newCanvasItems[0].id);
+    }
+  };
+
+  // 1. Listen to custom trigger events
+  useEffect(() => {
+    const handleLoadRequest = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const itemsToLoad = customEvent.detail?.items || [];
+      loadItemsOntoCanvas(itemsToLoad);
+    };
+
+    window.addEventListener('load-outfit-to-canvas', handleLoadRequest);
+    return () => {
+      window.removeEventListener('load-outfit-to-canvas', handleLoadRequest);
+    };
+  }, [wardrobeItems, stageSize]);
+
+  // 2. Check pending recommendation in sessionStorage (mount fallback)
+  useEffect(() => {
+    if (wardrobeItems.length === 0) return;
+    const pendingStr = sessionStorage.getItem('pending_outfit_load');
+    if (pendingStr) {
+      try {
+        const itemsToLoad = JSON.parse(pendingStr);
+        loadItemsOntoCanvas(itemsToLoad);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        sessionStorage.removeItem('pending_outfit_load');
+      }
+    }
+  }, [wardrobeItems, stageSize]);
 
   // Update Transformer node selections
   useEffect(() => {
@@ -410,6 +481,20 @@ export default function OutfitCanvas() {
 
           {/* Canvas Actions */}
           <div className="flex gap-2">
+            <button
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent('open-ai-chat', {
+                  detail: {
+                    query: "Gợi ý phối cho tôi một bộ đi chơi tối nay từ các trang phục trong tủ đồ nhé!",
+                    autoSend: true
+                  }
+                }));
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 border border-transparent rounded-xl text-xs font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] transition-colors shadow-sm"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              Gợi ý phối đồ
+            </button>
             <button
               onClick={clearCanvas}
               disabled={canvasItems.length === 0}

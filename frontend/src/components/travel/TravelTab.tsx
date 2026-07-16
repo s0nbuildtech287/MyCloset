@@ -318,13 +318,29 @@ export default function TravelTab() {
                 </p>
               </div>
 
-              <button
-                onClick={openSelector}
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
-              >
-                <Plus className="h-3.5 w-3.5" />
-                Chọn đồ vào Vali
-              </button>
+              <div className="flex gap-2 w-full sm:w-auto">
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('open-ai-chat', {
+                      detail: {
+                        query: activeTrip ? `Tôi chuẩn bị đi chuyến đi ${activeTrip.name} tới ${activeTrip.destination}. Hãy gợi ý cho tôi danh sách các trang phục phù hợp để xếp vào Vali từ tủ đồ hiện có của tôi.` : undefined,
+                        autoSend: true
+                      }
+                    }));
+                  }}
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                >
+                  <Sparkles className="h-3.5 w-3.5" />
+                  AI gợi ý xếp đồ
+                </button>
+                <button
+                  onClick={openSelector}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                >
+                  <Plus className="h-3.5 w-3.5" />
+                  Chọn đồ vào Vali
+                </button>
+              </div>
             </div>
 
             {/* Progress Bar (Always visible) */}

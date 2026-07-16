@@ -125,8 +125,19 @@ function App() {
       handleHashChange();
     }
 
+    const handleTabChangeRequest = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.tab) {
+        navigateToTab(customEvent.detail.tab);
+      }
+    };
+
     window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('change-active-tab', handleTabChangeRequest);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+      window.removeEventListener('change-active-tab', handleTabChangeRequest);
+    };
   }, [isAuthenticated]);
 
   // Wrapper function to change tab while updating the URL hash

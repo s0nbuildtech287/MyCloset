@@ -13,7 +13,7 @@ interface ParsedRecommendation {
   items: Array<{ id: string; name: string }>;
 }
 
-export default function AiStylistChat() {
+export default function StylistBot() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(() => {
     const saved = sessionStorage.getItem('drobe_stylist_chat');
@@ -42,15 +42,18 @@ export default function AiStylistChat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Helper to send message programmatically or via user input
-  const sendChatMessage = async (text: string) => {
-    if (!text.trim() || loading) return;
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim() || loading) return;
 
-    const newMessages = [...messages, { role: 'user', content: text } as ChatMessage];
+    const userText = input;
+    setInput('');
+    const newMessages = [...messages, { role: 'user', content: userText } as ChatMessage];
     setMessages(newMessages);
     setLoading(true);
 
     try {
+      // Send chat history to backend
       const res = await apiClient.post('/ai/chat', { messages: newMessages });
       const reply = res.data?.reply;
       if (reply) {
@@ -67,36 +70,6 @@ export default function AiStylistChat() {
       setLoading(false);
     }
   };
-
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
-    sendChatMessage(input);
-    setInput('');
-  };
-
-  // Listen to open-ai-chat events from context buttons
-  useEffect(() => {
-    const handleOpenRequest = (e: Event) => {
-      const customEvent = e as CustomEvent;
-      const query = customEvent.detail?.query || '';
-      const autoSend = customEvent.detail?.autoSend || false;
-
-      setIsOpen(true);
-      if (query) {
-        if (autoSend) {
-          sendChatMessage(query);
-        } else {
-          setInput(query);
-        }
-      }
-    };
-
-    window.addEventListener('open-ai-chat', handleOpenRequest);
-    return () => {
-      window.removeEventListener('open-ai-chat', handleOpenRequest);
-    };
-  }, [messages, loading]); // Update when messages or loading status changes to send with correct history
 
   // Parses markdown json block from text
   const parseJsonRecommendation = (text: string): ParsedRecommendation | null => {
@@ -121,8 +94,6 @@ export default function AiStylistChat() {
 
   // Action 1: Load outfit recommendations to Canvas workspace
   const handleLoadToCanvas = (items: Array<{ id: string; name: string }>) => {
-    // Save to session storage to prevent race conditions when component mounts
-    sessionStorage.setItem('pending_outfit_load', JSON.stringify(items));
     // 1. Dispatch custom event to tell OutfitCanvas to load items
     window.dispatchEvent(new CustomEvent('load-outfit-to-canvas', {
       detail: { items }
@@ -180,10 +151,7 @@ export default function AiStylistChat() {
                 <Sparkles className="h-4 w-4" />
               </div>
               <div className="text-left">
-                <h4 className="font-bold text-xs leading-none text-stone-100 flex items-center gap-1">
-                  Drobe Stylist
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                </h4>
+                <h4 className="font-bold text-xs leading-none">Drobe Stylist</h4>
                 <span className="text-[9px] text-white/80 mt-1 block">Trợ lý phối đồ & Xếp vali AI</span>
               </div>
             </div>

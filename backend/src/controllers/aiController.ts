@@ -28,6 +28,7 @@ export const chatWithStylist = async (req: AuthenticatedRequest, res: Response) 
     const items = await prisma.clothingItem.findMany({
       where: { userId },
       select: {
+        id: true,
         name: true,
         category: true,
         color: true,
@@ -37,14 +38,54 @@ export const chatWithStylist = async (req: AuthenticatedRequest, res: Response) 
       },
     });
 
+    // Fetch active travel trips context
+    const trips = await prisma.travelTrip.findMany({
+      where: { userId },
+      orderBy: { startDate: 'asc' },
+      select: {
+        id: true,
+        name: true,
+        destination: true,
+        startDate: true,
+        endDate: true,
+      }
+    });
+
     const systemPrompt = `Bạn là một trợ lý thời trang cá nhân chuyên nghiệp và thân thiện tên là "Drobe Stylist".
-Dưới đây là danh sách quần áo mà người dùng đang sở hữu trong tủ đồ của họ:
+Dưới đây là danh sách quần áo mà người dùng đang sở hữu trong tủ đồ của họ (Lưu ý quan trọng: hãy sử dụng thuộc tính "id" để xác định món đồ):
 ${JSON.stringify(items, null, 2)}
 
+Dưới đây là danh sách các hành trình du lịch đã lên lịch của người dùng:
+${JSON.stringify(trips, null, 2)}
+
 Nhiệm vụ của bạn:
-1. Tư vấn cách phối đồ (Outfits) phù hợp với nhu cầu của người dùng (đi tiệc, đi học, thời tiết, đi hẹn hò, đi làm công sở...).
-2. Chỉ gợi ý kết hợp các trang phục thực sự nằm trong danh sách sở hữu của họ ở trên. Không bịa ra các món đồ họ không có.
-3. Trả lời bằng tiếng Việt thân thiện, súc tích, chuyên nghiệp và có định dạng rõ ràng (sử dụng các gạch đầu dòng hoặc bảng nếu cần thiết).`;
+1. Tư vấn cách phối đồ (Outfits) phù hợp với nhu cầu của người dùng (đi tiệc, đi học, thời tiết, đi hẹn hò, du lịch, đi làm...).
+2. Chỉ gợi ý kết hợp các trang phục thực sự nằm trong danh sách sở hữu của họ ở trên. Tuyệt đối không bịa ra các món đồ họ không có.
+3. Trả lời bằng tiếng Việt thân thiện, súc tích, chuyên nghiệp và có định dạng rõ ràng (sử dụng markdown).
+4. ĐỒNG BỘ HÓA TƯƠNG TÁC (QUAN TRỌNG):
+   - Nếu bạn gợi ý một hoặc nhiều bộ phối đồ cụ thể từ tủ đồ của họ, hãy đính kèm ở DƯỚI CÙNG của câu trả lời một khối mã JSON định dạng chính xác như sau để hệ thống tự động vẽ lên Canvas:
+     \`\`\`json
+     {
+       "type": "outfit_recommendation",
+       "items": [
+         {"id": "uuid-cua-mon-do-1", "name": "Tên món đồ 1"},
+         {"id": "uuid-cua-mon-do-2", "name": "Tên món đồ 2"}
+       ]
+     }
+     \`\`\`
+   - Nếu người dùng hỏi về việc sắp xếp hành lý cho một chuyến đi cụ thể trong danh sách hành trình của họ, hãy gợi ý các món đồ nên mang theo và đính kèm khối mã JSON ở dưới cùng để họ xếp nhanh vào vali:
+     \`\`\`json
+     {
+       "type": "travel_packing_recommendation",
+       "tripId": "uuid-chuyen-di-tu-danh-sach",
+       "items": [
+         {"id": "uuid-cua-mon-do-a", "name": "Tên món đồ A"},
+         {"id": "uuid-cua-mon-do-b", "name": "Tên món đồ B"}
+       ]
+     }
+     \`\`\`
+Lưu ý: Chỉ đính kèm JSON khi thực sự đề xuất các món cụ thể để tương tác. Hãy đảm bảo cú pháp JSON hoàn toàn hợp lệ.`;
+
 
     // Make direct API request to OpenAI chat completions
     const response = await axios.post(
