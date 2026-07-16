@@ -3,7 +3,8 @@ import path from 'path';
 import sharp from 'sharp';
 import { prisma } from '../db';
 import { getEmbedding, checkDuplicateItem } from './similarityService';
-import { uploadToStorage } from './storageService';
+import { uploadToStorage, deleteFromStorage } from './storageService';
+
 
 export const processImageBackground = async (itemId: string, removeBg = true) => {
   try {
@@ -99,16 +100,35 @@ export const processImageBackground = async (itemId: string, removeBg = true) =>
       console.error(`Failed to process visual similarity for item ${itemId}:`, embErr);
     }
 
-    // 7. Update DB
-    await prisma.clothingItem.update({
-      where: { id: itemId },
-      data: {
-        processedImageUrl,
-        processingStatus: 'done',
-        embedding: embeddingStr,
-        duplicateWarning: duplicateWarningStr,
-      },
-    });
+    // 7. Update DB & optimize storage by deleting the raw original JPEG when removeBg is true
+    if (removeBg && item.originalImageUrl) {
+      console.log(`Optimizing storage: deleting original raw JPEG from storage: ${item.originalImageUrl}`);
+      await deleteFromStorage(item.originalImageUrl).catch((err: any) => 
+        console.error('Failed to delete original image during storage optimization:', err)
+      );
+
+      await prisma.clothingItem.update({
+        where: { id: itemId },
+        data: {
+          originalImageUrl: processedImageUrl, // point originalImageUrl to WebP to prevent broken links
+          processedImageUrl,
+          processingStatus: 'done',
+          embedding: embeddingStr,
+          duplicateWarning: duplicateWarningStr,
+        },
+      });
+    } else {
+      await prisma.clothingItem.update({
+        where: { id: itemId },
+        data: {
+          processedImageUrl,
+          processingStatus: 'done',
+          embedding: embeddingStr,
+          duplicateWarning: duplicateWarningStr,
+        },
+      });
+    }
+
 
     console.log(`Successfully completed processing for item: ${item.name}`);
 
