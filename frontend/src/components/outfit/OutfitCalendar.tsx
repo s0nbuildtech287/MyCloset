@@ -135,26 +135,27 @@ export default function OutfitCalendar() {
       <button
         key={`day-${day}`}
         onClick={() => handleDayClick(day)}
-        className={`aspect-square p-1.5 border border-stone-100 rounded-xl bg-white flex flex-col justify-between items-stretch hover:border-[#C4704F] transition-all relative overflow-hidden group shadow-sm ${
+        className={`aspect-square border border-stone-100 rounded-xl bg-white flex flex-col justify-between items-stretch hover:border-[#C4704F] transition-all relative overflow-hidden group shadow-sm ${
           isToday ? 'ring-1 ring-[#C4704F]' : ''
         }`}
       >
-        <span className={`text-[10px] font-bold self-start w-5 h-5 flex items-center justify-center rounded-full leading-none ${
-          isToday ? 'bg-[#C4704F] text-white' : 'text-stone-700 bg-stone-50'
+        {/* Date badge — always floats in top-left corner */}
+        <span className={`absolute top-1 left-1 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none z-20 ${
+          isToday ? 'bg-[#C4704F] text-white shadow-xs' : 'text-stone-700 bg-white/90 backdrop-blur-xs shadow-xs border border-stone-100'
         }`}>
           {day}
         </span>
 
         {entry ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-0.5 relative z-10">
+          <div className="absolute inset-0 w-full h-full z-10 bg-[#FAF9F6]">
             <img
               src={entry.outfit.thumbnailUrl}
               alt={entry.outfit.name}
-              className="object-contain max-h-[80%] max-w-[80%] rounded transform group-hover:scale-105 transition-transform"
+              className="object-contain w-full h-full transform group-hover:scale-105 transition-transform duration-300"
             />
           </div>
         ) : (
-          <div className="flex-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
             <span className="p-1 rounded-full bg-[#C4704F]/10 text-[#C4704F]">
               <Plus className="h-3 w-3" />
             </span>
