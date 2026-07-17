@@ -54,7 +54,26 @@ app.use('/api/closets', closetRoutes);
 app.use('/api/trips', tripRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date() });
+  const { execSync } = require('child_process');
+  const diagnostics: any = {
+    status: 'OK',
+    timestamp: new Date(),
+    python: {},
+  };
+  
+  try {
+    diagnostics.python.version = execSync('python3 --version').toString().trim();
+  } catch (e: any) {
+    diagnostics.python.version = 'Error: ' + e.message;
+  }
+  
+  try {
+    diagnostics.python.rembg = execSync('python3 -c "import rembg; print(\'rembg is installed\')"', { timeout: 5000 }).toString().trim();
+  } catch (e: any) {
+    diagnostics.python.rembg = 'Error: ' + e.message;
+  }
+
+  res.json(diagnostics);
 });
 
 // Seed default user for testing
