@@ -68,7 +68,18 @@ app.get('/api/health', (req, res) => {
   }
   
   try {
-    diagnostics.python.rembg = execSync('python3 -c "import rembg; print(\'rembg is installed\')"', { timeout: 10000 }).toString().trim();
+    const pythonScript = [
+      'import sys',
+      'try:',
+      '    import rembg',
+      '    print("SUCCESS: rembg imported")',
+      'except BaseException as e:',
+      '    import traceback',
+      '    print("CRASH:")',
+      '    traceback.print_exc(file=sys.stdout)',
+      '    sys.stdout.flush()'
+    ].join('\n');
+    diagnostics.python.rembg = execSync(`python3 -c "${pythonScript.replace(/"/g, '\\"')}"`, { timeout: 10000 }).toString().trim();
   } catch (e: any) {
     diagnostics.python.rembg = {
       message: e.message,
