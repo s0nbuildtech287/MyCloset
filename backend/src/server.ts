@@ -59,10 +59,16 @@ app.get('/api/health', (req, res) => {
   const path = require('path');
   const getPythonCommand = () => {
     const isWin = process.platform === 'win32';
-    const winVenv = path.join(process.cwd(), 'venv', 'Scripts', 'python.exe');
-    const nixVenv = path.join(process.cwd(), 'venv', 'bin', 'python');
-    if (isWin && fs.existsSync(winVenv)) return winVenv;
-    if (!isWin && fs.existsSync(nixVenv)) return nixVenv;
+    const pathsToCheck = [
+      path.join(process.cwd(), 'venv'),
+      path.join(process.cwd(), '..', 'venv')
+    ];
+    for (const venvDir of pathsToCheck) {
+      const winVenv = path.join(venvDir, 'Scripts', 'python.exe');
+      const nixVenv = path.join(venvDir, 'bin', 'python');
+      if (isWin && fs.existsSync(winVenv)) return winVenv;
+      if (!isWin && fs.existsSync(nixVenv)) return nixVenv;
+    }
     return isWin ? 'python' : 'python3';
   };
   const pyCmd = getPythonCommand();

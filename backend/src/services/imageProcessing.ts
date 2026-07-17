@@ -13,12 +13,20 @@ import { uploadToStorage, deleteFromStorage } from './storageService';
  */
 const getPythonCommand = () => {
   const isWin = process.platform === 'win32';
-  // process.cwd() trỏ tới thư mục gốc khi chạy npm run dev từ root monorepo
-  const winVenv = path.join(process.cwd(), 'venv', 'Scripts', 'python.exe');
-  const nixVenv = path.join(process.cwd(), 'venv', 'bin', 'python');
+  // venv có thể nằm ở root monorepo (cha của backend) hoặc cùng cấp
+  const pathsToCheck = [
+    path.join(process.cwd(), 'venv'),
+    path.join(process.cwd(), '..', 'venv')
+  ];
+
+  for (const venvDir of pathsToCheck) {
+    const winVenv = path.join(venvDir, 'Scripts', 'python.exe');
+    const nixVenv = path.join(venvDir, 'bin', 'python');
+    
+    if (isWin && fs.existsSync(winVenv)) return winVenv;
+    if (!isWin && fs.existsSync(nixVenv)) return nixVenv;
+  }
   
-  if (isWin && fs.existsSync(winVenv)) return winVenv;
-  if (!isWin && fs.existsSync(nixVenv)) return nixVenv;
   return isWin ? 'python' : 'python3';
 };
 
