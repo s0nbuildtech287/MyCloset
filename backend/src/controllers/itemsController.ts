@@ -2,7 +2,7 @@ import { Response } from 'express';
 import { AuthenticatedRequest } from '../middleware/auth';
 import { prisma } from '../db';
 import { imageQueue } from '../services/queue';
-import { processImageBackground } from '../services/imageProcessing';
+import { processImageBackground, removeBackgroundViaPython } from '../services/imageProcessing';
 import { fetchWeather } from '../services/weatherService';
 import { uploadToStorage, deleteFromStorage } from '../services/storageService';
 import path from 'path';
@@ -694,21 +694,14 @@ export const rembgImage = async (req: AuthenticatedRequest, res: Response) => {
     const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
     const buffer = Buffer.from(base64Data, 'base64');
 
-    const fileBlob = new Blob([buffer], { type: 'image/png' });
-    const formData = new FormData();
-    formData.append('file', fileBlob, 'canvas.png');
+    console.log('Calling rembg Python subprocess for editor inline background removal...');
+    const resultBuffer = await removeBackgroundViaPython(buffer);
 
-    const response = await axios.post('http://127.0.0.1:5000/api/remove', formData, {
-      responseType: 'arraybuffer',
-      headers: { 'Content-Type': 'multipart/form-data' },
-      timeout: 120000,
-    });
-
-    const resultBase64 = Buffer.from(response.data).toString('base64');
+    const resultBase64 = resultBuffer.toString('base64');
     return res.json({ imageBase64: `data:image/png;base64,${resultBase64}` });
   } catch (error: any) {
     console.error('rembg inline error:', error.message);
-    return res.status(500).json({ error: 'Không thể kết nối đến máy chủ tách nền AI. Hãy đảm bảo rembg đang chạy.' });
+    return res.status(500).json({ error: 'Không thể xử lý tách nền hình ảnh bằng AI.' });
   }
 };
 

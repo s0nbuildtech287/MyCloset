@@ -10,7 +10,7 @@ import { uploadToStorage, deleteFromStorage } from './storageService';
  * Gọi trực tiếp thư viện rembg qua Python subprocess (stdin → stdout).
  * Không cần HTTP server, không cần cổng 5000 — hoạt động ổn định 100% trên Docker.
  */
-const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> => {
+export const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const py = spawn('python3', [
       '-c',
