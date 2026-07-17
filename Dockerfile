@@ -4,13 +4,21 @@ FROM nikolaik/python-nodejs:python3.11-nodejs22-slim
 # Thiết lập thư mục làm việc trong container
 WORKDIR /app
 
-# Cài đặt các gói hệ thống cần thiết (cho onnxruntime/sharp nếu cần compile)
+# Cài đặt các gói hệ thống cần thiết (cho onnxruntime/sharp nếu cần compile, và libgl/glib cho OpenCV trong rembg)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    libgl1 \
+    libglib2.0-0 \
     && rm -rf /var/lib/apt/lists/*
+
+# Thiết lập thư mục lưu trữ Model AI rembg cố định
+ENV U2NET_HOME=/app/.u2net
 
 # Cài đặt rembg và các thư viện python đi kèm vào môi trường global của container
 RUN pip install --no-cache-dir rembg fastapi uvicorn python-multipart
+
+# Tải trước model u2net trong quá trình build để tránh lỗi mạng lúc runtime
+RUN python3 -c "from rembg import new_session; new_session('u2net')"
 
 # Copy package.json và lock files để cài đặt Node dependencies
 COPY package.json package-lock.json ./
