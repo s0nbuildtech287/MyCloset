@@ -26,14 +26,8 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    const isVercel = origin.endsWith('.vercel.app');
-    const isAllowed = allowedOrigins.includes(origin) || isVercel;
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      callback(new Error('Blocked by CORS'));
-    }
+    // Cho phép động mọi origin gửi tới để hỗ trợ credentials (cookie) và tránh lỗi CORS giữa Render & Vercel
+    callback(null, true);
   },
   credentials: true,
 }));
