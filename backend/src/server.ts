@@ -68,9 +68,14 @@ app.get('/api/health', (req, res) => {
   }
   
   try {
-    diagnostics.python.rembg = execSync('python3 -c "import rembg; print(\'rembg is installed\')"', { timeout: 5000 }).toString().trim();
+    diagnostics.python.rembg = execSync('python3 -c "import rembg; print(\'rembg is installed\')"', { timeout: 10000 }).toString().trim();
   } catch (e: any) {
-    diagnostics.python.rembg = 'Error: ' + e.message + (e.stderr ? ' | Stderr: ' + e.stderr.toString().trim() : '');
+    diagnostics.python.rembg = {
+      message: e.message,
+      status: e.status,
+      signal: e.signal,
+      stderr: e.stderr ? e.stderr.toString().trim() : ''
+    };
   }
 
   res.json(diagnostics);
