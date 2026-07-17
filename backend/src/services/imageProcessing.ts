@@ -1,9 +1,42 @@
 import axios from 'axios';
 import path from 'path';
 import sharp from 'sharp';
+import { spawn } from 'child_process';
 import { prisma } from '../db';
 import { getEmbedding, checkDuplicateItem } from './similarityService';
 import { uploadToStorage, deleteFromStorage } from './storageService';
+
+/**
+ * Gọi trực tiếp thư viện rembg qua Python subprocess (stdin → stdout).
+ * Không cần HTTP server, không cần cổng 5000 — hoạt động ổn định 100% trên Docker.
+ */
+const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> => {
+  return new Promise((resolve, reject) => {
+    const py = spawn('python3', [
+      '-c',
+      [
+        'import sys, os',
+        'os.environ.setdefault("U2NET_HOME", "/app/.u2net")',
+        'from rembg import remove',
+        'data = sys.stdin.buffer.read()',
+        'result = remove(data)',
+        'sys.stdout.buffer.write(result)',
+      ].join('; ')
+    ]);
+
+    const chunks: Buffer[] = [];
+    py.stdout.on('data', (chunk: Buffer) => chunks.push(chunk));
+    py.stderr.on('data', (data: Buffer) => console.log('[rembg subprocess]', data.toString().trim()));
+    py.on('close', (code) => {
+      if (code !== 0) return reject(new Error(`rembg python subprocess exited with code ${code}`));
+      resolve(Buffer.concat(chunks));
+    });
+    py.on('error', (err) => reject(new Error(`Failed to spawn python3: ${err.message}`)));
+
+    py.stdin.write(inputBuffer);
+    py.stdin.end();
+  });
+};
 
 
 export const processImageBackground = async (itemId: string, removeBg = true) => {
@@ -48,19 +81,11 @@ export const processImageBackground = async (itemId: string, removeBg = true) =>
     const processedFilename = `processed-${path.parse(originalFilename).name}.webp`;
 
     if (removeBg) {
-      const fileBlob = new Blob([compressedOriginalBuffer], { type: 'image/jpeg' });
-      const formData = new FormData();
-      formData.append('file', fileBlob, originalFilename);
-
-      console.log(`Sending image to rembg local server for item: ${item.name} (${itemId})...`);
-      const response = await axios.post('http://127.0.0.1:5000/api/remove', formData, {
-        responseType: 'arraybuffer',
-        headers: { 'Content-Type': 'multipart/form-data' },
-        timeout: 120000,
-      });
+      console.log(`Calling rembg Python subprocess to remove background for item: ${item.name} (${itemId})...`);
+      const removedBuffer = await removeBackgroundViaPython(compressedOriginalBuffer);
 
       console.log(`Converting background-removed image to transparent WebP for item: ${item.name}...`);
-      processedWebPBuffer = await sharp(Buffer.from(response.data))
+      processedWebPBuffer = await sharp(removedBuffer)
         .webp({ quality: 80 })
         .toBuffer();
     } else {

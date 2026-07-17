@@ -17,8 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Thiết lập thư mục lưu trữ Model AI rembg cố định
 ENV U2NET_HOME=/app/.u2net
 
-# Cài đặt rembg và các thư viện python đi kèm vào môi trường global của container
-RUN pip install --no-cache-dir rembg fastapi uvicorn python-multipart
+# Cài đặt rembg — gọi trực tiếp qua subprocess từ Node.js, không cần HTTP server
+RUN pip install --no-cache-dir rembg
 
 # Tải trước model u2net trong quá trình build để tránh lỗi mạng lúc runtime (Đã chuyển sang start.sh)
 
