@@ -160,7 +160,10 @@ function App() {
       setSuccess(`Thành công! Chào mừng ${user.name || user.email}`)
       setError('')
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Đăng nhập không thành công')
+      const errMsg = typeof err.response?.data?.error === 'string' 
+        ? err.response.data.error 
+        : (err.response?.data?.error?.message || 'Đăng nhập không thành công');
+      setError(errMsg);
     }
   }
 

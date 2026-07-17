@@ -134,7 +134,10 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       setTotalPages(res.data.pagination.totalPages);
       fetchStats();
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Không thể tải danh sách tủ đồ');
+      const errMsg = typeof err.response?.data?.error === 'string'
+        ? err.response.data.error
+        : (err.response?.data?.error?.message || 'Không thể tải danh sách tủ đồ');
+      setError(errMsg);
     } finally {
       setLoading(false);
     }
