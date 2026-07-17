@@ -10,9 +10,9 @@ if [ ! -f /app/.u2net/u2net.onnx ]; then
   curl -L -o /app/.u2net/u2net.onnx https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx
 fi
 
-# Khởi chạy rembg server ở background trên port 5000
+# Khởi chạy rembg server ở background trên port 5000 bằng python3 module để tránh lỗi PATH
 echo "Starting rembg background service on port 5000..."
-rembg s --host 127.0.0.1 --port 5000 &
+python3 -m rembg s --host 127.0.0.1 --port 5000 &
 
 # Chờ 5 giây để rembg server khởi động hoàn tất
 sleep 5
