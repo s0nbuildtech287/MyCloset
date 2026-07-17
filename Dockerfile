@@ -17,8 +17,7 @@ ENV U2NET_HOME=/app/.u2net
 # Cài đặt rembg và các thư viện python đi kèm vào môi trường global của container
 RUN pip install --no-cache-dir rembg fastapi uvicorn python-multipart
 
-# Tải trước model u2net trong quá trình build để tránh lỗi mạng lúc runtime
-RUN python3 -c "from rembg import new_session; new_session('u2net')"
+# Tải trước model u2net trong quá trình build để tránh lỗi mạng lúc runtime (Đã chuyển sang start.sh)
 
 # Copy package.json và lock files để cài đặt Node dependencies
 COPY package.json package-lock.json ./
