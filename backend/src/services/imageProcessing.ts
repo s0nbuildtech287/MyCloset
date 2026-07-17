@@ -13,15 +13,22 @@ import { uploadToStorage, deleteFromStorage } from './storageService';
 export const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
     const py = spawn('python3', [
+      '-u',
       '-c',
       [
         'import sys, os',
-        'os.environ.setdefault("U2NET_HOME", "/app/.u2net")',
-        'from rembg import remove',
-        'data = sys.stdin.buffer.read()',
-        'result = remove(data)',
-        'sys.stdout.buffer.write(result)',
-      ].join('; ')
+        'os.environ["U2NET_HOME"] = "/app/.u2net"',
+        'try:',
+        '    from rembg import remove',
+        '    data = sys.stdin.buffer.read()',
+        '    result = remove(data)',
+        '    sys.stdout.buffer.write(result)',
+        '    sys.stdout.buffer.flush()',
+        'except Exception as e:',
+        '    sys.stderr.write(f"PYTHON_CRASH: {str(e)}\\n")',
+        '    sys.stderr.flush()',
+        '    sys.exit(1)'
+      ].join('\n')
     ]);
 
     const chunks: Buffer[] = [];
