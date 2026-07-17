@@ -1,5 +1,6 @@
 # Sử dụng base image tích hợp sẵn cả Node.js 22 và Python 3.11 trên nền Debian Slim
 FROM nikolaik/python-nodejs:python3.11-nodejs22-slim
+USER root
 
 # Thiết lập thư mục làm việc trong container
 WORKDIR /app
