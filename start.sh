@@ -8,8 +8,16 @@ mkdir -p /app/.u2net
 # rembg sẽ dùng file này khi được gọi qua subprocess, không cần HTTP server nữa
 if [ ! -f /app/.u2net/u2net.onnx ]; then
   echo "Downloading rembg u2net model from GitHub Releases..."
-  curl -L -o /app/.u2net/u2net.onnx https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx
-  echo "Model downloaded successfully!"
+  # Tải vào file tạm .tmp trước
+  curl -L -o /app/.u2net/u2net.onnx.tmp https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx
+  # Chỉ đổi tên khi tải thành công trọn vẹn
+  if [ $? -eq 0 ] && [ -f /app/.u2net/u2net.onnx.tmp ]; then
+    mv /app/.u2net/u2net.onnx.tmp /app/.u2net/u2net.onnx
+    echo "Model downloaded successfully!"
+  else
+    echo "Error: Failed to download model."
+    rm -f /app/.u2net/u2net.onnx.tmp
+  fi
 fi
 
 # Đồng bộ schema Database Prisma (tự động đẩy migrations lên Supabase DB)

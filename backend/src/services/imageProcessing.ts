@@ -33,6 +33,11 @@ export const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> 
     });
     py.on('error', (err) => reject(new Error(`Failed to spawn python3: ${err.message}`)));
 
+    // Bắt lỗi trên stream stdin để tránh crash tiến trình Node khi EPIPE xảy ra
+    py.stdin.on('error', (err) => {
+      console.error('[rembg stdin error]', err.message);
+    });
+
     py.stdin.write(inputBuffer);
     py.stdin.end();
   });
