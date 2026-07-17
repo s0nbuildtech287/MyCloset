@@ -1,10 +1,26 @@
 import axios from 'axios';
 import path from 'path';
 import sharp from 'sharp';
+import fs from 'fs';
 import { spawn } from 'child_process';
 import { prisma } from '../db';
 import { getEmbedding, checkDuplicateItem } from './similarityService';
 import { uploadToStorage, deleteFromStorage } from './storageService';
+
+/**
+ * Tự động tìm đường dẫn Python: Ưu tiên ảo hóa venv cục bộ nếu có,
+ * ngược lại dùng lệnh python/python3 toàn cục.
+ */
+const getPythonCommand = () => {
+  const isWin = process.platform === 'win32';
+  // process.cwd() trỏ tới thư mục gốc khi chạy npm run dev từ root monorepo
+  const winVenv = path.join(process.cwd(), 'venv', 'Scripts', 'python.exe');
+  const nixVenv = path.join(process.cwd(), 'venv', 'bin', 'python');
+  
+  if (isWin && fs.existsSync(winVenv)) return winVenv;
+  if (!isWin && fs.existsSync(nixVenv)) return nixVenv;
+  return isWin ? 'python' : 'python3';
+};
 
 /**
  * Gọi trực tiếp thư viện rembg qua Python subprocess (stdin → stdout).
@@ -12,7 +28,7 @@ import { uploadToStorage, deleteFromStorage } from './storageService';
  */
 export const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
-    const pyCommand = process.platform === 'win32' ? 'python' : 'python3';
+    const pyCommand = getPythonCommand();
     const py = spawn(pyCommand, [
       '-u',
       '-c',

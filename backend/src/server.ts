@@ -55,7 +55,17 @@ app.get('/api/health', (req, res) => {
     python: {},
   };
   
-  const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
+  const fs = require('fs');
+  const path = require('path');
+  const getPythonCommand = () => {
+    const isWin = process.platform === 'win32';
+    const winVenv = path.join(process.cwd(), 'venv', 'Scripts', 'python.exe');
+    const nixVenv = path.join(process.cwd(), 'venv', 'bin', 'python');
+    if (isWin && fs.existsSync(winVenv)) return winVenv;
+    if (!isWin && fs.existsSync(nixVenv)) return nixVenv;
+    return isWin ? 'python' : 'python3';
+  };
+  const pyCmd = getPythonCommand();
 
   try {
     diagnostics.python.version = execSync(`${pyCmd} --version`).toString().trim();
