@@ -25,10 +25,14 @@ export const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> 
     ]);
 
     const chunks: Buffer[] = [];
+    const errChunks: Buffer[] = [];
     py.stdout.on('data', (chunk: Buffer) => chunks.push(chunk));
-    py.stderr.on('data', (data: Buffer) => console.log('[rembg subprocess]', data.toString().trim()));
+    py.stderr.on('data', (chunk: Buffer) => errChunks.push(chunk));
     py.on('close', (code) => {
-      if (code !== 0) return reject(new Error(`rembg python subprocess exited with code ${code}`));
+      if (code !== 0) {
+        const stderrStr = Buffer.concat(errChunks).toString().trim();
+        return reject(new Error(`rembg python subprocess exited with code ${code}. Python Error: ${stderrStr}`));
+      }
       resolve(Buffer.concat(chunks));
     });
     py.on('error', (err) => reject(new Error(`Failed to spawn python3: ${err.message}`)));
