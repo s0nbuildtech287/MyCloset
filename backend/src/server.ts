@@ -55,8 +55,10 @@ app.get('/api/health', (req, res) => {
     python: {},
   };
   
+  const pyCmd = process.platform === 'win32' ? 'python' : 'python3';
+
   try {
-    diagnostics.python.version = execSync('python3 --version').toString().trim();
+    diagnostics.python.version = execSync(`${pyCmd} --version`).toString().trim();
   } catch (e: any) {
     diagnostics.python.version = 'Error: ' + e.message;
   }
@@ -73,7 +75,7 @@ app.get('/api/health', (req, res) => {
       '    traceback.print_exc(file=sys.stdout)',
       '    sys.stdout.flush()'
     ].join('\n');
-    diagnostics.python.rembg = execSync(`python3 -c "${pythonScript.replace(/"/g, '\\"')}"`, { timeout: 10000 }).toString().trim();
+    diagnostics.python.rembg = execSync(`${pyCmd} -c "${pythonScript.replace(/"/g, '\\"')}"`, { timeout: 10000 }).toString().trim();
   } catch (e: any) {
     diagnostics.python.rembg = {
       message: e.message,

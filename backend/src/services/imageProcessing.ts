@@ -12,7 +12,8 @@ import { uploadToStorage, deleteFromStorage } from './storageService';
  */
 export const removeBackgroundViaPython = (inputBuffer: Buffer): Promise<Buffer> => {
   return new Promise((resolve, reject) => {
-    const py = spawn('python3', [
+    const pyCommand = process.platform === 'win32' ? 'python' : 'python3';
+    const py = spawn(pyCommand, [
       '-u',
       '-c',
       [
