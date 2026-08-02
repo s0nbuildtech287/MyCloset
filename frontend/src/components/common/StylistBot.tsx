@@ -139,11 +139,11 @@ export default function StylistBot() {
   };
 
   return (
-    <div className="fixed bottom-20 right-6 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-20 right-6 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end transition-colors">
       
       {/* 1. Extended Chat Window Wrapper */}
       {isOpen && (
-        <div className="w-[90vw] sm:w-[380px] h-[500px] bg-white/95 backdrop-blur-md rounded-[28px] border border-stone-150 shadow-2xl flex flex-col overflow-hidden mb-4 animate-in slide-in-from-bottom-5 duration-200">
+        <div className="w-[90vw] sm:w-[380px] h-[500px] bg-white/95 dark:bg-[#23201D]/95 backdrop-blur-md rounded-[28px] border border-stone-150 dark:border-stone-800 shadow-2xl flex flex-col overflow-hidden mb-4 animate-in slide-in-from-bottom-5 duration-200">
           {/* Header Banner */}
           <div className="bg-[#C4704F] p-4 text-white flex justify-between items-center shrink-0">
             <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export default function StylistBot() {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-stone-50/50 dark:bg-[#1E1B18]/50">
             {messages.map((msg, idx) => {
               const recommendation = parseJsonRecommendation(msg.content);
               const cleanText = getCleanText(msg.content);
@@ -179,7 +179,7 @@ export default function StylistBot() {
                     className={`max-w-[85%] px-4 py-2.5 rounded-2xl text-xs leading-relaxed text-left ${
                       msg.role === 'user' 
                         ? 'bg-[#C4704F] text-white rounded-br-none' 
-                        : 'bg-white border border-stone-150 text-stone-700 rounded-bl-none shadow-xs'
+                        : 'bg-white dark:bg-stone-900 border border-stone-150 dark:border-stone-800 text-stone-700 dark:text-stone-300 rounded-bl-none shadow-xs'
                     }`}
                   >
                     {/* Inline simplistic renderer for bullet list or bold markers */}
@@ -204,13 +204,13 @@ export default function StylistBot() {
 
                   {/* Recommendation action block */}
                   {msg.role === 'assistant' && recommendation && (
-                    <div className="mt-2.5 w-full max-w-[85%] bg-white border border-stone-150 rounded-2xl p-3 shadow-sm text-left space-y-2 animate-in fade-in duration-200">
-                      <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider block">
+                    <div className="mt-2.5 w-full max-w-[85%] bg-white dark:bg-stone-900 border border-stone-150 dark:border-stone-800 rounded-2xl p-3 shadow-sm text-left space-y-2 animate-in fade-in duration-200">
+                      <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">
                         {recommendation.type === 'outfit_recommendation' ? '✨ Đề xuất Bộ phối đồ' : '🧳 Đề xuất Xếp Vali'}
                       </span>
                       <div className="space-y-1">
                         {recommendation.items.map((item, iIdx) => (
-                          <div key={iIdx} className="text-[11px] text-stone-600 font-semibold flex items-center gap-1.5">
+                          <div key={iIdx} className="text-[11px] text-stone-600 dark:text-stone-300 font-semibold flex items-center gap-1.5">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#C4704F]" />
                             <span>{item.name}</span>
                           </div>
@@ -251,7 +251,7 @@ export default function StylistBot() {
             
             {/* AI generating spinner */}
             {loading && (
-              <div className="flex items-center gap-2 text-stone-400 text-[11px] font-bold animate-pulse">
+              <div className="flex items-center gap-2 text-stone-400 dark:text-stone-500 text-[11px] font-bold animate-pulse">
                 <Loader2 className="h-3.5 w-3.5 animate-spin text-[#C4704F]" />
                 <span>Drobe Stylist đang phân tích tủ đồ...</span>
               </div>
@@ -263,14 +263,14 @@ export default function StylistBot() {
           {/* Chat Form Input */}
           <form 
             onSubmit={handleSend}
-            className="p-3 border-t border-stone-150 bg-white flex gap-2 shrink-0"
+            className="p-3 border-t border-stone-150 dark:border-stone-800 bg-white dark:bg-[#23201D] flex gap-2 shrink-0"
           >
             <input
               type="text"
               placeholder="Hỏi phối đồ, xếp vali..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              className="flex-1 px-4 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+              className="flex-1 px-4 py-2 border border-stone-200 dark:border-stone-750 bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
             />
             <button
               type="submit"
@@ -294,7 +294,7 @@ export default function StylistBot() {
         ) : (
           <>
             <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6 group-hover:rotate-6 transition-transform" />
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></span>
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white dark:border-stone-900 animate-pulse"></span>
           </>
         )}
       </button>

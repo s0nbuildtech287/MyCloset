@@ -463,40 +463,40 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       {/* Dashboard Statistics */}
       {stats && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-in fade-in duration-300">
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
+          <div className="bg-white dark:bg-[#23201D] p-3 sm:p-4 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm flex items-center gap-3 transition-colors">
             <div className="w-10 h-10 rounded-xl bg-[#C4704F]/10 flex items-center justify-center text-[#C4704F]">
               <ShoppingBag className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng sản phẩm</p>
-              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalItems}</h3>
+              <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Tổng sản phẩm</p>
+              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] dark:text-stone-100 mt-0.5">{stats.totalItems}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500">
+          <div className="bg-white dark:bg-[#23201D] p-3 sm:p-4 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm flex items-center gap-3 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-red-50 dark:bg-red-950/20 flex items-center justify-center text-red-500 dark:text-red-400">
               <Heart className="h-5 w-5 fill-red-500 stroke-red-500" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Yêu thích</p>
-              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] mt-0.5">{stats.favoritesCount}</h3>
+              <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Yêu thích</p>
+              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] dark:text-stone-100 mt-0.5">{stats.favoritesCount}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500">
+          <div className="bg-white dark:bg-[#23201D] p-3 sm:p-4 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm flex items-center gap-3 transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/20 flex items-center justify-center text-indigo-500 dark:text-indigo-400">
               <Tag className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Bộ phối đồ</p>
-              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] mt-0.5">{stats.totalOutfits}</h3>
+              <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Bộ phối đồ</p>
+              <h3 className="text-lg sm:text-xl font-bold text-[#2A2521] dark:text-stone-100 mt-0.5">{stats.totalOutfits}</h3>
             </div>
           </div>
 
-          <div className="bg-white p-3 sm:p-4 rounded-2xl border border-stone-100 shadow-sm flex flex-col justify-center gap-1 col-span-2 lg:col-span-1">
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tỉ lệ phân loại</p>
+          <div className="bg-white dark:bg-[#23201D] p-3 sm:p-4 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm flex flex-col justify-center gap-1 col-span-2 lg:col-span-1 transition-colors">
+            <p className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Tỉ lệ phân loại</p>
             <div className="flex gap-1.5 items-center mt-1">
-              <div className="flex-1 h-2 rounded bg-stone-100 overflow-hidden flex">
+              <div className="flex-1 h-2 rounded bg-stone-100 dark:bg-stone-800 overflow-hidden flex">
                 {Object.entries(stats.byCategory).map(([cat, count]) => {
                   if (count === 0 || stats.totalItems === 0) return null;
                   const pct = (count / stats.totalItems) * 100;
@@ -527,19 +527,19 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       <WeatherWidget />
 
       {/* Filters Toolbar */}
-      <div className="bg-white p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-100 shadow-sm space-y-4">
+      <div className="bg-white dark:bg-[#23201D] p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm space-y-4 transition-colors">
         {/* Search and Favorite toggle */}
         <div className="flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
           <div className="relative flex-1">
             <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-stone-400" />
+              <Search className="h-4 w-4 text-stone-400 dark:text-stone-500" />
             </span>
             <input
               type="text"
               placeholder="Tìm kiếm theo tên, thương hiệu..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 w-full text-sm border border-stone-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] bg-[#FAF6F1]/30"
+              className="pl-9 pr-4 py-2 w-full text-sm border border-stone-200 dark:border-stone-750 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] bg-[#FAF6F1]/30 dark:bg-stone-900 text-stone-950 dark:text-stone-100"
             />
           </div>
 
@@ -550,7 +550,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                 setOrderBy(e.target.value);
                 setPage(1);
               }}
-              className="px-3 py-2 text-xs font-semibold border border-stone-200 rounded-xl text-stone-600 focus:outline-none bg-white focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+              className="px-3 py-2 text-xs font-semibold border border-stone-200 dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-400 focus:outline-none bg-white dark:bg-stone-900 focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
             >
               <option value="createdAt_desc">Mới nhất</option>
               <option value="createdAt_asc">Cũ nhất</option>
@@ -566,7 +566,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
               className={`flex items-center gap-1.5 px-4 py-2 text-xs font-medium border rounded-xl transition-all ${
                 isFavorite === true
                   ? 'border-[#C4704F] bg-[#C4704F]/5 text-[#C4704F]'
-                  : 'border-stone-200 text-stone-600 hover:bg-stone-50'
+                  : 'border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800/40'
               }`}
             >
               <Heart className={`h-3.5 w-3.5 ${isFavorite === true ? 'fill-[#C4704F]' : ''}`} />
@@ -576,11 +576,11 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
         </div>
 
         {/* Categories, Season, and Condition Filters in responsive grid columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-stone-100">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4 border-t border-stone-100 dark:border-stone-800">
           
           {/* Column 1: Categories Pills */}
           <div className="space-y-2 text-left">
-            <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Danh mục</label>
+            <label className="text-[11px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Danh mục</label>
             <div className="flex gap-1.5 overflow-x-auto pb-1 flex-nowrap scrollbar-hide">
               {CATEGORIES.map((cat) => (
                 <button
@@ -591,8 +591,8 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   }}
                   className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                     category === cat.value
-                      ? 'bg-[#2A2521] text-white shadow-xs'
-                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                      ? 'bg-[#2A2521] dark:bg-stone-100 text-white dark:text-stone-900 shadow-xs'
+                      : 'bg-stone-50 dark:bg-stone-900/60 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
                   {cat.label}
@@ -603,7 +603,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
           {/* Column 2: Season filter */}
           <div className="space-y-2 text-left">
-            <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Mùa phù hợp</label>
+            <label className="text-[11px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Mùa phù hợp</label>
             <div className="flex gap-1.5 overflow-x-auto pb-1 flex-nowrap scrollbar-hide">
               {SEASONS.map((se) => (
                 <button
@@ -615,7 +615,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                     season === se.value
                       ? 'bg-[#8A9A5B] text-white shadow-xs'
-                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                      : 'bg-stone-50 dark:bg-stone-900/60 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
                   {se.label}
@@ -626,7 +626,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
           {/* Column 3: Condition filter */}
           <div className="space-y-2 text-left col-span-1 md:col-span-2 lg:col-span-1">
-            <label className="text-[11px] font-bold text-stone-400 uppercase tracking-wider block">Tình trạng</label>
+            <label className="text-[11px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Tình trạng</label>
             <div className="flex gap-1.5 overflow-x-auto pb-1 flex-nowrap scrollbar-hide">
               {[
                 { value: '', label: 'Tất cả' },
@@ -644,7 +644,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   className={`px-3 py-1.5 rounded-full text-xs font-bold transition-all ${
                     conditionFilter === cond.value
                       ? 'bg-[#C4704F] text-white shadow-xs'
-                      : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                      : 'bg-stone-50 dark:bg-stone-900/60 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
                   }`}
                 >
                   {cond.label}
@@ -657,7 +657,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl text-center text-sm">
+        <div className="bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 p-4 rounded-xl text-center text-sm">
           {error}
         </div>
       )}
@@ -667,24 +667,24 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
         /* Shimmer Loading state */
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-6">
           {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-            <div key={i} className="bg-white rounded-2xl overflow-hidden border border-stone-100 shadow-sm animate-pulse space-y-4 pb-4">
-              <div className="aspect-square bg-stone-100 w-full" />
+            <div key={i} className="bg-white dark:bg-[#23201D] rounded-2xl overflow-hidden border border-stone-100 dark:border-stone-800 shadow-sm animate-pulse space-y-4 pb-4">
+              <div className="aspect-square bg-stone-100 dark:bg-stone-800 w-full" />
               <div className="px-4 space-y-2">
-                <div className="h-4 bg-stone-100 rounded w-3/4" />
-                <div className="h-3 bg-stone-100 rounded w-1/2" />
+                <div className="h-4 bg-stone-100 dark:bg-stone-800 rounded w-3/4" />
+                <div className="h-3 bg-stone-100 dark:bg-stone-800 rounded w-1/2" />
               </div>
             </div>
           ))}
         </div>
       ) : items.length === 0 ? (
         /* Empty State */
-        <div className="bg-white py-16 px-4 text-center rounded-2xl border border-stone-100 shadow-sm max-w-md mx-auto space-y-4">
-          <div className="w-16 h-16 bg-[#FAF6F1] rounded-full flex items-center justify-center mx-auto">
+        <div className="bg-white dark:bg-[#23201D] py-16 px-4 text-center rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm max-w-md mx-auto space-y-4 transition-colors">
+          <div className="w-16 h-16 bg-[#FAF6F1] dark:bg-stone-900 rounded-full flex items-center justify-center mx-auto">
             <ShoppingBag className="h-8 w-8 text-stone-400" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold text-[#2A2521]">Tủ đồ đang trống</h3>
-            <p className="text-sm text-stone-500">
+            <h3 className="text-lg font-semibold text-[#2A2521] dark:text-stone-200">Tủ đồ đang trống</h3>
+            <p className="text-sm text-stone-500 dark:text-stone-400">
               Hãy bấm thêm sản phẩm đầu tiên vào tủ đồ cá nhân của bạn nhé!
             </p>
           </div>
@@ -695,11 +695,11 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           {items.map((item) => (
             <div
               key={item.id}
-              className="group bg-white rounded-2xl overflow-hidden border border-stone-100 hover:border-stone-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
+              className="group bg-white dark:bg-[#23201D] rounded-2xl overflow-hidden border border-stone-100 dark:border-stone-800 hover:border-stone-200 dark:hover:border-stone-700 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between"
             >
               {/* Image card header */}
               <div 
-                className="relative aspect-square w-full overflow-hidden flex items-center justify-center border-b border-stone-50"
+                className="relative aspect-square w-full overflow-hidden flex items-center justify-center border-b border-stone-50 dark:border-stone-800"
                 style={{
                   backgroundColor: item.color && item.color.startsWith('#') && item.color.length === 7
                     ? `${item.color}0d`
@@ -732,7 +732,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
 
                 {/* Floating tags */}
                 {item.isFavorite && (
-                  <span className="absolute top-3 left-3 bg-white/95 text-[#C4704F] p-1.5 rounded-full shadow-sm">
+                  <span className="absolute top-3 left-3 bg-white/95 dark:bg-stone-900/95 text-[#C4704F] p-1.5 rounded-full shadow-sm">
                     <Heart className="h-3.5 w-3.5 fill-[#C4704F] stroke-[#C4704F]" />
                   </span>
                 )}
@@ -764,7 +764,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center gap-2">
                     <button
                       onClick={() => handleToggleFavorite(item)}
-                      className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-[#C4704F] transition-colors"
+                      className="p-2 bg-white dark:bg-stone-900 rounded-full shadow hover:bg-stone-50 dark:hover:bg-stone-800 text-[#C4704F] transition-colors"
                       title={item.isFavorite ? 'Bỏ yêu thích' : 'Yêu thích'}
                     >
                       <Heart className={`h-4 w-4 ${item.isFavorite ? 'fill-[#C4704F]' : ''}`} />
@@ -774,21 +774,21 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                         setSelectedEditItem(item);
                         setIsEditorOpen(true);
                       }}
-                      className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-[#C4704F] transition-colors"
+                      className="p-2 bg-white dark:bg-stone-900 rounded-full shadow hover:bg-stone-50 dark:hover:bg-stone-800 text-[#C4704F] transition-colors"
                       title="Tẩy nền thủ công"
                     >
                       <Scissors className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => onEditItem(item)}
-                      className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-stone-700 transition-colors"
+                      className="p-2 bg-white dark:bg-stone-900 rounded-full shadow hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-700 dark:text-stone-300 transition-colors"
                       title="Chỉnh sửa"
                     >
                       <Edit3 className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => setConfirmDeleteId(item.id)}
-                      className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-red-600 transition-colors"
+                      className="p-2 bg-white dark:bg-stone-900 rounded-full shadow hover:bg-stone-50 dark:hover:bg-stone-800 text-red-600 transition-colors"
                       title="Xóa món đồ"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -799,7 +799,7 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                   <div className="absolute inset-0 bg-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center">
                     <button
                       onClick={() => setConfirmDeleteId(item.id)}
-                      className="p-2 bg-white rounded-full shadow hover:bg-stone-50 text-red-600 transition-colors"
+                      className="p-2 bg-white dark:bg-stone-900 rounded-full shadow hover:bg-stone-50 dark:hover:bg-stone-800 text-red-600 transition-colors"
                       title="Xóa món đồ"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -811,20 +811,20 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
               {/* Detail body */}
               <div className="p-4 space-y-3 flex-1 flex flex-col justify-between">
                 <div className="space-y-1">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-stone-400">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-stone-400 dark:text-stone-500">
                     {CATEGORIES.find((c) => c.value === item.category)?.label || item.category}
                   </span>
-                  <h4 className="font-semibold text-sm text-[#2A2521] line-clamp-1 group-hover:text-[#C4704F] transition-colors">
+                  <h4 className="font-semibold text-sm text-[#2A2521] dark:text-stone-200 line-clamp-1 group-hover:text-[#C4704F] transition-colors">
                     {item.name}
                   </h4>
                   {item.brand && (
-                    <p className="text-xs text-stone-500 font-medium">{item.brand}</p>
+                    <p className="text-xs text-stone-500 dark:text-stone-400 font-medium">{item.brand}</p>
                   )}
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-stone-50">
+                <div className="space-y-2 pt-2 border-t border-stone-50 dark:border-stone-800">
                   {/* Meta items */}
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-stone-500">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-stone-500 dark:text-stone-400">
                     {item.season && (
                       <span className="flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
@@ -832,16 +832,16 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                       </span>
                     )}
                     {item.price && (
-                      <span className="font-semibold text-[#8A9A5B]">
+                      <span className="font-semibold text-[#8A9A5B] dark:text-[#E28A64]">
                         {Number(item.price).toLocaleString('vi-VN')} đ
                       </span>
                     )}
                     {item.condition && (
                       <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
-                        item.condition === 'new' ? 'bg-emerald-50 text-emerald-700' :
-                        item.condition === 'good' ? 'bg-blue-50 text-blue-700' :
-                        item.condition === 'old' ? 'bg-amber-50 text-amber-700' :
-                        'bg-rose-50 text-rose-700'
+                        item.condition === 'new' ? 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400' :
+                        item.condition === 'good' ? 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400' :
+                        item.condition === 'old' ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400' :
+                        'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400'
                       }`}>
                         {item.condition === 'new' ? 'Mới' :
                          item.condition === 'good' ? 'Tốt' :
@@ -857,14 +857,14 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
                       {item.tags.slice(0, 3).map((tag, idx) => (
                         <span
                           key={idx}
-                          className="flex items-center gap-0.5 px-2 py-0.5 bg-stone-100 text-stone-600 rounded text-[10px]"
+                          className="flex items-center gap-0.5 px-2 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-600 dark:text-stone-300 rounded text-[10px]"
                         >
-                          <Tag className="h-2 w-2 text-stone-400" />
+                          <Tag className="h-2 w-2 text-stone-400 dark:text-stone-500" />
                           {tag}
                         </span>
                       ))}
                       {item.tags.length > 3 && (
-                        <span className="px-1.5 py-0.5 bg-stone-100 text-stone-500 rounded text-[9px]">
+                        <span className="px-1.5 py-0.5 bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 rounded text-[9px]">
                           +{item.tags.length - 3}
                         </span>
                       )}
@@ -883,17 +883,17 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
           <button
             disabled={page === 1}
             onClick={() => setPage(page - 1)}
-            className="px-3 py-1.5 text-xs font-semibold border border-stone-200 rounded-lg text-stone-600 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+            className="px-3 py-1.5 text-xs font-semibold border border-stone-200 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-50 disabled:pointer-events-none transition-colors"
           >
             Trước
           </button>
-          <span className="text-xs text-stone-500">
+          <span className="text-xs text-stone-500 dark:text-stone-400">
             Trang {page} / {totalPages}
           </span>
           <button
             disabled={page === totalPages}
             onClick={() => setPage(page + 1)}
-            className="px-3 py-1.5 text-xs font-semibold border border-stone-200 rounded-lg text-stone-600 bg-white hover:bg-stone-50 disabled:opacity-50 disabled:pointer-events-none transition-colors"
+            className="px-3 py-1.5 text-xs font-semibold border border-stone-200 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-50 disabled:pointer-events-none transition-colors"
           >
             Sau
           </button>
@@ -929,31 +929,31 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
         }
         return (
           <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200">
-              <div className="flex items-center gap-2.5 text-amber-500 border-b border-stone-100 pb-3">
+            <div className="bg-white dark:bg-[#23201D] rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 dark:border-stone-800 text-left relative animate-in zoom-in-95 duration-200 transition-colors">
+              <div className="flex items-center gap-2.5 text-amber-500 border-b border-stone-100 dark:border-stone-850 pb-3">
                 <AlertTriangle className="h-5 w-5 shrink-0" />
-                <h3 className="text-base font-bold text-[#2A2521] font-serif">Phát hiện trùng lặp bằng AI</h3>
+                <h3 className="text-base font-bold text-[#2A2521] dark:text-stone-100 font-serif">Phát hiện trùng lặp bằng AI</h3>
               </div>
               
-              <div className="space-y-3.5 pt-2 text-xs text-stone-600">
+              <div className="space-y-3.5 pt-2 text-xs text-stone-600 dark:text-stone-300">
                 <p>
-                  Hệ thống AI nhận diện hình ảnh của sản phẩm <strong className="text-stone-800">"{duplicateModalItem.name}"</strong> giống <strong className="text-amber-600 font-bold">{Math.round(warning.similarity * 100)}%</strong> so với sản phẩm <strong className="text-stone-800">"{warning.matchedItemName}"</strong> đã có sẵn trong tủ đồ của bạn.
+                  Hệ thống AI nhận diện hình ảnh của sản phẩm <strong className="text-stone-800 dark:text-stone-200">"{duplicateModalItem.name}"</strong> giống <strong className="text-amber-600 dark:text-amber-400 font-bold">{Math.round(warning.similarity * 100)}%</strong> so với sản phẩm <strong className="text-stone-800 dark:text-stone-200">"{warning.matchedItemName}"</strong> đã có sẵn trong tủ đồ của bạn.
                 </p>
-                <div className="bg-amber-50/50 border border-amber-100/60 p-3 rounded-2xl space-y-1 text-left">
-                  <p className="text-[10px] font-bold text-amber-600 uppercase tracking-wider">Thông số trùng khớp</p>
-                  <p className="font-semibold text-stone-700">Tên vật phẩm khớp: {warning.matchedItemName}</p>
-                  <p className="font-semibold text-stone-700">Độ tương thích thị giác: {(warning.similarity * 100).toFixed(0)}%</p>
+                <div className="bg-amber-50/50 dark:bg-amber-950/20 border border-amber-100/60 dark:border-amber-900/50 p-3 rounded-2xl space-y-1 text-left">
+                  <p className="text-[10px] font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">Thông số trùng khớp</p>
+                  <p className="font-semibold text-stone-700 dark:text-stone-200">Tên vật phẩm khớp: {warning.matchedItemName}</p>
+                  <p className="font-semibold text-stone-700 dark:text-stone-200">Độ tương thích thị giác: {(warning.similarity * 100).toFixed(0)}%</p>
                 </div>
-                <p className="text-stone-400 text-[11px] leading-relaxed">
+                <p className="text-stone-400 dark:text-stone-500 text-[11px] leading-relaxed">
                   * Trùng lặp thường xảy ra khi bạn tải lên cùng một hình ảnh nhiều lần. Bạn có muốn giữ lại sản phẩm này hay xóa bỏ để giải phóng bộ nhớ?
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-stone-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-stone-100 dark:border-stone-850">
                 <button
                   type="button"
                   onClick={() => handleKeepDuplicate(duplicateModalItem.id)}
-                  className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-500 hover:bg-stone-50 transition-colors"
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
                 >
                   Giữ lại món này
                 </button>

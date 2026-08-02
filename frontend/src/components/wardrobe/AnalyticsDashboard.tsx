@@ -91,14 +91,14 @@ export default function AnalyticsDashboard() {
     return (
       <div className="flex flex-col items-center justify-center py-24 space-y-3">
         <span className="w-8 h-8 rounded-full border-4 border-[#C4704F] border-t-transparent animate-spin"></span>
-        <p className="text-sm font-semibold text-stone-500">Đang tính toán số liệu thống kê...</p>
+        <p className="text-sm font-semibold text-stone-500 dark:text-stone-400">Đang tính toán số liệu thống kê...</p>
       </div>
     );
   }
 
   if (error || !stats) {
     return (
-      <div className="bg-red-50 border border-red-100 text-red-700 p-4 rounded-xl text-center text-sm max-w-md mx-auto">
+      <div className="bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 p-4 rounded-xl text-center text-sm max-w-md mx-auto">
         {error || 'Không có dữ liệu báo cáo.'}
       </div>
     );
@@ -141,72 +141,72 @@ export default function AnalyticsDashboard() {
     <div className="w-full space-y-8 select-none">
       
       {/* Header Banner */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-stone-100 shadow-sm text-left">
-        <h2 className="text-xl font-bold text-[#2A2521] font-serif">Báo cáo & Phân tích tủ đồ</h2>
-        <p className="text-xs text-stone-500 mt-1">Phân tích giá trị tài chính mua sắm và cơ cấu phong cách thời trang của bạn.</p>
+      <div className="bg-white dark:bg-[#23201D] p-4 sm:p-6 rounded-2xl sm:rounded-3xl border border-stone-100 dark:border-stone-800 shadow-sm text-left transition-colors">
+        <h2 className="text-xl font-bold text-[#2A2521] dark:text-stone-100 font-serif">Báo cáo & Phân tích tủ đồ</h2>
+        <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">Phân tích giá trị tài chính mua sắm và cơ cấu phong cách thời trang của bạn.</p>
       </div>
 
       {/* Financial & Quantity Cards (Premium visual styling) */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         
         {/* Card 1: Total value */}
-        <div className="bg-white p-3 sm:p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+        <div className="bg-white dark:bg-[#23201D] p-3 sm:p-5 rounded-3xl border border-stone-100 dark:border-stone-800 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group transition-colors">
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#C4704F]" />
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tổng giá trị</span>
-            <span className="p-1.5 sm:p-2 rounded-xl bg-[#C4704F]/10 text-[#C4704F]">
+            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Tổng giá trị</span>
+            <span className="p-1.5 sm:p-2 rounded-xl bg-[#C4704F]/10 text-[#C4704F] dark:text-[#E28A64]">
               <DollarSign className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </span>
           </div>
-          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] tracking-tight mt-2 sm:mt-3 truncate">
+          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] dark:text-stone-100 tracking-tight mt-2 sm:mt-3 truncate">
             {formatCurrency(stats.totalValue)}
           </h3>
-          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none hidden sm:block">Tổng chi phí đầu tư thời trang</p>
+          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 font-semibold leading-none hidden sm:block">Tổng chi phí đầu tư thời trang</p>
         </div>
 
         {/* Card 2: Average price */}
-        <div className="bg-white p-3 sm:p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+        <div className="bg-white dark:bg-[#23201D] p-3 sm:p-5 rounded-3xl border border-stone-100 dark:border-stone-800 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group transition-colors">
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#8A9A5B]" />
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Giá TB</span>
-            <span className="p-1.5 sm:p-2 rounded-xl bg-[#8A9A5B]/10 text-[#8A9A5B]">
+            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Giá TB</span>
+            <span className="p-1.5 sm:p-2 rounded-xl bg-[#8A9A5B]/10 text-[#8A9A5B] dark:text-[#A7BA73]">
               <Tag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </span>
           </div>
-          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] tracking-tight mt-2 sm:mt-3 truncate">
+          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] dark:text-stone-100 tracking-tight mt-2 sm:mt-3 truncate">
             {formatCurrency(stats.averagePrice)}
           </h3>
-          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none hidden sm:block">Trung bình giá trị một sản phẩm</p>
+          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 font-semibold leading-none hidden sm:block">Trung bình giá trị một sản phẩm</p>
         </div>
 
         {/* Card 3: Total items */}
-        <div className="bg-white p-3 sm:p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+        <div className="bg-white dark:bg-[#23201D] p-3 sm:p-5 rounded-3xl border border-stone-100 dark:border-stone-800 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group transition-colors">
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#4A6B82]" />
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Sản phẩm</span>
-            <span className="p-1.5 sm:p-2 rounded-xl bg-[#4A6B82]/10 text-[#4A6B82]">
+            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Sản phẩm</span>
+            <span className="p-1.5 sm:p-2 rounded-xl bg-[#4A6B82]/10 text-[#4A6B82] dark:text-[#6FA2C5]">
               <ShoppingBag className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </span>
           </div>
-          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] tracking-tight mt-2 sm:mt-3">
+          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] dark:text-stone-100 tracking-tight mt-2 sm:mt-3">
             {stats.totalItems} món
           </h3>
-          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none hidden sm:block">Phân bổ trên {validCategories.length} danh mục</p>
+          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 font-semibold leading-none hidden sm:block">Phân bổ trên {validCategories.length} danh mục</p>
         </div>
 
         {/* Card 4: Total outfits */}
-        <div className="bg-white p-3 sm:p-5 rounded-3xl border border-stone-100 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group">
+        <div className="bg-white dark:bg-[#23201D] p-3 sm:p-5 rounded-3xl border border-stone-100 dark:border-stone-800 shadow-xs hover:shadow-md transition-shadow relative overflow-hidden text-left group transition-colors">
           <div className="absolute top-0 left-0 right-0 h-1 bg-[#D4AF37]" />
           <div className="flex justify-between items-center">
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Bộ phối</span>
+            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Bộ phối</span>
             <span className="p-1.5 sm:p-2 rounded-xl bg-[#D4AF37]/10 text-[#D4AF37]">
               <Layers className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </span>
           </div>
-          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] tracking-tight mt-2 sm:mt-3">
+          <h3 className="text-base sm:text-2xl font-black text-[#2A2521] dark:text-stone-100 tracking-tight mt-2 sm:mt-3">
             {stats.totalOutfits} bộ
           </h3>
-          <p className="text-[10px] text-stone-400 mt-1 font-semibold leading-none hidden sm:block">Bộ phối đồ tự thiết kế sáng tạo</p>
+          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-1 font-semibold leading-none hidden sm:block">Bộ phối đồ tự thiết kế sáng tạo</p>
         </div>
       </div>
 
@@ -214,13 +214,13 @@ export default function AnalyticsDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Donut Chart: Quantity Distribution */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-stone-100 shadow-sm space-y-6 text-left flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#23201D] p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-stone-100 dark:border-stone-800 shadow-sm space-y-6 text-left flex flex-col justify-between transition-colors">
           <div>
-            <h3 className="font-bold text-base text-[#2A2521] font-serif flex items-center gap-1.5">
+            <h3 className="font-bold text-base text-[#2A2521] dark:text-stone-100 font-serif flex items-center gap-1.5">
               <PieChart className="h-4 w-4 text-[#C4704F]" />
               Phân bổ số lượng sản phẩm
             </h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">Tỷ lệ cơ cấu các loại quần áo trong tủ đồ hoạt động</p>
+            <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">Tỷ lệ cơ cấu các loại quần áo trong tủ đồ hoạt động</p>
           </div>
 
           <div className="flex flex-col sm:flex-row items-center justify-around gap-4 sm:gap-8 py-4">
@@ -234,6 +234,7 @@ export default function AnalyticsDashboard() {
                   fill="transparent"
                   stroke="#FAF6F1"
                   strokeWidth="10"
+                  className="stroke-[#FAF6F1] dark:stroke-stone-800"
                 />
                 {donutSlices.map((slice) => {
                   const isActive = activeSlice === slice.category;
@@ -258,8 +259,8 @@ export default function AnalyticsDashboard() {
               </svg>
               {/* Inner Center Label */}
               <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                <span className="text-2xl font-black text-[#2A2521] leading-none">{stats.totalItems}</span>
-                <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider mt-1.5">Sản phẩm</span>
+                <span className="text-2xl font-black text-[#2A2521] dark:text-stone-100 leading-none">{stats.totalItems}</span>
+                <span className="text-[9px] font-bold text-stone-400 dark:text-stone-555 uppercase tracking-wider mt-1.5">Sản phẩm</span>
               </div>
             </div>
 
@@ -273,7 +274,9 @@ export default function AnalyticsDashboard() {
                     onMouseEnter={() => setActiveSlice(slice.category)}
                     onMouseLeave={() => setActiveSlice(null)}
                     className={`flex items-center justify-between text-xs p-2 rounded-xl transition-colors cursor-pointer ${
-                      isActive ? 'bg-[#C4704F]/5 text-[#C4704F] font-bold' : 'text-stone-600'
+                      isActive 
+                        ? 'bg-[#C4704F]/5 dark:bg-[#C4704F]/10 text-[#C4704F] dark:text-[#E28A64] font-bold' 
+                        : 'text-stone-600 dark:text-stone-400'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -289,16 +292,16 @@ export default function AnalyticsDashboard() {
         </div>
 
         {/* Bar Chart: Investment Distribution */}
-        <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-stone-100 shadow-sm space-y-6 text-left flex flex-col justify-between">
+        <div className="bg-white dark:bg-[#23201D] p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-stone-100 dark:border-stone-800 shadow-sm space-y-6 text-left flex flex-col justify-between transition-colors">
           <div>
-            <h3 className="font-bold text-base text-[#2A2521] font-serif flex items-center gap-1.5">
+            <h3 className="font-bold text-base text-[#2A2521] dark:text-stone-100 font-serif flex items-center gap-1.5">
               <BarChart className="h-4 w-4 text-[#8A9A5B]" />
               Giá trị đầu tư thời trang
             </h3>
-            <p className="text-[10px] text-stone-400 mt-0.5">So sánh chi phí mua sắm theo từng nhóm danh mục thời trang</p>
+            <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">So sánh chi phí mua sắm theo từng nhóm danh mục thời trang</p>
           </div>
 
-          <div className="h-40 sm:h-48 flex items-end gap-2 sm:gap-6 border-b border-stone-100 pb-2 relative mt-4">
+          <div className="h-40 sm:h-48 flex items-end gap-2 sm:gap-6 border-b border-stone-100 dark:border-stone-850 pb-2 relative mt-4">
             {/* Bars */}
             {barChartEntries.map((bar) => {
               const isActive = activeBar === bar.category;
@@ -325,7 +328,7 @@ export default function AnalyticsDashboard() {
                     }}
                   />
                   
-                  <span className="text-[10px] font-bold text-stone-400 mt-2 truncate w-full text-center">
+                  <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 mt-2 truncate w-full text-center">
                     {CATEGORY_LABELS[bar.category] || bar.category}
                   </span>
                 </div>
@@ -334,24 +337,24 @@ export default function AnalyticsDashboard() {
           </div>
 
           {/* Bar Chart Value Info */}
-          <div className="pt-2 flex justify-between items-center text-xs font-bold text-stone-600">
+          <div className="pt-2 flex justify-between items-center text-xs font-bold text-stone-600 dark:text-stone-300">
             <span>Tổng vốn đầu tư:</span>
-            <span className="text-[#8A9A5B] font-extrabold text-sm">{formatCurrency(stats.totalValue)}</span>
+            <span className="text-[#8A9A5B] dark:text-[#A7BA73] font-extrabold text-sm">{formatCurrency(stats.totalValue)}</span>
           </div>
         </div>
 
       </div>
 
       {/* Color Palette List (Full Width styling) */}
-      <div className="bg-white p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-stone-100 shadow-sm space-y-4 text-left">
+      <div className="bg-white dark:bg-[#23201D] p-4 sm:p-6 rounded-2xl sm:rounded-[32px] border border-stone-100 dark:border-stone-800 shadow-sm space-y-4 text-left transition-colors">
         <div>
-          <h3 className="font-bold text-sm text-[#2A2521] font-serif">Phân bổ màu sắc trang phục</h3>
-          <p className="text-[10px] text-stone-400 mt-0.5">Bản đồ phân phối màu sắc quần áo thực tế đang sở hữu</p>
+          <h3 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 font-serif">Phân bổ màu sắc trang phục</h3>
+          <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">Bản đồ phân phối màu sắc quần áo thực tế đang sở hữu</p>
         </div>
 
         <div className="flex flex-wrap gap-4 pt-2">
           {stats.colorDistribution.length === 0 ? (
-            <div className="text-center py-6 text-stone-400 text-xs w-full">
+            <div className="text-center py-6 text-stone-400 dark:text-stone-500 text-xs w-full">
               Chưa có dữ liệu màu sắc
             </div>
           ) : (
@@ -362,15 +365,15 @@ export default function AnalyticsDashboard() {
               return (
                 <div
                   key={col.color}
-                  className="flex items-center gap-3 bg-stone-50 border border-stone-100 px-4 py-2.5 rounded-2xl text-xs font-bold text-stone-700 shadow-xs hover:border-stone-200 transition-colors"
+                  className="flex items-center gap-3 bg-stone-50 dark:bg-stone-900 border border-stone-100 dark:border-stone-800 px-4 py-2.5 rounded-2xl text-xs font-bold text-stone-700 dark:text-stone-300 shadow-xs hover:border-stone-250 dark:hover:border-stone-750 transition-colors"
                 >
                   <span
-                    className="w-4 h-4 rounded-full border border-stone-200 shadow-inner shrink-0"
+                    className="w-4 h-4 rounded-full border border-stone-200 dark:border-stone-700 shadow-inner shrink-0"
                     style={{ backgroundColor: renderedHex }}
                   />
                   <div>
                     <p className="capitalize leading-none text-xs">{col.color}</p>
-                    <p className="text-[9px] text-[#C4704F] mt-1 font-bold leading-none">
+                    <p className="text-[9px] text-[#C4704F] dark:text-[#E28A64] mt-1 font-bold leading-none">
                       {col.count} món ({Math.round(percent)}%)
                     </p>
                   </div>

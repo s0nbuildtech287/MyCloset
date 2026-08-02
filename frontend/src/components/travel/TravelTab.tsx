@@ -185,11 +185,13 @@ export default function TravelTab() {
     <div className="w-full space-y-0 text-left">
 
       {/* Mobile Tab Toggle (only visible on < lg) */}
-      <div className="lg:hidden flex bg-stone-100 p-1 rounded-2xl gap-1 mb-4">
+      <div className="lg:hidden flex bg-stone-100 dark:bg-stone-800 p-1 rounded-2xl gap-1 mb-4">
         <button
           onClick={() => setMobilePaneView('list')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-            mobilePaneView === 'list' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+            mobilePaneView === 'list' 
+              ? 'bg-white dark:bg-stone-900 text-[#C4704F] dark:text-[#E28A64] shadow-sm' 
+              : 'text-stone-500 dark:text-stone-400'
           }`}
         >
           ✈️ Hành trình ({trips.length})
@@ -197,7 +199,9 @@ export default function TravelTab() {
         <button
           onClick={() => setMobilePaneView('detail')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-            mobilePaneView === 'detail' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+            mobilePaneView === 'detail' 
+              ? 'bg-white dark:bg-stone-900 text-[#C4704F] dark:text-[#E28A64] shadow-sm' 
+              : 'text-stone-500 dark:text-stone-400'
           }`}
         >
           🧳 Checklist Vali
@@ -207,17 +211,17 @@ export default function TravelTab() {
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
       
       {/* 1. Left Column: Trips List Sidebar (4 Grid Columns) */}
-      <div className={`lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-4 sm:p-6 shadow-sm flex flex-col min-h-[300px] lg:h-[580px] w-full lg:order-1 order-2 ${
+      <div className={`lg:col-span-4 bg-white dark:bg-[#23201D] rounded-3xl border border-stone-100 dark:border-stone-800 p-4 sm:p-6 shadow-sm flex flex-col min-h-[300px] lg:h-[580px] w-full lg:order-1 order-2 transition-colors ${
         mobilePaneView === 'list' ? 'flex' : 'hidden lg:flex'
       }`}>
         {error && (
-          <div className="bg-rose-50 border border-rose-100 text-rose-700 p-3 rounded-xl text-center text-xs mb-3">
+          <div className="bg-rose-50 dark:bg-rose-950/30 border border-rose-100 dark:border-rose-900/45 text-rose-750 dark:text-rose-455 p-3 rounded-xl text-center text-xs mb-3">
             {error}
           </div>
         )}
 
-        <div className="flex justify-between items-center pb-2 border-b border-stone-100 mb-4">
-          <h3 className="font-bold text-sm text-[#2A2521] uppercase tracking-wider flex items-center gap-1.5 font-serif">
+        <div className="flex justify-between items-center pb-2 border-b border-stone-100 dark:border-stone-850 mb-4">
+          <h3 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 uppercase tracking-wider flex items-center gap-1.5 font-serif">
             <Briefcase className="h-4 w-4 text-[#C4704F]" />
             Hành trình du lịch
           </h3>
@@ -232,13 +236,13 @@ export default function TravelTab() {
 
         {loading ? (
           <div className="flex-1 flex justify-center items-center py-10">
-            <Loader2 className="h-6 w-6 animate-spin text-stone-400" />
+            <Loader2 className="h-6 w-6 animate-spin text-stone-400 dark:text-stone-500" />
           </div>
         ) : trips.length === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-stone-50/20 border border-dashed border-stone-200 rounded-2xl">
-            <FolderLock className="h-8 w-8 text-stone-300 mx-auto" />
-            <p className="text-xs text-stone-500 font-semibold">Chưa có kế hoạch xếp vali nào</p>
-            <p className="text-[10px] text-stone-400">Hãy tạo hành trình mới để lên danh sách đồ du lịch!</p>
+          <div className="flex-1 flex flex-col items-center justify-center text-center p-6 space-y-3 bg-stone-50/20 dark:bg-stone-900/10 border border-dashed border-stone-200 dark:border-stone-800 rounded-2xl">
+            <FolderLock className="h-8 w-8 text-stone-300 dark:text-stone-600 mx-auto" />
+            <p className="text-xs text-stone-500 dark:text-stone-400 font-semibold">Chưa có kế hoạch xếp vali nào</p>
+            <p className="text-[10px] text-stone-400 dark:text-stone-550">Hãy tạo hành trình mới để lên danh sách đồ du lịch!</p>
           </div>
         ) : (
           <div className="flex-grow overflow-y-auto space-y-2 pr-1">
@@ -253,26 +257,26 @@ export default function TravelTab() {
                   onClick={() => setActiveTripId(trip.id)}
                   className={`p-4 rounded-2xl border text-left cursor-pointer transition-all relative ${
                     isActive
-                      ? 'border-[#C4704F] bg-white shadow-sm'
-                      : 'border-stone-100 bg-[#FAF9F6]/40 hover:bg-[#FAF9F6]'
+                      ? 'border-[#C4704F] bg-white dark:bg-stone-900/40 shadow-sm'
+                      : 'border-stone-100 dark:border-stone-850 bg-[#FAF9F6]/40 dark:bg-stone-900/10 hover:bg-[#FAF9F6] dark:hover:bg-stone-850/40'
                   }`}
                 >
-                  <h4 className="font-bold text-xs text-stone-800 font-serif leading-tight pr-6">{trip.name}</h4>
-                  <div className="flex items-center gap-3 text-[10px] text-stone-400 mt-2 font-medium">
+                  <h4 className="font-bold text-xs text-stone-800 dark:text-stone-200 font-serif leading-tight pr-6">{trip.name}</h4>
+                  <div className="flex items-center gap-3 text-[10px] text-stone-400 dark:text-stone-500 mt-2 font-medium">
                     <span className="flex items-center gap-0.5">
-                      <MapPin className="h-3 w-3 text-stone-300" />
+                      <MapPin className="h-3 w-3 text-stone-300 dark:text-stone-600" />
                       {trip.destination}
                     </span>
                     <span className="flex items-center gap-0.5">
-                      <Calendar className="h-3 w-3 text-stone-300" />
+                      <Calendar className="h-3 w-3 text-stone-300 dark:text-stone-600" />
                       {new Date(trip.startDate).toLocaleDateString('vi-VN')}
                     </span>
                   </div>
                   
                   {/* Progress Indicator inside trip card */}
-                  <div className="mt-3 flex items-center justify-between text-[9px] font-bold text-stone-400">
+                  <div className="mt-3 flex items-center justify-between text-[9px] font-bold text-stone-400 dark:text-stone-500">
                     <span>Đã xếp {tripPackedCount}/{tripItemsCount} món</span>
-                    <span className="text-[#C4704F]">{tripItemsCount > 0 ? Math.round((tripPackedCount / tripItemsCount) * 100) : 0}%</span>
+                    <span className="text-[#C4704F] dark:text-[#E28A64]">{tripItemsCount > 0 ? Math.round((tripPackedCount / tripItemsCount) * 100) : 0}%</span>
                   </div>
 
                   <button
@@ -280,7 +284,7 @@ export default function TravelTab() {
                       e.stopPropagation();
                       handleDeleteTrip(trip.id);
                     }}
-                    className="absolute top-4 right-4 p-1 hover:bg-stone-50 rounded-lg text-stone-300 hover:text-red-500 transition-colors"
+                    className="absolute top-4 right-4 p-1 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-lg text-stone-300 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -292,27 +296,27 @@ export default function TravelTab() {
       </div>
 
       {/* 2. Right Column: Packing Checklist Details Workspace (8 Grid Columns) */}
-      <div className={`lg:col-span-8 w-full flex flex-col lg:order-2 order-1 min-h-[360px] lg:h-[580px] ${
+      <div className={`lg:col-span-8 w-full flex flex-col lg:order-2 order-1 min-h-[360px] lg:h-[580px] transition-colors ${
         mobilePaneView === 'detail' ? 'flex' : 'hidden lg:flex'
       }`}>
         {activeTrip ? (
-          <div className="bg-white rounded-3xl border border-stone-100 p-6 space-y-6 shadow-sm h-full flex flex-col overflow-hidden">
+          <div className="bg-white dark:bg-[#23201D] rounded-3xl border border-stone-100 dark:border-stone-800 p-6 space-y-6 shadow-sm h-full flex flex-col overflow-hidden transition-colors">
             
             {/* Details Header info */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-100 pb-4 shrink-0 gap-3">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-stone-100 dark:border-stone-850 pb-4 shrink-0 gap-3">
               <div className="space-y-1">
-                <span className="text-[9px] bg-stone-100 text-stone-500 font-bold uppercase px-2 py-0.5 rounded tracking-wide">
+                <span className="text-[9px] bg-stone-100 dark:bg-stone-800 text-stone-500 dark:text-stone-400 font-bold uppercase px-2 py-0.5 rounded tracking-wide">
                   Chi tiết đóng gói Vali
                 </span>
-                <h3 className="font-bold text-lg text-[#2A2521] font-serif leading-none pt-1">{activeTrip.name}</h3>
-                <p className="text-xs text-stone-400 flex items-center gap-2 font-medium pt-1">
+                <h3 className="font-bold text-lg text-[#2A2521] dark:text-stone-100 font-serif leading-none pt-1">{activeTrip.name}</h3>
+                <p className="text-xs text-stone-400 dark:text-stone-550 flex items-center gap-2 font-medium pt-1">
                   <span className="flex items-center gap-0.5">
-                    <MapPin className="h-3 w-3 text-stone-300" />
+                    <MapPin className="h-3 w-3 text-stone-300 dark:text-stone-650" />
                     {activeTrip.destination}
                   </span>
-                  <span className="text-stone-300">|</span>
+                  <span className="text-stone-300 dark:text-stone-750">|</span>
                   <span className="flex items-center gap-0.5">
-                    <Calendar className="h-3 w-3 text-stone-300" />
+                    <Calendar className="h-3 w-3 text-stone-300 dark:text-stone-650" />
                     Từ {new Date(activeTrip.startDate).toLocaleDateString('vi-VN')} đến {new Date(activeTrip.endDate).toLocaleDateString('vi-VN')}
                   </span>
                 </p>
@@ -328,14 +332,14 @@ export default function TravelTab() {
                       }
                     }));
                   }}
-                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white text-xs font-bold rounded-xl transition-all shadow-xs animate-in duration-200"
                 >
                   <Sparkles className="h-3.5 w-3.5" />
                   AI gợi ý xếp đồ
                 </button>
                 <button
                   onClick={openSelector}
-                  className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white text-xs font-bold rounded-xl transition-all shadow-xs"
+                  className="flex items-center justify-center gap-1.5 px-4 py-2 bg-[#8A9A5B] hover:bg-[#72804b] text-white text-xs font-bold rounded-xl transition-all shadow-xs animate-in duration-200"
                 >
                   <Plus className="h-3.5 w-3.5" />
                   Chọn đồ vào Vali
@@ -344,18 +348,18 @@ export default function TravelTab() {
             </div>
 
             {/* Progress Bar (Always visible) */}
-            <div className="space-y-1.5 shrink-0 bg-[#FAF9F6]/40 p-4 border border-stone-50 rounded-2xl">
-              <div className="flex justify-between text-xs font-bold text-stone-600">
+            <div className="space-y-1.5 shrink-0 bg-[#FAF9F6]/40 dark:bg-stone-900/20 p-4 border border-stone-50 dark:border-stone-850/40 rounded-2xl transition-colors">
+              <div className="flex justify-between text-xs font-bold text-stone-600 dark:text-stone-300">
                 <span>Tiến trình chuẩn bị hành lý</span>
-                <span className="text-[#8A9A5B]">{progressPercent}%</span>
+                <span className="text-[#8A9A5B] dark:text-[#A7BA73]">{progressPercent}%</span>
               </div>
-              <div className="w-full h-2 bg-stone-100 rounded-full overflow-hidden">
+              <div className="w-full h-2 bg-stone-100 dark:bg-stone-800 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-[#8A9A5B] rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <p className="text-[10px] text-stone-400 font-semibold leading-none">
+              <p className="text-[10px] text-stone-400 dark:text-stone-500 font-semibold leading-none">
                 Đã chuẩn bị xong {packedCount} trên tổng số {tripItems.length} sản phẩm cần mang đi.
               </p>
             </div>
@@ -363,19 +367,19 @@ export default function TravelTab() {
             {/* Checklist Items Area (Scrollable within parent height) */}
             <div className="flex-1 overflow-y-auto pr-1">
               {tripItems.length === 0 ? (
-                <div className="text-center py-20 border border-dashed border-stone-200 rounded-2xl p-6 space-y-3 bg-stone-50/20">
+                <div className="text-center py-20 border border-dashed border-stone-200 dark:border-stone-850 rounded-2xl p-6 space-y-3 bg-stone-50/20 dark:bg-stone-900/10 transition-colors">
                   <Sparkles className="h-6 w-6 text-[#8A9A5B] mx-auto animate-pulse" />
-                  <h4 className="font-bold text-xs text-stone-700 font-serif">Vali đang trống trơn</h4>
-                  <p className="text-[10px] text-stone-400 max-w-xs mx-auto">
+                  <h4 className="font-bold text-xs text-stone-700 dark:text-stone-300 font-serif">Vali đang trống trơn</h4>
+                  <p className="text-[10px] text-stone-400 dark:text-stone-500 max-w-xs mx-auto">
                     Hãy nhấn nút "Chọn đồ vào Vali" ở góc trên để lựa chọn các món quần áo, giày dép, phụ kiện bạn muốn mang đi chuyến này.
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-stone-100">
+                <div className="divide-y divide-stone-100 dark:divide-stone-850">
                   {tripItems.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between py-3 hover:bg-stone-50/50 rounded-xl px-2 transition-colors group"
+                      className="flex items-center justify-between py-3 hover:bg-stone-50/50 dark:hover:bg-stone-800/40 rounded-xl px-2 transition-colors group"
                     >
                       <div 
                         onClick={() => handleTogglePacked(item.id)}
@@ -384,20 +388,20 @@ export default function TravelTab() {
                         {item.packed ? (
                           <CheckSquare className="h-5 w-5 text-[#8A9A5B] shrink-0" />
                         ) : (
-                          <Square className="h-5 w-5 text-stone-300 shrink-0" />
+                          <Square className="h-5 w-5 text-stone-300 dark:text-stone-600 shrink-0" />
                         )}
                         
                         <div className="flex items-center gap-3">
                           <img
                             src={item.clothingItem?.processedImageUrl || item.clothingItem?.originalImageUrl}
                             alt={item.clothingItem?.name}
-                            className="w-10 h-10 object-contain p-0.5 border border-stone-100 rounded-lg bg-stone-50/80"
+                            className="w-10 h-10 object-contain p-0.5 border border-stone-100 dark:border-stone-800 rounded-lg bg-stone-50/80 dark:bg-stone-950/80"
                           />
                           <div className="text-left">
-                            <p className={`text-xs font-bold leading-tight ${item.packed ? 'line-through text-stone-400' : 'text-stone-700'}`}>
+                            <p className={`text-xs font-bold leading-tight ${item.packed ? 'line-through text-stone-400 dark:text-stone-550' : 'text-stone-700 dark:text-stone-250'}`}>
                               {item.clothingItem?.name}
                             </p>
-                            <p className="text-[9px] text-stone-400 mt-1 uppercase font-bold tracking-wider leading-none">
+                            <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-1 uppercase font-bold tracking-wider leading-none">
                               {item.clothingItem?.brand || 'Thương hiệu tự do'}
                             </p>
                           </div>
@@ -406,7 +410,7 @@ export default function TravelTab() {
 
                       <button
                         onClick={() => handleRemoveItemFromTrip(item.id)}
-                        className="p-1.5 hover:bg-stone-100 rounded text-stone-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        className="p-1.5 hover:bg-stone-100 dark:hover:bg-stone-800 rounded text-stone-300 dark:text-stone-500 hover:text-red-500 dark:hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
                         title="Bỏ khỏi vali"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -419,10 +423,10 @@ export default function TravelTab() {
 
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-3xl border border-stone-100 p-6 space-y-3 shadow-xs h-full text-center">
-            <Briefcase className="h-10 w-10 text-stone-300 animate-bounce" />
-            <h4 className="font-bold text-sm text-[#2A2521] font-serif">Chọn hoặc tạo chuyến đi</h4>
-            <p className="text-xs text-stone-400 max-w-xs text-center leading-relaxed">
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-[#23201D] rounded-3xl border border-stone-100 dark:border-stone-800 p-6 space-y-3 shadow-xs h-full text-center transition-colors">
+            <Briefcase className="h-10 w-10 text-stone-300 dark:text-stone-650 animate-bounce" />
+            <h4 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 font-serif">Chọn hoặc tạo chuyến đi</h4>
+            <p className="text-xs text-stone-400 dark:text-stone-500 max-w-xs text-center leading-relaxed">
               Vui lòng chọn một hành trình ở cột bên trái hoặc nhấp vào nút "Mới" để thiết lập kế hoạch đóng vali cho hành trình tiếp theo của bạn!
             </p>
           </div>
@@ -434,67 +438,67 @@ export default function TravelTab() {
         <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
           <form
             onSubmit={handleCreateTrip}
-            className="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl space-y-4 relative overflow-hidden animate-in zoom-in-95 duration-200 text-left"
+            className="bg-white dark:bg-[#23201D] rounded-3xl max-w-md w-full p-6 shadow-xl space-y-4 relative overflow-hidden border border-stone-100 dark:border-stone-800 animate-in zoom-in-95 duration-200 text-left transition-colors"
           >
             <div>
-              <h4 className="font-bold text-sm text-[#2A2521] font-serif uppercase tracking-wider">Hành trình du lịch mới</h4>
-              <p className="text-[10px] text-stone-400 mt-0.5">Lên lịch trình đóng đồ gọn gàng vào vali</p>
+              <h4 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 font-serif uppercase tracking-wider">Hành trình du lịch mới</h4>
+              <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">Lên lịch trình đóng đồ gọn gàng vào vali</p>
             </div>
 
             <div className="space-y-3.5 pt-2">
               <div>
-                <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Tên hành trình *</label>
+                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Tên hành trình *</label>
                 <input
                   type="text"
                   placeholder="Ví dụ: Đi Đà Nẵng 3 ngày"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Điểm đến *</label>
+                <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Điểm đến *</label>
                 <input
                   type="text"
                   placeholder="Ví dụ: Đà Nẵng"
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   required
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Ngày đi *</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-550 uppercase tracking-wider">Ngày đi *</label>
                   <input
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Ngày về *</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-555 uppercase tracking-wider">Ngày về *</label>
                   <input
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
                     required
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-4 border-t border-stone-100">
+            <div className="flex justify-end gap-2 pt-4 border-t border-stone-100 dark:border-stone-850">
               <button
                 type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-semibold text-stone-500 hover:bg-stone-50 transition-colors"
+                className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-semibold text-stone-550 dark:text-stone-400 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
               >
                 Hủy
               </button>
@@ -514,16 +518,16 @@ export default function TravelTab() {
       {/* 4. Select Clothes Drawer / Modal Overlay */}
       {isSelectorOpen && activeTrip && (
         <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-xl space-y-4 relative overflow-hidden animate-in zoom-in-95 duration-200 text-left flex flex-col h-[520px]">
+          <div className="bg-white dark:bg-[#23201D] rounded-3xl max-w-2xl w-full p-6 shadow-xl space-y-4 relative overflow-hidden border border-stone-100 dark:border-stone-800 animate-in zoom-in-95 duration-200 text-left flex flex-col h-[520px] transition-colors">
             
-            <div className="flex justify-between items-center pb-2 border-b border-stone-100">
+            <div className="flex justify-between items-center pb-2 border-b border-stone-100 dark:border-stone-850">
               <div>
-                <h4 className="font-bold text-sm text-[#2A2521] font-serif uppercase tracking-wider">Lựa chọn quần áo đem đi</h4>
-                <p className="text-[10px] text-stone-400 mt-0.5">Click để thêm sản phẩm vào vali của hành trình này</p>
+                <h4 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 font-serif uppercase tracking-wider">Lựa chọn quần áo đem đi</h4>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">Click để thêm sản phẩm vào vali của hành trình này</p>
               </div>
               <button
                 onClick={() => setIsSelectorOpen(false)}
-                className="p-1.5 hover:bg-stone-50 rounded-lg text-stone-400 hover:text-stone-600 transition-colors"
+                className="p-1.5 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-lg text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -533,10 +537,10 @@ export default function TravelTab() {
             <div className="flex-1 overflow-y-auto pr-1">
               {selectorLoading ? (
                 <div className="flex justify-center items-center py-20">
-                  <Loader2 className="h-6 w-6 animate-spin text-stone-400" />
+                  <Loader2 className="h-6 w-6 animate-spin text-stone-400 dark:text-stone-500" />
                 </div>
               ) : wardrobe.length === 0 ? (
-                <div className="text-center py-20 text-stone-400 text-xs font-semibold">
+                <div className="text-center py-20 text-stone-400 dark:text-stone-500 text-xs font-semibold">
                   Tủ đồ trống. Vui lòng thêm quần áo vào tủ trước.
                 </div>
               ) : (
@@ -557,8 +561,8 @@ export default function TravelTab() {
                         }}
                         className={`p-2 border rounded-2xl cursor-pointer transition-all flex flex-col justify-between aspect-square relative overflow-hidden group ${
                           isAdded
-                            ? 'border-[#8A9A5B] bg-[#8A9A5B]/5 shadow-inner'
-                            : 'border-stone-100 bg-[#FAF9F6]/20 hover:border-stone-200 hover:bg-[#FAF9F6]/50'
+                            ? 'border-[#8A9A5B] bg-[#8A9A5B]/5 dark:bg-[#8A9A5B]/10 shadow-inner'
+                            : 'border-stone-100 dark:border-stone-850 bg-[#FAF9F6]/20 dark:bg-stone-900/10 hover:border-stone-200 dark:hover:border-stone-700 hover:bg-[#FAF9F6]/50 dark:hover:bg-stone-900/30'
                         }`}
                       >
                         <div className="w-full flex-1 flex items-center justify-center overflow-hidden min-h-[80px]">
@@ -568,7 +572,7 @@ export default function TravelTab() {
                             className="max-h-[80px] object-contain p-1"
                           />
                         </div>
-                        <p className="text-[10px] font-bold text-stone-600 line-clamp-1 mt-1.5 leading-tight text-center">
+                        <p className="text-[10px] font-bold text-stone-600 dark:text-stone-300 line-clamp-1 mt-1.5 leading-tight text-center">
                           {item.name}
                         </p>
                         
@@ -587,7 +591,7 @@ export default function TravelTab() {
               )}
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-stone-100">
+            <div className="flex justify-end pt-3 border-t border-stone-100 dark:border-stone-850">
               <button
                 onClick={() => setIsSelectorOpen(false)}
                 className="px-5 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white rounded-xl text-xs font-semibold transition-colors shadow-sm"

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from './store/authStore'
 import { apiClient } from './api/client'
+import { type Theme, getSystemTheme, applyTheme } from './utils/theme'
 import WardrobeGrid from './components/wardrobe/WardrobeGrid'
 import ItemForm from './components/wardrobe/ItemForm'
 import OutfitCanvas from './components/outfit/OutfitCanvas'
@@ -35,8 +36,12 @@ function App() {
   // Header and user dropdown/modal states
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isUserInfoOpen, setIsUserInfoOpen] = useState(false)
-  const [isDarkModeDemo, setIsDarkModeDemo] = useState(false)
+  const [theme, setTheme] = useState<Theme>(getSystemTheme())
   const [langDemo, setLangDemo] = useState<'VI' | 'EN'>('VI')
+
+  useEffect(() => {
+    applyTheme(theme)
+  }, [theme])
 
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [currentPassword, setCurrentPassword] = useState('')
@@ -216,7 +221,18 @@ function App() {
 
   if (!isAuthenticated || !user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-[#FAF6F1] via-[#FFFBF9] to-[#F3ECE4] font-sans flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF6F1] via-[#FFFBF9] to-[#F3ECE4] dark:from-[#181614] dark:via-[#1E1B18] dark:to-[#12100F] font-sans flex items-center justify-center p-4 relative transition-colors">
+        {/* Floating Theme Switcher on Login Page */}
+        <div className="absolute top-4 right-4">
+          <button 
+            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} 
+            className="p-2.5 text-stone-400 dark:text-stone-500 hover:text-[#C4704F] dark:hover:text-[#E28A64] hover:bg-white dark:hover:bg-[#23201D] rounded-full shadow-md transition-all border border-stone-200/50 dark:border-stone-800"
+            title="Chuyển chế độ sáng/tối"
+          >
+            {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          </button>
+        </div>
+
         {/* Floating Success Toast */}
         {success && (
           <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-emerald-500 text-white font-semibold text-xs px-5 py-3 rounded-full shadow-lg flex items-center gap-2 z-50 animate-in fade-in slide-in-from-top-4 duration-300">
@@ -227,23 +243,23 @@ function App() {
           </div>
         )}
 
-        <div className="max-w-md w-full space-y-6 bg-white p-8 rounded-3xl shadow-xl border border-stone-100/80 animate-in zoom-in-95 duration-200">
+        <div className="max-w-md w-full space-y-6 bg-white dark:bg-[#23201D] p-8 rounded-3xl shadow-xl border border-stone-100/80 dark:border-stone-800 animate-in zoom-in-95 duration-200 transition-colors">
           <div className="text-center flex flex-col items-center">
             {/* Logo */}
             <img src={loginLogo} alt="Drobe" className="h-20 w-auto object-contain mb-3 rounded-2xl shadow-xs" />
-            <h2 className="text-3xl font-extrabold tracking-tight text-[#2A2521] leading-none" style={{ fontFamily: '"Prata", serif' }}>
+            <h2 className="text-3xl font-extrabold tracking-tight text-[#2A2521] dark:text-stone-100 leading-none" style={{ fontFamily: '"Prata", serif' }}>
               Drobe
             </h2>
-            <span className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.25em] leading-none mt-2">
+            <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.25em] leading-none mt-2">
               My Closet
             </span>
-            <p className="mt-4 text-xs text-stone-500 max-w-[280px]">
+            <p className="mt-4 text-xs text-stone-500 dark:text-stone-400 max-w-[280px]">
               Web app quản lý tủ quần áo cá nhân trực quan
             </p>
           </div>
 
           {error && (
-            <div className="bg-red-50 text-red-700 p-3 rounded-2xl text-xs text-center border border-red-100 animate-in fade-in duration-200">
+            <div className="bg-red-50 dark:bg-red-950/30 text-red-700 dark:text-red-400 p-3 rounded-2xl text-xs text-center border border-red-100 dark:border-red-900/50 animate-in fade-in duration-200">
               {error}
             </div>
           )}
@@ -251,7 +267,7 @@ function App() {
           <form className="space-y-5 text-left" onSubmit={handleSubmit}>
             <div className="space-y-4">
               <div>
-                <label htmlFor="email" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <label htmlFor="email" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Email đăng nhập
                 </label>
                 <input
@@ -260,13 +276,13 @@ function App() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-700 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100"
                   placeholder="xu4ns0n@drobe.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <label htmlFor="password" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Mật khẩu
                 </label>
                 <input
@@ -275,7 +291,7 @@ function App() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-700 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100"
                   placeholder="••••••••"
                 />
               </div>
@@ -290,7 +306,7 @@ function App() {
               </button>
             </div>
 
-            <div className="text-center text-[10px] pt-1 text-stone-400 font-medium">
+            <div className="text-center text-[10px] pt-1 text-stone-400 dark:text-stone-500 font-medium">
               Hệ thống tủ đồ nội bộ cá nhân
             </div>
           </form>
@@ -301,24 +317,24 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF6F1] font-sans flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#FAF6F1] dark:bg-[#181614] font-sans flex flex-col lg:flex-row transition-colors">
 
       
       {/* Navbar & Sidebar layout if logged in */}
       {isAuthenticated && user ? (
         <>
           {/* Desktop Left Sidebar (Visible only on lg and larger) */}
-          <aside className="hidden lg:flex w-64 bg-white border-r border-stone-150 h-screen sticky top-0 flex-col justify-between shrink-0 z-30 shadow-xs">
+          <aside className="hidden lg:flex w-64 bg-white dark:bg-[#23201D] border-r border-stone-150 dark:border-stone-800 h-screen sticky top-0 flex-col justify-between shrink-0 z-30 shadow-xs transition-colors">
             <div className="flex flex-col gap-6">
               {/* Logo section */}
               <div className="p-6 pb-2">
                 <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigateToTab('wardrobe'); setEditingItem(null); }}>
                   <img src={headerLogo} alt="Drobe" className="h-14 w-auto object-contain rounded-sm" />
                   <div className="flex flex-col text-left">
-                    <span className="font-semibold text-[#2A2521] text-2xl tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
+                    <span className="font-semibold text-[#2A2521] dark:text-stone-100 text-2xl tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
                       Drobe
                     </span>
-                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-[0.25em] leading-none mt-1.5">
+                    <span className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.25em] leading-none mt-1.5">
                       My Closet
                     </span>
                   </div>
@@ -351,9 +367,8 @@ function App() {
                       onClick={() => { navigateToTab(item.tab); setEditingItem(null); }}
                       className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                         isActive
-                          ? 'bg-[#C4704F]/10 text-[#C4704F] shadow-xs font-extrabold'
-
-                          : 'text-stone-500 hover:text-stone-700 hover:bg-stone-50'
+                          ? 'bg-[#C4704F]/10 dark:bg-[#C4704F]/20 text-[#C4704F] dark:text-[#E28A64] shadow-xs font-extrabold'
+                          : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-800/40'
                       }`}
                     >
                       <Icon className="h-4.5 w-4.5 shrink-0" />
@@ -366,19 +381,19 @@ function App() {
             </div>
 
             {/* Profile info & Logout at bottom of Sidebar */}
-            <div className="p-4 border-t border-stone-100 space-y-3">
+            <div className="p-4 border-t border-stone-100 dark:border-stone-800 space-y-3">
               <div className="flex items-center gap-3 px-2">
-                <span className="w-8 h-8 rounded-full bg-[#C4704F]/10 text-[#C4704F] flex items-center justify-center font-bold text-xs shrink-0">
+                <span className="w-8 h-8 rounded-full bg-[#C4704F]/10 dark:bg-[#C4704F]/20 text-[#C4704F] dark:text-[#E28A64] flex items-center justify-center font-bold text-xs shrink-0">
                   {user.name ? user.name[0].toUpperCase() : user.email[0].toUpperCase()}
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-stone-700 truncate leading-none">{user.name || 'Người dùng'}</p>
-                  <p className="text-[10px] text-stone-400 truncate mt-1">{user.email}</p>
+                  <p className="text-xs font-bold text-stone-700 dark:text-stone-200 truncate leading-none">{user.name || 'Người dùng'}</p>
+                  <p className="text-[10px] text-stone-400 dark:text-stone-500 truncate mt-1">{user.email}</p>
                 </div>
               </div>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-stone-500 hover:text-red-600 hover:bg-red-50 transition-colors"
+                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-xs font-bold text-stone-500 dark:text-stone-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
               >
                 <LogOut className="h-4 w-4 shrink-0" />
                 <span>Đăng xuất</span>
@@ -387,7 +402,7 @@ function App() {
           </aside>
 
           {/* Mobile Bottom Tabbar Navigation (Visible on screen < lg) */}
-          <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-stone-150 flex items-center justify-around z-40 px-2 shadow-lg">
+          <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white dark:bg-[#23201D] border-t border-stone-150 dark:border-stone-800 flex items-center justify-around z-40 px-2 shadow-lg transition-colors">
             {[
               { tab: 'wardrobe', label: 'Tủ đồ', icon: LayoutGrid },
               { tab: 'outfit_canvas', label: 'Ghép', icon: Sparkles },
@@ -402,7 +417,7 @@ function App() {
                   key={item.tab}
                   onClick={() => { navigateToTab(item.tab); setEditingItem(null); }}
                   className={`flex flex-col items-center gap-1 py-1 px-3 text-[11px] font-bold transition-all ${
-                    isActive ? 'text-[#C4704F] font-extrabold' : 'text-stone-400 hover:text-stone-600'
+                    isActive ? 'text-[#C4704F] dark:text-[#E28A64] font-extrabold' : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
                   }`}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
@@ -416,28 +431,25 @@ function App() {
       ) : null}
 
       {/* Main Content Area */}
-      <main className={`flex-1 flex flex-col min-w-0 ${isAuthenticated && user ? 'pb-20 lg:pb-0 pt-0' : ''}`}>
+      <main className={`flex-grow flex flex-col min-w-0 ${isAuthenticated && user ? 'pb-20 lg:pb-0 pt-0' : ''}`}>
         
         {/* Unified Top Header for both Desktop and Mobile */}
         {isAuthenticated && user && (
-          <header className="sticky top-0 bg-white border-b border-stone-150 h-16 px-6 sm:px-6 flex items-center justify-between z-30 shadow-xs shrink-0 w-full">
+          <header className="sticky top-0 bg-white dark:bg-[#23201D] border-b border-stone-150 dark:border-stone-800 h-16 px-6 sm:px-6 flex items-center justify-between z-30 shadow-xs shrink-0 w-full transition-colors">
             {/* Left section: Tab label on Desktop, logo + closet selector on Mobile */}
             <div className="flex items-center gap-3">
               {/* Mobile view only logo */}
               <div className="lg:hidden flex items-center gap-2.5 cursor-pointer shrink-0" onClick={() => { navigateToTab('wardrobe'); setEditingItem(null); }}>
                 <img src={headerLogo} alt="Drobe" className="h-11 w-auto object-contain rounded-sm" />
                 <div className="flex flex-col text-left hidden min-[375px]:flex">
-                  <span className="font-semibold text-[#2A2521] text-lg tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
+                  <span className="font-semibold text-[#2A2521] dark:text-stone-100 text-lg tracking-wide leading-none" style={{ fontFamily: '"Prata", serif' }}>
                     Drobe
                   </span>
-                  <span className="text-[8.5px] font-bold text-stone-400 uppercase tracking-[0.2em] leading-none mt-1">
+                  <span className="text-[8.5px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-[0.2em] leading-none mt-1">
                     My Closet
                   </span>
                 </div>
               </div>
-
-
-
 
               
               {/* Mobile view only closet selector */}
@@ -446,7 +458,7 @@ function App() {
               </div>
 
               {/* Desktop view only tab label */}
-              <h2 className="hidden lg:block font-bold text-sm text-[#2A2521] uppercase tracking-wider font-serif">
+              <h2 className="hidden lg:block font-bold text-sm text-[#2A2521] dark:text-stone-100 uppercase tracking-wider font-serif">
                 {activeTab === 'wardrobe' ? 'Tủ đồ của bạn' :
                  activeTab === 'add_item' ? (editingItem ? 'Chỉnh sửa món đồ' : 'Thêm món đồ mới') :
                  activeTab === 'outfit_canvas' ? 'Studio ghép đồ' :
@@ -456,41 +468,38 @@ function App() {
               </h2>
             </div>
 
-            {/* Right section: Live Server Status dot, Notification bell, FaceBook Profile dropdown */}
+            {/* Right section: Live Server Status dot, Theme switcher, FaceBook Profile dropdown */}
             <div className="flex items-center gap-2.5 sm:gap-4">
               
               {/* Server Live Status Dot indicator */}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 border border-stone-100 rounded-full" title="Trạng thái máy chủ">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-stone-50 dark:bg-stone-900 border border-stone-100 dark:border-stone-800 rounded-full" title="Trạng thái máy chủ">
                 <span className={`w-1.5 h-1.5 rounded-full ${healthStatus ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'} inline-block`}></span>
-                <span className="hidden sm:inline-block text-[9px] font-bold text-stone-500 uppercase tracking-wider">Live</span>
+                <span className="hidden sm:inline-block text-[9px] font-bold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Live</span>
               </div>
 
               {/* Notification icon */}
-              <button className="relative p-1.5 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all" title="Thông báo">
+              <button className="relative p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#C4704F] dark:hover:text-[#E28A64] hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-all" title="Thông báo">
                 <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#C4704F] rounded-full"></span>
                 <Bell className="h-4.5 w-4.5" />
               </button>
 
-              {/* Light/Dark mode placeholder switcher - hidden on xs screens */}
+              {/* Light/Dark mode switcher */}
               <button 
-                onClick={() => {
-                  setIsDarkModeDemo(!isDarkModeDemo);
-                  alert(!isDarkModeDemo ? 'Chuyển sang chế độ tối (Demo - Chức năng đang phát triển)' : 'Chuyển sang chế độ sáng (Demo)');
-                }} 
-                className="hidden sm:flex p-1.5 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all" 
+                onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} 
+                className="p-1.5 text-stone-400 dark:text-stone-500 hover:text-[#C4704F] dark:hover:text-[#E28A64] hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-all" 
                 title="Chuyển chế độ sáng/tối"
               >
-                {isDarkModeDemo ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
+                {theme === 'dark' ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
               </button>
 
-              {/* Language switcher placeholder - hidden on xs screens */}
+              {/* Language switcher placeholder */}
               <button 
                 onClick={() => {
                   const nextLang = langDemo === 'VI' ? 'EN' : 'VI';
                   setLangDemo(nextLang);
                   alert(`Đã đổi ngôn ngữ sang: ${nextLang === 'VI' ? 'Tiếng Việt' : 'Tiếng Anh'} (Demo)`);
                 }}
-                className="hidden sm:flex items-center gap-1 px-2 py-1 text-stone-400 hover:text-[#C4704F] hover:bg-stone-50 rounded-xl transition-all border border-stone-200 text-[10px] font-bold"
+                className="hidden sm:flex items-center gap-1 px-2 py-1 text-stone-400 dark:text-stone-500 hover:text-[#C4704F] dark:hover:text-[#E28A64] hover:bg-stone-50 dark:hover:bg-stone-800 rounded-xl transition-all border border-stone-200 dark:border-stone-700 text-[10px] font-bold"
                 title="Đổi ngôn ngữ"
               >
                 <Globe className="h-3.5 w-3.5" />
@@ -503,54 +512,54 @@ function App() {
                 <button 
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-                  className="flex items-center gap-2 p-1 hover:bg-stone-50 rounded-full transition-all border border-transparent hover:border-stone-100"
+                  className="flex items-center gap-2 p-1 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-full transition-all border border-transparent hover:border-stone-100 dark:hover:border-stone-700"
                 >
                   <img 
                     src="https://www.facebook.com/images/assets_files/yis/r/45x45/default_profile_pic.png" 
                     alt="Facebook Avatar" 
-                    className="w-7 h-7 rounded-full border border-stone-200"
+                    className="w-7 h-7 rounded-full border border-stone-200 dark:border-stone-700"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "https://i.stack.imgur.com/34AD2.jpg";
                     }}
                   />
-                  <span className="hidden sm:inline-block text-xs font-bold text-stone-700 max-w-[100px] truncate">
+                  <span className="hidden sm:inline-block text-xs font-bold text-stone-700 dark:text-stone-200 max-w-[100px] truncate">
                     {user.name || 'Người dùng'}
                   </span>
-                  <ChevronDown className="h-3 w-3 text-stone-400 shrink-0" />
+                  <ChevronDown className="h-3 w-3 text-stone-400 dark:text-stone-500 shrink-0" />
                 </button>
 
                 {/* Dropdown Menu Popup */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white border border-stone-150 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
-                    <div className="px-4 py-2 border-b border-stone-100">
-                      <p className="text-xs font-bold text-stone-700">{user.name || 'Người dùng'}</p>
-                      <p className="text-[10px] text-stone-400 truncate mt-0.5">{user.email}</p>
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#23201D] border border-stone-150 dark:border-stone-800 rounded-2xl shadow-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left transition-colors">
+                    <div className="px-4 py-2 border-b border-stone-100 dark:border-stone-850">
+                      <p className="text-xs font-bold text-stone-700 dark:text-stone-200">{user.name || 'Người dùng'}</p>
+                      <p className="text-[10px] text-stone-400 dark:text-stone-500 truncate mt-0.5">{user.email}</p>
                     </div>
                     
                     <button 
                       onClick={() => { setIsUserInfoOpen(true); setIsDropdownOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors"
                     >
                       Thông tin người dùng
                     </button>
                     <button 
                       onClick={() => { setIsUserInfoOpen(true); setIsDropdownOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors"
                     >
                       Thông tin tài khoản
                     </button>
                     <button 
                       onClick={() => { setIsChangePasswordOpen(true); setIsDropdownOpen(false); }}
-                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-stone-600 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors"
                     >
                       Đổi mật khẩu
                     </button>
                     
-                    <div className="border-t border-stone-100 my-1"></div>
+                    <div className="border-t border-stone-100 dark:border-stone-850 my-1"></div>
                     
                     <button 
                       onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors"
+                      className="w-full text-left px-4 py-2 text-xs font-bold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                     >
                       Đăng xuất
                     </button>
@@ -610,27 +619,27 @@ function App() {
         {/* Modal: Thông tin người dùng & tài khoản */}
         {isAuthenticated && user && isUserInfoOpen && (
           <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-            <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200">
-              <h3 className="text-base font-bold text-[#2A2521] font-serif border-b border-stone-100 pb-2">Thông tin tài khoản</h3>
-              <div className="space-y-3.5 text-xs text-stone-600 pt-2">
+            <div className="bg-white dark:bg-[#23201D] rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 border border-stone-100 dark:border-stone-800 text-left relative animate-in zoom-in-95 duration-200 transition-colors">
+              <h3 className="text-base font-bold text-[#2A2521] dark:text-stone-100 font-serif border-b border-stone-100 dark:border-stone-850 pb-2">Thông tin tài khoản</h3>
+              <div className="space-y-3.5 text-xs text-stone-600 dark:text-stone-300 pt-2">
                 <div className="grid grid-cols-3 gap-2">
-                  <span className="font-bold text-stone-400">Họ và tên:</span>
-                  <span className="col-span-2 text-stone-800 font-semibold">{user.name || 'Chưa thiết lập'}</span>
+                  <span className="font-bold text-stone-400 dark:text-stone-500">Họ và tên:</span>
+                  <span className="col-span-2 text-stone-800 dark:text-stone-200 font-semibold">{user.name || 'Chưa thiết lập'}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <span className="font-bold text-stone-400">Email:</span>
-                  <span className="col-span-2 text-stone-800 font-semibold">{user.email}</span>
+                  <span className="font-bold text-stone-400 dark:text-stone-500">Email:</span>
+                  <span className="col-span-2 text-stone-800 dark:text-stone-200 font-semibold">{user.email}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <span className="font-bold text-stone-400">Mã User ID:</span>
-                  <span className="col-span-2 text-stone-800 font-mono font-semibold">{user.id}</span>
+                  <span className="font-bold text-stone-400 dark:text-stone-500">Mã User ID:</span>
+                  <span className="col-span-2 text-stone-800 dark:text-stone-200 font-mono font-semibold">{user.id}</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
-                  <span className="font-bold text-stone-400">Thời gian tạo:</span>
-                  <span className="col-span-2 text-stone-800 font-semibold">{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
+                  <span className="font-bold text-stone-400 dark:text-stone-500">Thời gian tạo:</span>
+                  <span className="col-span-2 text-stone-800 dark:text-stone-200 font-semibold">{new Date(user.createdAt).toLocaleDateString('vi-VN')}</span>
                 </div>
               </div>
-              <div className="flex justify-end pt-4 border-t border-stone-100">
+              <div className="flex justify-end pt-4 border-t border-stone-100 dark:border-stone-850">
                 <button
                   onClick={() => setIsUserInfoOpen(false)}
                   className="px-5 py-2 bg-[#C4704F] hover:bg-[#b05f3f] text-white rounded-xl text-xs font-bold transition-all shadow-sm"
@@ -647,41 +656,41 @@ function App() {
           <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
             <form
               onSubmit={handleChangePassword}
-              className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200"
+              className="bg-white dark:bg-[#23201D] rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 dark:border-stone-800 text-left relative animate-in zoom-in-95 duration-200 transition-colors"
             >
-              <h3 className="text-base font-bold text-[#2A2521] font-serif border-b border-stone-100 pb-2">Thay đổi mật khẩu</h3>
+              <h3 className="text-base font-bold text-[#2A2521] dark:text-stone-100 font-serif border-b border-stone-100 dark:border-stone-850 pb-2">Thay đổi mật khẩu</h3>
               
-              {pwdError && <div className="bg-rose-50 text-rose-700 p-2 rounded-xl text-xs text-center border border-rose-100">{pwdError}</div>}
-              {pwdSuccess && <div className="bg-emerald-50 text-emerald-700 p-2 rounded-xl text-xs text-center border border-emerald-100">{pwdSuccess}</div>}
+              {pwdError && <div className="bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 p-2 rounded-xl text-xs text-center border border-rose-100 dark:border-rose-900/50">{pwdError}</div>}
+              {pwdSuccess && <div className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 p-2 rounded-xl text-xs text-center border border-emerald-100 dark:border-emerald-900/50">{pwdSuccess}</div>}
 
               <div className="space-y-3 pt-2">
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Mật khẩu hiện tại</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Mật khẩu hiện tại</label>
                   <input
                     type="password"
                     required
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">Mật khẩu mới</label>
+                  <label className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Mật khẩu mới</label>
                   <input
                     type="password"
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                    className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-stone-100">
+              <div className="flex justify-end gap-2 pt-4 border-t border-stone-100 dark:border-stone-850">
                 <button
                   type="button"
                   onClick={() => { setIsChangePasswordOpen(false); setPwdError(''); setPwdSuccess(''); }}
-                  className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-500 hover:bg-stone-50 transition-colors"
+                  className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
                 >
                   Hủy
                 </button>

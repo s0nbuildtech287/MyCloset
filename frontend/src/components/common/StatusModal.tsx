@@ -22,41 +22,41 @@ export default function StatusModal({
   const config = {
     success: {
       icon: <CheckCircle2 className="h-6 w-6 text-emerald-500" />,
-      titleColor: 'text-[#2A2521]',
+      titleColor: 'text-[#2A2521] dark:text-stone-100',
       btnBg: 'bg-[#C4704F] hover:bg-[#b05f3f]',
     },
     error: {
       icon: <XCircle className="h-6 w-6 text-rose-500" />,
-      titleColor: 'text-rose-700',
+      titleColor: 'text-rose-700 dark:text-rose-455',
       btnBg: 'bg-rose-600 hover:bg-rose-700',
     },
     info: {
       icon: <Info className="h-6 w-6 text-blue-500" />,
-      titleColor: 'text-[#2A2521]',
-      btnBg: 'bg-stone-700 hover:bg-stone-800',
+      titleColor: 'text-[#2A2521] dark:text-stone-100',
+      btnBg: 'bg-stone-700 hover:bg-stone-850',
     },
   }[type];
 
   return (
     <div className="fixed inset-0 bg-stone-900/60 backdrop-blur-xs flex items-center justify-center p-4 z-55 animate-in fade-in duration-200">
-      <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 text-left relative animate-in zoom-in-95 duration-200">
+      <div className="bg-white dark:bg-[#23201D] rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-100 dark:border-stone-800 text-left relative animate-in zoom-in-95 duration-200 transition-colors">
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 rounded-full text-stone-400 hover:text-stone-600 hover:bg-stone-50 transition-colors"
+          className="absolute top-4 right-4 p-1 rounded-full text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="flex items-center gap-3 border-b border-stone-100 pb-3">
+        <div className="flex items-center gap-3 border-b border-stone-100 dark:border-stone-850 pb-3">
           {config.icon}
           <h3 className={`text-base font-bold font-serif ${config.titleColor}`}>{title}</h3>
         </div>
         
-        <div className="text-xs text-stone-600 leading-relaxed pt-1 whitespace-pre-line">
+        <div className="text-xs text-stone-600 dark:text-stone-300 leading-relaxed pt-1 whitespace-pre-line">
           {message}
         </div>
 
-        <div className="flex justify-end pt-4 border-t border-stone-100">
+        <div className="flex justify-end pt-4 border-t border-stone-100 dark:border-stone-850">
           <button
             type="button"
             onClick={onClose}

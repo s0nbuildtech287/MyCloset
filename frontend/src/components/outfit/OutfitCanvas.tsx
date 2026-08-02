@@ -373,14 +373,16 @@ export default function OutfitCanvas() {
   });
 
   return (
-    <div className="w-full space-y-0 text-left">
+    <div className="w-full space-y-0 text-left transition-colors">
 
       {/* Mobile Tab Toggle (only visible on < lg) */}
-      <div className="lg:hidden flex bg-stone-100 p-1 rounded-2xl gap-1 mb-4">
+      <div className="lg:hidden flex bg-stone-100 dark:bg-stone-800 p-1 rounded-2xl gap-1 mb-4">
         <button
           onClick={() => setMobilePaneView('canvas')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-            mobilePaneView === 'canvas' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+            mobilePaneView === 'canvas' 
+              ? 'bg-white dark:bg-stone-900 text-[#C4704F] dark:text-[#E28A64] shadow-sm' 
+              : 'text-stone-500 dark:text-stone-400'
           }`}
         >
           🎨 Studio ghép đồ
@@ -388,7 +390,9 @@ export default function OutfitCanvas() {
         <button
           onClick={() => setMobilePaneView('selector')}
           className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
-            mobilePaneView === 'selector' ? 'bg-white text-[#C4704F] shadow-sm' : 'text-stone-500'
+            mobilePaneView === 'selector' 
+              ? 'bg-white dark:bg-stone-900 text-[#C4704F] dark:text-[#E28A64] shadow-sm' 
+              : 'text-stone-500 dark:text-stone-400'
           }`}
         >
           👗 Chọn đồ ({wardrobeItems.length})
@@ -398,10 +402,10 @@ export default function OutfitCanvas() {
       <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-8 items-start">
       
       {/* 1. Wardrobe Selector Sidebar (Left panel - grid 4 span for wider item cards) */}
-      <div className={`lg:col-span-4 bg-white rounded-3xl border border-stone-100 p-4 sm:p-6 shadow-sm flex flex-col h-[420px] sm:h-[500px] lg:h-[580px] lg:order-1 order-2 w-full ${
+      <div className={`lg:col-span-4 bg-white dark:bg-[#23201D] rounded-3xl border border-stone-100 dark:border-stone-800 p-4 sm:p-6 shadow-sm flex flex-col h-[420px] sm:h-[500px] lg:h-[580px] lg:order-1 order-2 w-full transition-colors ${
         mobilePaneView === 'selector' ? 'block' : 'hidden lg:flex'
       }`}>
-        <h3 className="font-bold text-sm text-[#2A2521] font-serif border-b border-stone-100 pb-2 mb-4">
+        <h3 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 font-serif border-b border-stone-100 dark:border-stone-850 pb-2 mb-4">
           Bộ chọn sản phẩm phối đồ
         </h3>
         
@@ -414,7 +418,7 @@ export default function OutfitCanvas() {
               className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all ${
                 activeCategory === cat.value
                   ? 'bg-[#C4704F] text-white shadow-xs'
-                  : 'bg-stone-50 text-stone-600 hover:bg-stone-100'
+                  : 'bg-stone-50 dark:bg-stone-900 text-stone-600 dark:text-stone-400 hover:bg-stone-100 dark:hover:bg-stone-800'
               }`}
             >
               {cat.label}
@@ -429,14 +433,14 @@ export default function OutfitCanvas() {
             placeholder="Tìm kiếm đồ để phối..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-3 py-2 border border-stone-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] bg-[#FAF6F1]/30"
+            className="w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
           />
         </div>
 
         {/* Closet grid containing cards (responsive 3 to 4 columns to utilize sidebar width) */}
         <div className="flex-1 overflow-y-auto grid grid-cols-3 xl:grid-cols-4 gap-2 pr-1">
           {filteredWardrobe.length === 0 ? (
-            <div className="col-span-3 xl:col-span-4 text-center py-12 text-stone-400 text-xs">
+            <div className="col-span-3 xl:col-span-4 text-center py-12 text-stone-400 dark:text-stone-550 text-xs">
               Không tìm thấy sản phẩm nào phù hợp.
             </div>
           ) : (
@@ -444,7 +448,7 @@ export default function OutfitCanvas() {
               <div
                 key={wItem.id}
                 onClick={() => handleAddItemToCanvas(wItem)}
-                className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-2xl p-2 flex items-center justify-center cursor-pointer hover:border-[#C4704F] hover:bg-[#FAF6F1] transition-all group relative shadow-xs"
+                className="aspect-square bg-[#FAF6F1]/50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 rounded-2xl p-2 flex items-center justify-center cursor-pointer hover:border-[#C4704F] hover:bg-[#FAF6F1] dark:hover:bg-stone-800 transition-all group relative shadow-xs"
                 title="Bấm để thêm vào Studio"
               >
                 <img
@@ -466,13 +470,13 @@ export default function OutfitCanvas() {
         mobilePaneView === 'canvas' ? 'block' : 'hidden lg:flex'
       }`}>
         {/* Workspace Toolbar Header (Stretches 100% width flush) */}
-        <div className="w-full flex justify-between items-center bg-white px-4 py-3 border border-stone-100 shadow-sm rounded-2xl">
+        <div className="w-full flex justify-between items-center bg-white dark:bg-[#23201D] px-4 py-3 border border-stone-100 dark:border-stone-800 shadow-sm rounded-2xl transition-colors">
           {/* Layer manipulation actions */}
           <div className="flex gap-1.5">
             <button
               disabled={!selectedId}
               onClick={bringToFront}
-              className="p-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
+              className="p-2 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-40 transition-colors"
               title="Đưa lên trên cùng (Z-Index)"
             >
               <ArrowUp className="h-4 w-4" />
@@ -480,7 +484,7 @@ export default function OutfitCanvas() {
             <button
               disabled={!selectedId}
               onClick={sendToBack}
-              className="p-2 border border-stone-200 rounded-xl text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
+              className="p-2 border border-stone-200 dark:border-stone-700 rounded-xl text-stone-600 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-40 transition-colors"
               title="Đưa xuống dưới cùng (Z-Index)"
             >
               <ArrowDown className="h-4 w-4" />
@@ -488,7 +492,7 @@ export default function OutfitCanvas() {
             <button
               disabled={!selectedId}
               onClick={deleteSelected}
-              className="p-2 border border-stone-200 rounded-xl text-red-600 hover:bg-red-50 disabled:opacity-40 transition-colors border-l-2 ml-1"
+              className="p-2 border border-stone-200 dark:border-stone-750 rounded-xl text-red-600 dark:text-red-450 hover:bg-red-50 dark:hover:bg-red-950/20 disabled:opacity-40 transition-colors border-l-2 dark:border-l-stone-700 ml-1"
               title="Xóa món đồ đang chọn"
             >
               <Trash2 className="h-4 w-4" />
@@ -522,7 +526,7 @@ export default function OutfitCanvas() {
             <button
               onClick={clearCanvas}
               disabled={canvasItems.length === 0}
-              className="flex items-center gap-1.5 px-3 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 disabled:opacity-40 transition-colors"
+              className="flex items-center gap-1.5 px-3 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-400 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 disabled:opacity-40 transition-colors"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Làm mới
@@ -539,10 +543,10 @@ export default function OutfitCanvas() {
         </div>
 
         {/* Konva Stage Frame with beautiful dotted background (Stretches 100% width flush) */}
-        <div className="w-full bg-white p-3 rounded-[32px] border border-stone-200 shadow-lg relative overflow-hidden" style={{ height: stageSize.height + 24 }}>
+        <div className="w-full bg-white dark:bg-[#23201D] p-3 rounded-[32px] border border-stone-250 dark:border-stone-850 shadow-lg relative overflow-hidden transition-colors" style={{ height: stageSize.height + 24 }}>
           {/* Dotted Figma-like designer grid layout */}
           <div 
-            className="absolute inset-3 bg-[#FAF9F6] rounded-2xl -z-10 pointer-events-none" 
+            className="absolute inset-3 bg-[#FAF9F6] dark:bg-stone-900 rounded-2xl -z-10 pointer-events-none transition-colors" 
             style={{ 
               backgroundImage: 'radial-gradient(#e5e7eb 1.5px, transparent 1.5px)', 
               backgroundSize: '16px 16px' 
@@ -579,9 +583,9 @@ export default function OutfitCanvas() {
 
           {canvasItems.length === 0 && (
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
-              <Layers className="h-10 w-10 text-stone-300 mb-2" />
-              <p className="text-sm font-bold text-stone-600 font-serif">Studio ghép đồ trống</p>
-              <p className="text-[11px] text-stone-400 mt-1">Bấm các bức ảnh ở cột trái để thêm đồ vào canvas</p>
+              <Layers className="h-10 w-10 text-stone-300 dark:text-stone-600 mb-2" />
+              <p className="text-sm font-bold text-stone-600 dark:text-stone-300 font-serif">Studio ghép đồ trống</p>
+              <p className="text-[11px] text-stone-400 dark:text-stone-500 mt-1">Bấm các bức ảnh ở cột trái để thêm đồ vào canvas</p>
             </div>
           )}
         </div>
@@ -590,16 +594,16 @@ export default function OutfitCanvas() {
       {/* 3. Save Outfit Modal */}
       {isSaveModalOpen && (
         <div className="fixed inset-0 bg-stone-900/60 z-50 flex items-center justify-center p-4">
-          <div className="bg-white max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4 border border-stone-100 animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#23201D] max-w-sm w-full p-6 rounded-3xl shadow-2xl space-y-4 border border-stone-100 dark:border-stone-800 animate-in fade-in zoom-in-95 duration-200 transition-colors">
             <div>
-              <h3 className="text-base font-bold text-[#2A2521] font-serif">Lưu bộ trang phục</h3>
-              <p className="text-xs text-stone-500 mt-0.5">
+              <h3 className="text-base font-bold text-[#2A2521] dark:text-stone-100 font-serif">Lưu bộ trang phục</h3>
+              <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
                 Đặt tên cho bộ trang phục phối đồ này để lưu lại trong kho lưu trữ của bạn.
               </p>
             </div>
 
             <div>
-              <label htmlFor="outfitName" className="block text-[10px] font-bold text-stone-400 uppercase tracking-wider">
+              <label htmlFor="outfitName" className="block text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">
                 Tên bộ phối
               </label>
               <input
@@ -609,7 +613,7 @@ export default function OutfitCanvas() {
                 onChange={(e) => setOutfitName(e.target.value)}
                 placeholder="Ví dụ: Outfit đi chơi hè 2026"
                 required
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
               />
             </div>
 
@@ -618,7 +622,7 @@ export default function OutfitCanvas() {
                 type="button"
                 disabled={saving}
                 onClick={() => setIsSaveModalOpen(false)}
-                className="px-4 py-2 border border-stone-200 rounded-xl text-xs font-bold text-stone-600 hover:bg-stone-50 transition-colors"
+                className="px-4 py-2 border border-stone-200 dark:border-stone-700 rounded-xl text-xs font-bold text-stone-600 dark:text-stone-400 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
               >
                 Hủy bỏ
               </button>

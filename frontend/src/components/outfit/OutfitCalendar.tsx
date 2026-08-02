@@ -124,7 +124,7 @@ export default function OutfitCalendar() {
   // Render day cells
   const dayCells = [];
   for (let i = 0; i < startDay; i++) {
-    dayCells.push(<div key={`empty-${i}`} className="aspect-square bg-stone-50/20 border border-stone-100/40 rounded-xl" />);
+    dayCells.push(<div key={`empty-${i}`} className="aspect-square bg-stone-50/10 dark:bg-stone-900/10 border border-stone-100/40 dark:border-stone-850/40 rounded-xl" />);
   }
   for (let day = 1; day <= daysInMonth; day++) {
     const entry = getEntryForDay(day);
@@ -135,19 +135,19 @@ export default function OutfitCalendar() {
       <button
         key={`day-${day}`}
         onClick={() => handleDayClick(day)}
-        className={`aspect-square border border-stone-100 rounded-xl bg-white flex flex-col justify-between items-stretch hover:border-[#C4704F] transition-all relative overflow-hidden group shadow-sm ${
+        className={`aspect-square border border-stone-100 dark:border-stone-800 rounded-xl bg-white dark:bg-stone-900 flex flex-col justify-between items-stretch hover:border-[#C4704F] transition-all relative overflow-hidden group shadow-sm ${
           isToday ? 'ring-1 ring-[#C4704F]' : ''
         }`}
       >
         {/* Date badge — always floats in top-left corner */}
         <span className={`absolute top-1 left-1 text-[10px] font-bold w-5 h-5 flex items-center justify-center rounded-full leading-none z-20 ${
-          isToday ? 'bg-[#C4704F] text-white shadow-xs' : 'text-stone-700 bg-white/90 backdrop-blur-xs shadow-xs border border-stone-100'
+          isToday ? 'bg-[#C4704F] text-white shadow-xs' : 'text-stone-700 dark:text-stone-300 bg-white/90 dark:bg-stone-950/90 backdrop-blur-xs shadow-xs border border-stone-100 dark:border-stone-800'
         }`}>
           {day}
         </span>
 
         {entry ? (
-          <div className="absolute inset-0 w-full h-full z-10 bg-[#FAF9F6]">
+          <div className="absolute inset-0 w-full h-full z-10 bg-[#FAF9F6] dark:bg-stone-950">
             <img
               src={entry.outfit.thumbnailUrl}
               alt={entry.outfit.name}
@@ -156,7 +156,7 @@ export default function OutfitCalendar() {
           </div>
         ) : (
           <div className="flex-1 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity relative z-10">
-            <span className="p-1 rounded-full bg-[#C4704F]/10 text-[#C4704F]">
+            <span className="p-1 rounded-full bg-[#C4704F]/10 dark:bg-[#C4704F]/20 text-[#C4704F] dark:text-[#E28A64]">
               <Plus className="h-3 w-3" />
             </span>
           </div>
@@ -169,12 +169,12 @@ export default function OutfitCalendar() {
   const selectedEntry = selectedDate ? diaryEntries.find(e => new Date(e.wearDate).toISOString().split('T')[0] === selectedDate) : null;
 
   return (
-    <div className="bg-white rounded-3xl border border-stone-100 p-6 shadow-sm space-y-6 max-w-4xl mx-auto">
+    <div className="bg-white dark:bg-[#23201D] rounded-3xl border border-stone-100 dark:border-stone-800 p-6 shadow-sm space-y-6 max-w-4xl mx-auto transition-colors">
       {/* Calendar Header controls */}
-      <div className="flex justify-between items-center pb-4 border-b border-stone-100">
+      <div className="flex justify-between items-center pb-4 border-b border-stone-100 dark:border-stone-850">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-5 w-5 text-[#C4704F]" />
-          <h3 className="text-md font-bold text-[#2A2521] font-serif">
+          <h3 className="text-md font-bold text-[#2A2521] dark:text-stone-100 font-serif">
             {monthNames[month]} năm {year}
           </h3>
         </div>
@@ -182,13 +182,13 @@ export default function OutfitCalendar() {
         <div className="flex gap-2">
           <button
             onClick={handlePrevMonth}
-            className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 text-stone-600 transition-colors"
+            className="p-1.5 border border-stone-200 dark:border-stone-700 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             onClick={handleNextMonth}
-            className="p-1.5 border border-stone-200 rounded-lg hover:bg-stone-50 text-stone-600 transition-colors"
+            className="p-1.5 border border-stone-200 dark:border-stone-700 rounded-lg hover:bg-stone-50 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-400 transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -196,7 +196,7 @@ export default function OutfitCalendar() {
       </div>
 
       {/* Weekdays Labels */}
-      <div className="grid grid-cols-7 gap-2.5 text-center text-[10px] font-bold text-stone-400 tracking-wider">
+      <div className="grid grid-cols-7 gap-2.5 text-center text-[10px] font-bold text-stone-400 dark:text-stone-555 tracking-wider">
         {weekdays.map((d) => (
           <div key={d} className="py-1 uppercase">
             {d}
@@ -218,12 +218,12 @@ export default function OutfitCalendar() {
       {/* Scheduling / Selection Modal */}
       {isModalOpen && selectedDate && (
         <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-xl space-y-6 relative overflow-hidden animate-in zoom-in-95 duration-200">
+          <div className="bg-white dark:bg-[#23201D] rounded-3xl max-w-md w-full p-6 shadow-xl space-y-6 relative overflow-hidden border border-stone-100 dark:border-stone-800 animate-in zoom-in-95 duration-200 transition-colors">
             {/* Modal Header */}
-            <div className="flex justify-between items-center pb-3 border-b border-stone-100">
+            <div className="flex justify-between items-center pb-3 border-b border-stone-100 dark:border-stone-850">
               <div>
-                <h4 className="font-bold text-md text-[#2A2521] font-serif">Lịch trình ngày</h4>
-                <p className="text-[10px] text-stone-400 font-semibold uppercase tracking-wider mt-0.5">
+                <h4 className="font-bold text-md text-[#2A2521] dark:text-stone-100 font-serif">Lịch trình ngày</h4>
+                <p className="text-[10px] text-stone-400 dark:text-stone-500 font-semibold uppercase tracking-wider mt-0.5">
                   {new Date(selectedDate).toLocaleDateString('vi-VN', {
                     weekday: 'long',
                     year: 'numeric',
@@ -234,7 +234,7 @@ export default function OutfitCalendar() {
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 hover:bg-stone-50 rounded-lg text-stone-500 transition-colors"
+                className="p-1.5 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-lg text-stone-500 dark:text-stone-400 transition-colors"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -244,7 +244,7 @@ export default function OutfitCalendar() {
             {selectedEntry ? (
               // Case 1: Already has outfit scheduled
               <div className="space-y-4 text-center">
-                <div className="aspect-square max-w-[200px] mx-auto bg-[#FAF6F1]/50 border border-stone-100 rounded-2xl p-4 flex items-center justify-center">
+                <div className="aspect-square max-w-[200px] mx-auto bg-[#FAF6F1]/50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 rounded-2xl p-4 flex items-center justify-center">
                   <img
                     src={selectedEntry.outfit.thumbnailUrl}
                     alt={selectedEntry.outfit.name}
@@ -252,16 +252,16 @@ export default function OutfitCalendar() {
                   />
                 </div>
                 <div>
-                  <h5 className="font-bold text-sm text-[#2A2521] font-serif">
+                  <h5 className="font-bold text-sm text-[#2A2521] dark:text-stone-100 font-serif">
                     {selectedEntry.outfit.name}
                   </h5>
-                  <p className="text-[10px] text-stone-400 mt-0.5">Đã lên lịch mặc cho ngày này</p>
+                  <p className="text-[10px] text-stone-400 dark:text-stone-500 mt-0.5">Đã lên lịch mặc cho ngày này</p>
                 </div>
 
                 <div className="pt-2 flex flex-col gap-2">
                   <button
                     onClick={() => handleUnscheduleOutfit(selectedEntry.id)}
-                    className="flex items-center justify-center gap-1.5 w-full py-2 border border-red-200 text-red-600 rounded-xl text-xs font-bold hover:bg-red-50 transition-colors"
+                    className="flex items-center justify-center gap-1.5 w-full py-2 border border-red-250 dark:border-red-950/40 text-red-650 dark:text-red-400 rounded-xl text-xs font-bold hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Hủy lịch mặc đồ
@@ -271,13 +271,13 @@ export default function OutfitCalendar() {
             ) : (
               // Case 2: Schedule new outfit selection
               <div className="space-y-4">
-                <div className="flex gap-1.5 items-center text-xs font-semibold text-stone-600">
+                <div className="flex gap-1.5 items-center text-xs font-semibold text-stone-600 dark:text-stone-300">
                   <Sparkles className="h-3.5 w-3.5 text-[#C4704F]" />
                   Chọn một bộ phối để lên lịch:
                 </div>
 
                 {outfits.length === 0 ? (
-                  <div className="text-center py-10 border border-dashed border-stone-200 rounded-xl text-stone-400 text-xs">
+                  <div className="text-center py-10 border border-dashed border-stone-200 dark:border-stone-800 rounded-xl text-stone-400 dark:text-stone-500 text-xs">
                     Tủ đồ chưa lưu bộ phối nào.
                     <br />
                     Hãy qua mục Ghép Đồ để sáng tạo trước nhé!
@@ -288,16 +288,16 @@ export default function OutfitCalendar() {
                       <button
                         key={outfit.id}
                         onClick={() => handleScheduleOutfit(outfit.id)}
-                        className="p-2 border border-stone-100 rounded-xl bg-stone-50/30 hover:border-[#C4704F] hover:bg-white transition-all text-center flex flex-col items-center gap-1.5"
+                        className="p-2 border border-stone-100 dark:border-stone-800 rounded-xl bg-stone-50/30 dark:bg-stone-900/50 hover:border-[#C4704F] hover:bg-white dark:hover:bg-stone-900 transition-all text-center flex flex-col items-center gap-1.5"
                       >
-                        <div className="aspect-square w-full bg-[#FAF6F1]/50 border border-stone-100 rounded-lg p-1 flex items-center justify-center overflow-hidden">
+                        <div className="aspect-square w-full bg-[#FAF6F1]/50 dark:bg-stone-950/50 border border-stone-100 dark:border-stone-850 rounded-lg p-1 flex items-center justify-center overflow-hidden">
                           <img
                             src={outfit.thumbnailUrl}
                             alt={outfit.name}
                             className="object-contain max-h-full max-w-full"
                           />
                         </div>
-                        <span className="text-[9px] font-bold text-stone-600 line-clamp-1 block w-full leading-none">
+                        <span className="text-[9px] font-bold text-stone-600 dark:text-stone-300 line-clamp-1 block w-full leading-none">
                           {outfit.name}
                         </span>
                       </button>

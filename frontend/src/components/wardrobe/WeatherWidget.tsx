@@ -85,12 +85,12 @@ export default function WeatherWidget() {
 
   if (loading) {
     return (
-      <div className="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm animate-pulse space-y-4">
+      <div className="bg-white dark:bg-[#23201D] p-6 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm animate-pulse space-y-4 transition-colors">
         <div className="flex gap-4 items-center">
-          <div className="w-12 h-12 bg-stone-100 rounded-xl" />
+          <div className="w-12 h-12 bg-stone-100 dark:bg-stone-800 rounded-xl" />
           <div className="space-y-2 flex-1">
-            <div className="h-4 bg-stone-100 rounded w-1/4" />
-            <div className="h-3 bg-stone-100 rounded w-3/4" />
+            <div className="h-4 bg-stone-100 dark:bg-stone-800 rounded w-1/4" />
+            <div className="h-3 bg-stone-100 dark:bg-stone-800 rounded w-3/4" />
           </div>
         </div>
       </div>
@@ -102,24 +102,24 @@ export default function WeatherWidget() {
   const { weather, recommendation, suggestedItems, suggestedOutfits } = data;
 
   return (
-    <div className="bg-white rounded-2xl border border-stone-100 shadow-sm overflow-hidden flex flex-col">
+    <div className="bg-white dark:bg-[#23201D] rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm overflow-hidden flex flex-col transition-colors">
       {/* 1. Weather Info Banner */}
-      <div className="p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between bg-stone-50/50 border-b border-stone-100">
+      <div className="p-5 flex flex-col sm:flex-row gap-5 items-start sm:items-center justify-between bg-stone-50/50 dark:bg-[#1E1B18]/50 border-b border-stone-100 dark:border-stone-800/80">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 bg-white rounded-2xl border border-stone-100 shadow-sm flex items-center justify-center shrink-0">
+          <div className="w-14 h-14 bg-white dark:bg-stone-900 rounded-2xl border border-stone-100 dark:border-stone-800 shadow-sm flex items-center justify-center shrink-0">
             {getWeatherIcon(weather.weatherCode)}
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h4 className="font-bold text-md text-[#2A2521] font-serif">Thời tiết hiện tại</h4>
+              <h4 className="font-bold text-md text-[#2A2521] dark:text-stone-100 font-serif">Thời tiết hiện tại</h4>
               {permissionDenied && (
-                <span className="flex items-center gap-0.5 text-[8px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-1 py-0.2 rounded" title="GPS bị chặn, hiển thị thời tiết mặc định">
+                <span className="flex items-center gap-0.5 text-[8px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50 px-1 py-0.2 rounded" title="GPS bị chặn, hiển thị thời tiết mặc định">
                   <AlertCircle className="h-2.5 w-2.5" /> Mặc định
                 </span>
               )}
             </div>
             
-            <p className="text-[10px] font-semibold text-stone-500 uppercase tracking-wider mt-0.5 flex items-center gap-1">
+            <p className="text-[10px] font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mt-0.5 flex items-center gap-1">
               <Thermometer className="h-3 w-3 text-[#C4704F]" />
               {weather.temperature}°C &bull; {weather.condition}
             </p>
@@ -127,11 +127,11 @@ export default function WeatherWidget() {
         </div>
 
         {/* Suggestion Text */}
-        <div className="flex-1 text-left bg-white p-3 rounded-xl border border-stone-100 shadow-inner flex gap-2 items-start">
+        <div className="flex-1 text-left bg-white dark:bg-stone-900 p-3 rounded-xl border border-stone-100 dark:border-stone-800 shadow-inner flex gap-2 items-start">
           <span className="p-1 rounded bg-[#C4704F]/10 text-[#C4704F] shrink-0 mt-0.5">
             <Sparkles className="h-3.5 w-3.5" />
           </span>
-          <p className="text-xs text-stone-600 font-medium leading-relaxed">
+          <p className="text-xs text-stone-600 dark:text-stone-300 font-medium leading-relaxed">
             {recommendation}
           </p>
         </div>
@@ -143,18 +143,18 @@ export default function WeatherWidget() {
           {/* Suggested Outfits first */}
           {suggestedOutfits.length > 0 && (
             <div className="space-y-2">
-              <h5 className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Gợi ý bộ phối hợp thời tiết:</h5>
+              <h5 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Gợi ý bộ phối hợp thời tiết:</h5>
               <div className="flex gap-4 overflow-x-auto pb-2 pr-1 select-none" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {suggestedOutfits.map((outfit) => (
                   <div key={outfit.id} className="w-[120px] shrink-0 space-y-1 group">
-                    <div className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-xl p-1 overflow-hidden flex items-center justify-center relative">
+                    <div className="aspect-square bg-[#FAF6F1]/50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 rounded-xl p-1 overflow-hidden flex items-center justify-center relative">
                       <img
                         src={outfit.thumbnailUrl}
                         alt={outfit.name}
                         className="object-contain max-h-full max-w-full group-hover:scale-102 transition-transform duration-300"
                       />
                     </div>
-                    <p className="text-[10px] font-semibold text-stone-600 line-clamp-1 text-center font-serif leading-tight">
+                    <p className="text-[10px] font-semibold text-stone-600 dark:text-stone-300 line-clamp-1 text-center font-serif leading-tight">
                       {outfit.name}
                     </p>
                   </div>
@@ -166,18 +166,18 @@ export default function WeatherWidget() {
           {/* Suggested Individual items */}
           {suggestedItems.length > 0 && (
             <div className="space-y-2">
-              <h5 className="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Quần áo khuyên dùng trong ngày:</h5>
+              <h5 className="text-[10px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider">Quần áo khuyên dùng trong ngày:</h5>
               <div className="flex gap-4 overflow-x-auto pb-2 pr-1 select-none" style={{ WebkitOverflowScrolling: 'touch' }}>
                 {suggestedItems.map((item) => (
                   <div key={item.id} className="w-[80px] shrink-0 space-y-1 text-center group">
-                    <div className="aspect-square bg-[#FAF6F1]/50 border border-stone-100 rounded-xl p-1 overflow-hidden flex items-center justify-center">
+                    <div className="aspect-square bg-[#FAF6F1]/50 dark:bg-stone-900/50 border border-stone-100 dark:border-stone-800 rounded-xl p-1 overflow-hidden flex items-center justify-center">
                       <img
                         src={item.processedImageUrl || item.originalImageUrl}
                         alt={item.name}
                         className="object-contain max-h-full max-w-full p-0.5 group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                    <p className="text-[9px] font-bold text-stone-500 line-clamp-1 leading-tight">
+                    <p className="text-[9px] font-bold text-stone-500 dark:text-stone-400 line-clamp-1 leading-tight">
                       {item.name}
                     </p>
                   </div>
@@ -187,7 +187,7 @@ export default function WeatherWidget() {
           )}
         </div>
       ) : (
-        <div className="p-8 text-center text-xs text-stone-400">
+        <div className="p-8 text-center text-xs text-stone-400 dark:text-stone-500">
           Không tìm thấy trang phục phù hợp cho thời tiết này. Hãy thêm thêm quần áo và phối đồ nhé!
         </div>
       )}

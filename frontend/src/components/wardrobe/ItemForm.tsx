@@ -264,28 +264,28 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
     <div className="w-full flex flex-col lg:flex-row gap-6 lg:gap-8 items-start text-left">
       
       {/* Left Side: Form Card */}
-      <div className="w-full lg:w-3/5 bg-white rounded-2xl sm:rounded-3xl border border-stone-100 shadow-sm p-4 sm:p-6 space-y-6">
+      <div className="w-full lg:w-3/5 bg-white dark:bg-[#23201D] rounded-2xl sm:rounded-3xl border border-stone-100 dark:border-stone-800 shadow-sm p-4 sm:p-6 space-y-6 transition-colors">
         {/* Header */}
-        <div className="flex items-center gap-3 pb-4 border-b border-stone-100">
+        <div className="flex items-center gap-3 pb-4 border-b border-stone-100 dark:border-stone-850">
           <button
             onClick={onCancel}
             type="button"
-            className="p-1.5 hover:bg-stone-50 rounded-lg text-stone-500 hover:text-stone-700 transition-colors"
+            className="p-1.5 hover:bg-stone-50 dark:hover:bg-stone-800 rounded-lg text-stone-500 hover:text-stone-700 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
           >
             <ArrowLeft className="h-5 w-5" />
           </button>
           <div>
-            <h2 className="text-xl font-bold text-[#2A2521] font-serif">
+            <h2 className="text-xl font-bold text-[#2A2521] dark:text-stone-100 font-serif">
               {isEditMode ? 'Chỉnh sửa món đồ' : 'Thêm đồ mới vào tủ'}
             </h2>
-            <p className="text-xs text-stone-500">
+            <p className="text-xs text-stone-500 dark:text-stone-400">
               {isEditMode ? 'Cập nhật lại các thông tin của món đồ thời trang' : 'Tạo mới tủ đồ của bạn với hình ảnh trực quan'}
             </p>
           </div>
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-100 text-red-700 p-3 rounded-lg text-sm text-center">
+          <div className="bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50 text-red-700 dark:text-red-400 p-3 rounded-lg text-sm text-center">
             {error}
           </div>
         )}
@@ -299,12 +299,14 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
             </label>
 
             {!isEditMode && (
-              <div className="flex w-full bg-stone-100 p-1 rounded-xl gap-1 shrink-0">
+              <div className="flex w-full bg-stone-100 dark:bg-stone-800 p-1 rounded-xl gap-1 shrink-0">
                 <button
                   type="button"
                   onClick={() => { setUploadMethod('file'); handleClearImage(); }}
                   className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                    uploadMethod === 'file' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                    uploadMethod === 'file' 
+                      ? 'bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 shadow-sm' 
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                   }`}
                 >
                   Tải tệp ảnh
@@ -313,7 +315,9 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                   type="button"
                   onClick={() => { setUploadMethod('url'); handleClearImage(); }}
                   className={`flex-1 py-1.5 rounded-lg text-[11px] font-bold transition-all ${
-                    uploadMethod === 'url' ? 'bg-white text-stone-800 shadow-sm' : 'text-stone-500 hover:text-stone-700'
+                    uploadMethod === 'url' 
+                      ? 'bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 shadow-sm' 
+                      : 'text-stone-500 dark:text-stone-400 hover:text-stone-700 dark:hover:text-stone-200'
                   }`}
                 >
                   Dán link ảnh
@@ -323,7 +327,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
 
             {imagePreview ? (
               <div className="w-full space-y-3">
-                <div className="relative aspect-square w-full bg-[#FAF6F1]/50 border border-stone-200 rounded-xl overflow-hidden flex items-center justify-center group animate-in fade-in duration-200">
+                <div className="relative aspect-square w-full bg-[#FAF6F1]/50 dark:bg-stone-900/50 border border-stone-200 dark:border-stone-700 rounded-xl overflow-hidden flex items-center justify-center group animate-in fade-in duration-200">
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -363,7 +367,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                 )}
               </div>
             ) : uploadMethod === 'file' ? (
-              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 hover:bg-[#FAF6F1]/20 transition-colors cursor-pointer w-full">
+              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 dark:bg-stone-900/10 hover:bg-[#FAF6F1]/20 dark:hover:bg-stone-900/20 transition-colors cursor-pointer w-full">
                 <input
                   type="file"
                   accept="image/*"
@@ -372,22 +376,22 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                   required={!isEditMode}
                 />
                 <Upload className="h-10 w-10 text-stone-400 mb-2" />
-                <p className="text-sm font-medium text-stone-700">Tải lên hình ảnh</p>
-                <p className="text-xs text-stone-400 mt-1">JPEG, PNG, WEBP lên tới 5MB</p>
+                <p className="text-sm font-medium text-stone-700 dark:text-stone-300">Tải lên hình ảnh</p>
+                <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">JPEG, PNG, WEBP lên tới 5MB</p>
               </div>
             ) : (
-              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 hover:bg-[#FAF6F1]/20 transition-all w-full gap-3">
+              <div className="relative aspect-square w-full border-2 border-dashed border-stone-300 dark:border-stone-700 rounded-xl flex flex-col items-center justify-center p-6 bg-[#FAF6F1]/10 dark:bg-stone-900/10 hover:bg-[#FAF6F1]/20 dark:hover:bg-stone-900/20 transition-all w-full gap-3">
                 <Upload className="h-10 w-10 text-stone-400 animate-bounce" />
                 <div className="w-full text-center space-y-1">
-                  <p className="text-xs font-bold text-stone-700 uppercase tracking-wider">Đường dẫn ảnh online</p>
-                  <p className="text-[10px] text-stone-400">Hỗ trợ Pinterest, Google, Imgur...</p>
+                  <p className="text-xs font-bold text-stone-700 dark:text-stone-300 uppercase tracking-wider">Đường dẫn ảnh online</p>
+                  <p className="text-[10px] text-stone-400 dark:text-stone-500">Hỗ trợ Pinterest, Google, Imgur...</p>
                 </div>
                 <input
                   type="url"
                   placeholder="Dán link ảnh (e.g. https://...)"
                   value={imageUrl}
                   onChange={handleUrlChange}
-                  className="w-full px-3 py-2 border border-stone-200 rounded-xl text-xs bg-white text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  className="w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-xl text-xs bg-white dark:bg-stone-900 text-stone-800 dark:text-stone-100 placeholder-stone-400 dark:placeholder-stone-500 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                   required={!isEditMode}
                 />
               </div>
@@ -398,7 +402,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
           {/* Right Sub-column: Form fields */}
           <div className="space-y-4">
             <div>
-              <label htmlFor="name" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+              <label htmlFor="name" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                 Tên món đồ *
               </label>
               <input
@@ -407,21 +411,21 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 placeholder="Ví dụ: Áo khoác Blazer đen"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="category" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <label htmlFor="category" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Phân loại *
                 </label>
                 <select
                   id="category"
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 >
                   {CATEGORIES.map((c) => (
                     <option key={c.value} value={c.value}>
@@ -432,14 +436,14 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
               </div>
 
               <div>
-                <label htmlFor="season" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <label htmlFor="season" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Mùa phù hợp
                 </label>
                 <select
                   id="season"
                   value={season}
                   onChange={(e) => setSeason(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-200 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 >
                   {SEASONS.map((s) => (
                     <option key={s.value} value={s.value}>
@@ -452,7 +456,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="color" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <label htmlFor="color" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Màu sắc
                 </label>
                 <div className="flex gap-2 mt-1">
@@ -460,7 +464,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                     type="color"
                     value={color.startsWith('#') && color.length === 7 ? color : '#FAF6F1'}
                     onChange={(e) => setColor(e.target.value)}
-                    className="w-10 h-9 p-0.5 border border-stone-200 rounded-lg cursor-pointer bg-white"
+                    className="w-10 h-9 p-0.5 border border-stone-200 dark:border-stone-750 rounded-lg cursor-pointer bg-white dark:bg-stone-900"
                     title="Chọn mã màu thực tế"
                   />
                   <input
@@ -468,14 +472,14 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                     type="text"
                     value={color}
                     onChange={(e) => setColor(e.target.value)}
-                    className="flex-1 min-w-0 px-2 py-2 border border-stone-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                    className="flex-1 min-w-0 px-2 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-xs bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                     placeholder="#HEX / Tên màu"
                   />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="brand" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+                <label htmlFor="brand" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                   Thương hiệu
                 </label>
                 <input
@@ -483,14 +487,14 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                   type="text"
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
-                  className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                  className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                   placeholder="Ví dụ: Zara, Uniqlo"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="price" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+              <label htmlFor="price" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                 Giá mua (VND)
               </label>
               <input
@@ -498,13 +502,13 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                 type="number"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 placeholder="Ví dụ: 350000"
               />
             </div>
 
             <div>
-              <label htmlFor="tags" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
+              <label htmlFor="tags" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                 Nhãn (Tags - phân tách bằng dấu phẩy)
               </label>
               <input
@@ -512,21 +516,21 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                 type="text"
                 value={tagsInput}
                 onChange={(e) => setTagsInput(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
+                className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F]"
                 placeholder="ví dụ: công sở, năng động, đi tiệc"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider mb-2">
                 Tình trạng trang phục
               </label>
               <div className="grid grid-cols-2 gap-1.5 sm:flex">
                 {[
-                  { value: 'new', label: '✨ Mới', color: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-                  { value: 'good', label: '👍 Tốt', color: 'bg-blue-50 text-blue-700 border-blue-200' },
-                  { value: 'old', label: '🍂 Cũ', color: 'bg-amber-50 text-amber-700 border-amber-200' },
-                  { value: 'damaged', label: '⚠️ Hỏng', color: 'bg-rose-50 text-rose-700 border-rose-200' }
+                  { value: 'new', label: '✨ Mới', color: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 border-emerald-200 dark:border-emerald-900/40' },
+                  { value: 'good', label: '👍 Tốt', color: 'bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-900/40' },
+                  { value: 'old', label: '🍂 Cũ', color: 'bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 border-amber-200 dark:border-amber-900/40' },
+                  { value: 'damaged', label: '⚠️ Hỏng', color: 'bg-rose-50 dark:bg-rose-950/30 text-rose-700 dark:text-rose-400 border-rose-200 dark:border-rose-900/40' }
                 ].map((cond) => {
                   const isSelected = condition === cond.value;
                   return (
@@ -537,7 +541,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                       className={`flex-1 py-2 px-0.5 border text-[10px] font-bold rounded-xl text-center transition-all ${
                         isSelected
                           ? cond.color + ' border-current scale-[1.02] shadow-xs'
-                          : 'border-stone-200 text-stone-500 hover:bg-stone-50'
+                          : 'border-stone-200 dark:border-stone-700 text-stone-500 dark:text-stone-400 hover:bg-stone-50 dark:hover:bg-stone-800'
                       }`}
                     >
                       {cond.label}
@@ -548,16 +552,16 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
             </div>
 
             {!isEditMode && (
-              <div className="flex items-center justify-between p-3.5 bg-stone-50 border border-stone-100 rounded-2xl animate-in fade-in duration-200">
+              <div className="flex items-center justify-between p-3.5 bg-stone-50 dark:bg-[#1E1B18]/60 border border-stone-100 dark:border-stone-850 rounded-2xl animate-in fade-in duration-200">
                 <div className="space-y-0.5">
-                  <span className="block text-xs font-bold text-[#2A2521]">Tự động tách nền bằng AI</span>
-                  <span className="block text-[10px] text-stone-400">Sử dụng AI để loại bỏ hình nền xung quanh trang phục</span>
+                  <span className="block text-xs font-bold text-[#2A2521] dark:text-stone-200">Tự động tách nền bằng AI</span>
+                  <span className="block text-[10px] text-stone-400 dark:text-stone-500">Sử dụng AI để loại bỏ hình nền xung quanh trang phục</span>
                 </div>
                 <button
                   type="button"
                   onClick={() => setRemoveBg(!removeBg)}
                   className={`w-11 h-6 flex items-center rounded-full p-1 transition-all ${
-                    removeBg ? 'bg-[#C4704F]' : 'bg-stone-300'
+                    removeBg ? 'bg-[#C4704F]' : 'bg-stone-300 dark:bg-stone-700'
                   }`}
                 >
                   <div
@@ -570,8 +574,7 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
             )}
 
             <div>
-              <label htmlFor="notes" className="block text-xs font-semibold text-stone-500 uppercase tracking-wider">
-
+              <label htmlFor="notes" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
                 Ghi chú thêm
               </label>
               <textarea
@@ -579,18 +582,18 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
-                className="mt-1 block w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] resize-none"
+                className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-750 rounded-lg text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100 focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] resize-none"
                 placeholder="Nhập chất liệu, cách giặt ủi..."
               />
             </div>
           </div>
 
           {/* Form Actions */}
-          <div className="md:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-stone-100">
+          <div className="md:col-span-2 flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t border-stone-100 dark:border-stone-850">
             <button
               type="button"
               onClick={onCancel}
-              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm font-bold border border-stone-200 rounded-lg text-stone-600 bg-white hover:bg-stone-50 transition-colors"
+              className="w-full sm:w-auto px-4 py-2.5 sm:py-2 text-sm font-bold border border-stone-200 dark:border-stone-700 rounded-lg text-stone-600 dark:text-stone-400 bg-white dark:bg-stone-900 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors"
             >
               Hủy bỏ
             </button>
@@ -609,22 +612,22 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
       {/* Right Side: History & Stats (Visually balancing the screen space) */}
       <div className="hidden lg:block w-full lg:w-2/5 space-y-6">
         {/* Quick Stats Card */}
-        <div className="bg-[#C4704F]/5 border border-[#C4704F]/15 rounded-3xl p-6 space-y-4">
-          <h3 className="text-xs font-bold text-[#C4704F] uppercase tracking-wider font-serif">Thông tin tủ đồ hiện tại</h3>
+        <div className="bg-[#C4704F]/5 dark:bg-[#C4704F]/10 border border-[#C4704F]/15 dark:border-[#C4704F]/25 rounded-3xl p-6 space-y-4 transition-colors">
+          <h3 className="text-xs font-bold text-[#C4704F] dark:text-[#E28A64] uppercase tracking-wider font-serif">Thông tin tủ đồ hiện tại</h3>
           {historyLoading ? (
             <div className="animate-pulse space-y-2">
-              <div className="h-4 bg-[#C4704F]/10 rounded w-1/2" />
-              <div className="h-3 bg-[#C4704F]/10 rounded w-3/4" />
+              <div className="h-4 bg-[#C4704F]/10 dark:bg-[#C4704F]/20 rounded w-1/2" />
+              <div className="h-3 bg-[#C4704F]/10 dark:bg-[#C4704F]/20 rounded w-3/4" />
             </div>
           ) : stats ? (
             <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white/80 p-3 rounded-2xl border border-[#C4704F]/10 shadow-xs">
-                <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider block">Tổng số đồ</span>
-                <span className="text-base font-extrabold text-stone-700 mt-1 block">{stats.totalItems} món</span>
+              <div className="bg-white/80 dark:bg-[#23201D]/80 p-3 rounded-2xl border border-[#C4704F]/10 dark:border-[#C4704F]/20 shadow-xs transition-colors">
+                <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Tổng số đồ</span>
+                <span className="text-base font-extrabold text-stone-700 dark:text-stone-200 mt-1 block">{stats.totalItems} món</span>
               </div>
-              <div className="bg-white/80 p-3 rounded-2xl border border-[#C4704F]/10 shadow-xs">
-                <span className="text-[9px] font-bold text-stone-400 uppercase tracking-wider block">Tổng giá trị</span>
-                <span className="text-xs font-extrabold text-stone-700 block truncate mt-2.5" title={stats.totalPrice.toLocaleString('vi-VN') + ' đ'}>
+              <div className="bg-white/80 dark:bg-[#23201D]/80 p-3 rounded-2xl border border-[#C4704F]/10 dark:border-[#C4704F]/20 shadow-xs transition-colors">
+                <span className="text-[9px] font-bold text-stone-400 dark:text-stone-500 uppercase tracking-wider block">Tổng giá trị</span>
+                <span className="text-xs font-extrabold text-stone-700 dark:text-stone-200 block truncate mt-2.5" title={stats.totalPrice.toLocaleString('vi-VN') + ' đ'}>
                   {stats.totalPrice.toLocaleString('vi-VN')} đ
                 </span>
               </div>
@@ -635,18 +638,18 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
         </div>
 
         {/* Recently Added Items List */}
-        <div className="bg-white border border-stone-100 rounded-3xl p-6 shadow-sm space-y-4">
-          <div className="border-b border-stone-100 pb-2">
-            <h3 className="text-sm font-bold text-[#2A2521] font-serif">Món đồ vừa thêm gần đây</h3>
+        <div className="bg-white dark:bg-[#23201D] border border-stone-100 dark:border-stone-800 rounded-3xl p-6 shadow-sm space-y-4 transition-colors">
+          <div className="border-b border-stone-100 dark:border-stone-850 pb-2">
+            <h3 className="text-sm font-bold text-[#2A2521] dark:text-stone-100 font-serif">Món đồ vừa thêm gần đây</h3>
           </div>
           {historyLoading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="flex gap-3 animate-pulse">
-                  <div className="w-10 h-10 bg-stone-100 rounded-lg" />
+                  <div className="w-10 h-10 bg-stone-100 dark:bg-stone-800 rounded-lg" />
                   <div className="flex-1 space-y-2">
-                    <div className="h-3 bg-stone-100 rounded w-2/3" />
-                    <div className="h-3 bg-stone-100 rounded w-1/3" />
+                    <div className="h-3 bg-stone-100 dark:bg-stone-800 rounded w-2/3" />
+                    <div className="h-3 bg-stone-100 dark:bg-stone-800 rounded w-1/3" />
                   </div>
                 </div>
               ))}
@@ -654,9 +657,9 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
           ) : recentItems.length > 0 ? (
             <div className="space-y-3">
               {recentItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-3 p-2 rounded-2xl hover:bg-stone-50 transition-colors border border-stone-50">
+                <div key={item.id} className="flex items-center gap-3 p-2 rounded-2xl hover:bg-stone-50 dark:hover:bg-stone-800/60 transition-colors border border-stone-50 dark:border-stone-850/40">
                   <div 
-                    className="w-10 h-10 rounded-xl overflow-hidden bg-stone-50 border border-stone-100 flex items-center justify-center shrink-0"
+                    className="w-10 h-10 rounded-xl overflow-hidden bg-stone-50 dark:bg-stone-900 border border-stone-100 dark:border-stone-800 flex items-center justify-center shrink-0"
                     style={{
                       backgroundColor: item.color && item.color.startsWith('#') && item.color.length === 7
                         ? `${item.color}0d`
@@ -666,19 +669,19 @@ export default function ItemForm({ initialItem, onSuccess, onCancel }: ItemFormP
                     <img src={item.originalImageUrl} alt={item.name} className="object-contain w-full h-full p-1" />
                   </div>
                   <div className="min-w-0 flex-1 text-left">
-                    <h4 className="text-xs font-bold text-stone-700 truncate leading-tight">{item.name}</h4>
-                    <p className="text-[9px] text-stone-400 mt-0.5 truncate capitalize">
+                    <h4 className="text-xs font-bold text-stone-700 dark:text-stone-200 truncate leading-tight">{item.name}</h4>
+                    <p className="text-[9px] text-stone-400 dark:text-stone-500 mt-0.5 truncate capitalize">
                       {CATEGORIES.find(c => c.value === item.category)?.label || item.category}
                     </p>
                   </div>
-                  <span className="text-xs font-bold text-stone-600 shrink-0">
+                  <span className="text-xs font-bold text-stone-600 dark:text-stone-400 shrink-0">
                     {item.price ? `${item.price.toLocaleString('vi-VN')}đ` : 'Miễn phí'}
                   </span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-xs text-stone-400 py-4 text-center">Chưa có món đồ nào trong tủ đồ này.</p>
+            <p className="text-xs text-stone-400 dark:text-stone-500 py-4 text-center">Chưa có món đồ nào trong tủ đồ này.</p>
           )}
         </div>
       </div>
