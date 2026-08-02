@@ -1,73 +1,104 @@
-# Drobe — Closet Management Web Application
+# 👗 Drobe — Ứng Dụng Quản Lý Tủ Đồ Cá Nhân Thông Minh
 
-Drobe là ứng dụng web giúp quản lý tủ quần áo cá nhân trực quan bằng cách: lưu trữ thông tin quần áo kèm ảnh sạch (tự động tách nền qua AI chạy local), và phối đồ trực quan trên canvas kéo-thả.
-
-## Cấu Trúc Dự Án (Monorepo)
-
-Dự án được cấu trúc dưới dạng monorepo sử dụng npm workspaces:
-- `/frontend`: Ứng dụng client React 18 + Vite + Tailwind CSS.
-- `/backend`: API server Express + TypeScript + Prisma ORM + PostgreSQL.
-- `/shared`: Chứa định nghĩa kiểu dữ liệu dùng chung (Types) cho cả client và server.
+Drobe là ứng dụng Web giúp bạn số hóa và quản lý tủ quần áo của mình một cách trực quan, khoa học. Với Drobe, bạn có thể lưu trữ thông tin trang phục, tự động tách nền ảnh bằng AI chạy offline (local), và tự tay phối đồ trên một canvas kéo-thả vô cùng sinh động.
 
 ---
 
-## Hướng Dẫn Chạy Local
+## ✨ Các Tính Năng Nổi Bật
+
+* Quản lý tủ đồ trực quan: Lưu trữ hình ảnh quần áo, phân loại (Áo, Quần, Giày dép, Phụ kiện, Áo khoác) kèm thông tin về màu sắc, thương hiệu, tình trạng và mùa sử dụng.
+* Tách nền thông minh (AI Background Remover): Tách sạch nền ảnh quần áo tự động bằng mô hình AI chạy trực tiếp ngay trên máy tính của bạn (không tốn phí API).
+* Canvas phối đồ tự do: Tự do kéo thả, phóng to, thu nhỏ, xoay và sắp xếp các món đồ để tạo ra những bộ cánh (Outfits) phong cách nhất.
+* Lên kế hoạch xếp đồ du lịch (Travel Planner): Lập danh sách đồ cần chuẩn bị cho các chuyến đi và đánh dấu những món đã xếp vào vali.
+* Nhật ký phối đồ (Outfit Diary): Lưu lại lịch sử trang phục bạn đã mặc theo từng ngày trên giao diện lịch trực quan.
+* Chế độ Ngoại tuyến / Giả lập (Bypass Mode): Cho phép đăng nhập nhanh không cần kết nối Server Backend để xem thử giao diện tủ đồ mẫu.
+
+---
+
+## 🛠️ Hướng Dẫn Cài Đặt & Khởi Chạy Local
 
 ### 1. Yêu Cầu Hệ Thống
-- **Node.js**: Phiên bản 18+ (khuyên dùng v20).
-- **PostgreSQL**: Đã được cài đặt và đang chạy local (mặc định cấu hình dùng DB tên `mycloset`).
-- **Python**: Đã cài đặt Python 3.9+ (để cài đặt công cụ tách nền `rembg`).
+Trước khi chạy, hãy đảm bảo máy tính của bạn đã cài đặt các công cụ sau:
+* Node.js: Phiên bản 18 trở lên (Khuyên dùng v20+).
+* PostgreSQL: Đã được cài đặt và đang chạy local (Cổng mặc định 5432).
+* Python: Phiên bản 3.9 - 3.11 (để chạy server tách nền AI rembg nếu cần).
 
-### 2. Thiết Lập Database (PostgreSQL)
-1. Đảm bảo bạn đã khởi tạo một database có tên `mycloset` trong PostgreSQL (qua pgAdmin hoặc DBeaver).
-2. Kiểm tra/điều chỉnh chuỗi kết nối database trong file `/backend/.env`:
+---
+
+### 2. Các Bước Khởi Chạy Nhanh
+
+#### Bước 1: Cài đặt thư viện
+Mở terminal tại thư mục gốc của dự án (MyCloset) và chạy lệnh sau để tự động cài đặt tất cả thư viện cho Frontend và Backend:
+```bash
+npm install
+```
+
+#### Bước 2: Cấu hình Cơ sở dữ liệu (PostgreSQL Local)
+1. Mở phần mềm quản lý database của bạn (như pgAdmin, DBeaver) và tạo một database mới tên là:
+   ```sql
+   CREATE DATABASE mycloset;
+   ```
+2. Mở file cấu hình kết nối database tại đường dẫn [backend/.env](file:///C:/Users/XUAN%20SON/Desktop/Xuan%20Son%20Version/MyCloset/backend/.env).
+3. Đảm bảo cấu hình đang trỏ về PostgreSQL local của bạn. Ví dụ:
    ```env
    DATABASE_URL="postgresql://postgres:123456@localhost:5432/mycloset?schema=public"
-   PORT=3000
-   JWT_ACCESS_SECRET="drobe_access_secret_key_12345!@#$"
-   JWT_REFRESH_SECRET="drobe_refresh_secret_key_67890!@#$"
+   DIRECT_URL="postgresql://postgres:123456@localhost:5432/mycloset?schema=public"
    ```
-3. Ở thư mục gốc dự án, cài đặt các dependencies và chạy migration để đồng bộ các bảng cơ sở dữ liệu:
-   ```bash
-   # Cài đặt dependencies toàn monorepo
-   npm install
+   *(Hãy thay thế postgres bằng tên đăng nhập và 123456 bằng mật khẩu PostgreSQL trên máy của bạn).*
 
-   # Tạo các bảng cơ sở dữ liệu trong PostgreSQL
-   npm run build --workspace=backend
-   npx prisma migrate dev --name init --schema=backend/prisma/schema.prisma
+4. Đồng bộ cấu hình bảng dữ liệu bằng lệnh:
+   ```bash
+   npx prisma db push --schema=backend/prisma/schema.prisma
    ```
 
-### 3. Thiết Lập Công Cụ Tách Nền (Rembg Service) - *Cho Phase 3*
-Công cụ tách nền sẽ chạy dưới dạng một tiến trình Python độc lập đóng vai trò REST API:
-1. Tạo một thư mục Python Virtual Environment ở thư mục gốc:
-   ```bash
-   python -m venv venv
-   # Kích hoạt venv (trên Windows PowerShell):
-   .\venv\Scripts\Activate.ps1
-   ```
-2. Cài đặt thư viện `rembg`:
-   ```bash
-   pip install "rembg[cli]"
-   ```
-3. Khởi động server tách nền (chạy cổng 5000):
-   ```bash
-   rembg s --host 0.0.0.0 --port 5000
-   ```
-   *(Lưu ý: Trong lần tách ảnh đầu tiên, server sẽ tự động tải model AI `u2net` hoặc `u2net_cloth_seg` khoảng 100-300MB, sẽ mất khoảng vài chục giây).*
-
-### 4. Chạy Ứng Dụng Dev
-Chỉ cần chạy một lệnh duy nhất từ thư mục gốc, hệ thống sẽ tự động khởi chạy song song cả client (port 5173) và backend (port 3000):
+#### Bước 3: Chạy ứng dụng web
+Khởi chạy đồng thời cả Frontend và Backend chỉ bằng một lệnh duy nhất:
 ```bash
 npm run dev
 ```
-
-- **Frontend client**: Truy cập `http://localhost:5173`
-- **Backend API**: Truy cập `http://localhost:3000/api/health` để kiểm tra trạng thái hoạt động.
+* Giao diện người dùng (Vite + React): Truy cập http://localhost:5173 (hoặc http://localhost:5174 nếu cổng 5173 bị trùng).
+* Máy chủ API (Node.js + Express): Chạy tại cổng http://localhost:3000.
 
 ---
 
-## Luồng Hoạt Động Của Authentication (JWT + HTTP-Only Cookie)
-1. **Đăng nhập / Đăng ký**: Gửi email và mật khẩu lên backend `/api/auth/login` hoặc `/api/auth/register`.
-2. **Access Token**: Trả về trực tiếp trong response dạng JSON và lưu vào memory của ứng dụng client (qua Zustand store) với hạn dùng ngắn (15 phút). Dùng để đính kèm vào header `Authorization: Bearer <token>` khi gọi API.
-3. **Refresh Token**: Được backend ký và trả về dạng Cookie với cờ `httpOnly` và thời hạn dài (7 ngày). Trình duyệt sẽ tự động lưu và gửi kèm cookie này khi gọi route `/api/auth/refresh`.
-4. **Tự Động Làm Mới (Silent Refresh)**: Khi access token hết hạn (lỗi 401), Axios Interceptor ở phía frontend sẽ tự động chặn, gọi ngầm API `/api/auth/refresh` bằng refresh token cookie để lấy access token mới, rồi tiếp tục gửi lại request cũ một cách hoàn toàn tự động và trong suốt với trải nghiệm người dùng.
+### 3. Thiết Lập Công Cụ Tách Nền AI (Tùy chọn)
+
+Nếu bạn muốn sử dụng tính năng tự động xóa phông ảnh khi tải quần áo lên:
+1. Mở một cửa sổ Terminal mới tại thư mục gốc dự án và tạo môi trường ảo Python:
+   ```bash
+   python -m venv venv
+   ```
+2. Kích hoạt môi trường ảo:
+   * Trên Windows (PowerShell): .\venv\Scripts\Activate.ps1
+   * Trên Windows (CMD): .\venv\Scripts\activate.bat
+   * Trên macOS/Linux: source venv/bin/activate
+3. Cài đặt thư viện tách nền:
+   ```bash
+   pip install rembg
+   ```
+4. Khởi chạy Server AI tách nền ở cổng 5000:
+   ```bash
+   rembg s --host 0.0.0.0 --port 5000
+   ```
+*(Lần đầu tiên tách ảnh, ứng dụng sẽ tải tự động model AI u2net khoảng 170MB về máy mất khoảng vài chục giây, những lần sau sẽ chạy ngay lập tức).*
+
+---
+
+## 🔑 Tài Khoản Đăng Nhập & Chế Độ Bypass
+
+Ứng dụng hỗ trợ cơ chế đăng nhập đặc biệt giúp bạn thử nghiệm nhanh chóng:
+* Tài khoản dùng thử mặc định:
+  * Email/Username: xu4ns0n hoặc xu4ns0n@drobe.com
+  * Mật khẩu: Sondeptrai123@k
+* Cơ chế hoạt động:
+  * Chế độ Local (Có Backend): Khi đăng nhập bằng tài khoản này, hệ thống sẽ tự động tạo tài khoản trong database local và tự động nạp (seed) sẵn 10 sản phẩm quần áo & giày dép mẫu tuyệt đẹp để bạn trải nghiệm tính năng phối đồ ngay lập tức mà không cần tự tải ảnh lên.
+  * Chế độ Bypass (Khi Backend tắt): Nếu server backend gặp sự cố hoặc bị tắt, giao diện frontend sẽ tự động kích hoạt Bypass Mode khi nhập đúng tài khoản này. Hệ thống sẽ cho phép bạn vào thẳng màn hình chính và tải sẵn 10 trang phục mẫu trên giao diện để xem thử và test giao diện bộ lọc.
+
+---
+
+## 📂 Cấu Trúc Dự Án (Monorepo)
+
+Dự án sử dụng tính năng Workspaces của npm để quản lý mã nguồn tập trung:
+* [frontend/](file:///C:/Users/XUAN%20SON/Desktop/Xuan%20Son%20Version/MyCloset/frontend) — Giao diện phía client (React, Vite, Tailwind CSS, Zustand).
+* [backend/](file:///C:/Users/XUAN%20SON/Desktop/Xuan%20Son%20Version/MyCloset/backend) — Máy chủ xử lý API (Express, Prisma ORM, TypeScript).
+* [shared/](file:///C:/Users/XUAN%20SON/Desktop/Xuan%20Son%20Version/MyCloset/shared) — Định nghĩa kiểu dữ liệu dùng chung (Types) cho cả client và server.
