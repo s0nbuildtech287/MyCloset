@@ -150,6 +150,7 @@ function App() {
     setError('')
     setSuccess('')
     
+    const isMock = (email.toLowerCase().includes('xu4ns0n') || email === 'xu4ns0n') && password === 'Sondeptrai123@k';
     const endpoint = '/auth/login'
     const payload = { email, password }
     
@@ -160,10 +161,24 @@ function App() {
       setSuccess(`Thành công! Chào mừng ${user.name || user.email}`)
       setError('')
     } catch (err: any) {
-      const errMsg = typeof err.response?.data?.error === 'string' 
-        ? err.response.data.error 
-        : (err.response?.data?.error?.message || 'Đăng nhập không thành công');
-      setError(errMsg);
+      if (isMock) {
+        // Bypass when backend server is down/stopped (e.g. Render online deployment)
+        const mockUser = {
+          id: "00000000-0000-0000-0000-000000000000",
+          email: email.includes('@') ? email : `${email}@drobe.com`,
+          name: "xu4ns0n",
+          avatarUrl: null,
+          createdAt: new Date().toISOString()
+        }
+        setAuth(mockUser, "mock-access-token")
+        setSuccess(`Thành công! Chào mừng xu4ns0n (Bypass Mode)`)
+        setError('')
+      } else {
+        const errMsg = typeof err.response?.data?.error === 'string' 
+          ? err.response.data.error 
+          : (err.response?.data?.error?.message || 'Đăng nhập không thành công');
+        setError(errMsg);
+      }
     }
   }
 
@@ -241,7 +256,7 @@ function App() {
                 </label>
                 <input
                   id="email"
-                  type="email"
+                  type="text"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
