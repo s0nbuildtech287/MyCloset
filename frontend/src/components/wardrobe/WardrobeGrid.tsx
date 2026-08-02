@@ -6,7 +6,231 @@ import ImageEditor from './ImageEditor';
 import ConfirmModal from '../common/ConfirmModal';
 
 import { useClosetStore } from '../../store/closetStore';
+import { useAuthStore } from '../../store/authStore';
 import { Heart, Search, Edit3, Trash2, Tag, Calendar, ShoppingBag, Scissors, AlertTriangle } from 'lucide-react';
+
+const MOCK_FALLBACK_ITEMS: ClothingItem[] = [
+  {
+    id: "1",
+    userId: "mock-user-id",
+    name: "Áo thun trắng Basic",
+    category: "top",
+    color: "Trắng",
+    brand: "Uniqlo",
+    season: "all",
+    originalImageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: true,
+    condition: "new",
+    notes: "Áo thun mặc hàng ngày thoải mái.",
+    tags: ["basic", "trắng", "t-shirt"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    userId: "mock-user-id",
+    name: "Áo Hoodie đen",
+    category: "top",
+    color: "Đen",
+    brand: "Champion",
+    season: "winter",
+    originalImageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: false,
+    condition: "new",
+    notes: "Áo hoodie ấm áp cho mùa đông.",
+    tags: ["hoodie", "đen", "ấm áp"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    userId: "mock-user-id",
+    name: "Quần Jeans xanh",
+    category: "bottom",
+    color: "Xanh dương",
+    brand: "Levi's",
+    season: "all",
+    originalImageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: true,
+    condition: "good",
+    notes: "Quần jean ống đứng dễ phối đồ.",
+    tags: ["jean", "xanh", "levi"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "4",
+    userId: "mock-user-id",
+    name: "Quần Tây đen",
+    category: "bottom",
+    color: "Đen",
+    brand: "Zara",
+    season: "all",
+    originalImageUrl: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: false,
+    condition: "new",
+    notes: "Quần tây đi làm lịch sự.",
+    tags: ["trousers", "đen", "công sở"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "5",
+    userId: "mock-user-id",
+    name: "Giày Sneaker trắng",
+    category: "shoes",
+    color: "Trắng",
+    brand: "Adidas",
+    season: "all",
+    originalImageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: true,
+    condition: "new",
+    notes: "Sneaker trắng năng động.",
+    tags: ["sneaker", "trắng", "thể thao"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "6",
+    userId: "mock-user-id",
+    name: "Giày Chelsea Boots cổ điển",
+    category: "shoes",
+    color: "Nâu",
+    brand: "Timberland",
+    season: "winter",
+    originalImageUrl: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: false,
+    condition: "new",
+    notes: "Boots da lộn sang trọng.",
+    tags: ["boots", "nâu", "da lộn"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "7",
+    userId: "mock-user-id",
+    name: "Áo khoác Bò Denim",
+    category: "outerwear",
+    color: "Xanh nhạt",
+    brand: "Levi's",
+    season: "fall",
+    originalImageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: false,
+    condition: "good",
+    notes: "Áo khoác bò phong cách.",
+    tags: ["jacket", "denim", "bò"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "8",
+    userId: "mock-user-id",
+    name: "Áo khoác Da Biker",
+    category: "outerwear",
+    color: "Đen",
+    brand: "AllSaints",
+    season: "winter",
+    originalImageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: true,
+    condition: "new",
+    notes: "Áo khoác da biker cá tính.",
+    tags: ["jacket", "da", "biker"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "9",
+    userId: "mock-user-id",
+    name: "Mũ lưỡi trai đen",
+    category: "accessory",
+    color: "Đen",
+    brand: "New Era",
+    season: "all",
+    originalImageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: false,
+    condition: "good",
+    notes: "Mũ lưỡi trai che nắng.",
+    tags: ["cap", "đen", "phụ kiện"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: "10",
+    userId: "mock-user-id",
+    name: "Kính râm Ray-Ban",
+    category: "accessory",
+    color: "Đen",
+    brand: "Ray-Ban",
+    season: "summer",
+    originalImageUrl: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500&q=80",
+    processedImageUrl: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500&q=80",
+    processingStatus: "done",
+    isFavorite: false,
+    condition: "new",
+    notes: "Kính râm đi biển.",
+    tags: ["glasses", "kính", "phụ kiện"],
+    purchaseUrl: null,
+    price: null,
+    purchasedAt: null,
+    closetId: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
+];
 
 
 interface WardrobeGridProps {
@@ -45,6 +269,23 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
   } | null>(null);
 
   const fetchStats = async () => {
+    const isBypass = useAuthStore.getState().accessToken === 'mock-access-token';
+    if (isBypass) {
+      setStats({
+        totalItems: MOCK_FALLBACK_ITEMS.length,
+        favoritesCount: MOCK_FALLBACK_ITEMS.filter(i => i.isFavorite).length,
+        totalOutfits: 0,
+        byCategory: {
+          top: MOCK_FALLBACK_ITEMS.filter(i => i.category === 'top').length,
+          bottom: MOCK_FALLBACK_ITEMS.filter(i => i.category === 'bottom').length,
+          shoes: MOCK_FALLBACK_ITEMS.filter(i => i.category === 'shoes').length,
+          accessory: MOCK_FALLBACK_ITEMS.filter(i => i.category === 'accessory').length,
+          outerwear: MOCK_FALLBACK_ITEMS.filter(i => i.category === 'outerwear').length,
+        }
+      });
+      return;
+    }
+
     try {
       const res = await apiClient.get('/items/stats');
       setStats(res.data);
@@ -115,7 +356,13 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
   const fetchItems = async () => {
     setLoading(true);
     setError('');
+    const isBypass = useAuthStore.getState().accessToken === 'mock-access-token';
+    
     try {
+      if (isBypass) {
+        throw new Error('Using fallback items in bypass mode');
+      }
+
       const params: any = {
         page,
         limit: 12,
@@ -134,10 +381,34 @@ export default function WardrobeGrid({ onEditItem }: WardrobeGridProps) {
       setTotalPages(res.data.pagination.totalPages);
       fetchStats();
     } catch (err: any) {
-      const errMsg = typeof err.response?.data?.error === 'string'
-        ? err.response.data.error
-        : (err.response?.data?.error?.message || 'Không thể tải danh sách tủ đồ');
-      setError(errMsg);
+      if (isBypass) {
+        let filtered = [...MOCK_FALLBACK_ITEMS];
+        if (category) {
+          filtered = filtered.filter(item => item.category === category);
+        }
+        if (season) {
+          filtered = filtered.filter(item => item.season === season || item.season === 'all');
+        }
+        if (isFavorite !== null) {
+          filtered = filtered.filter(item => item.isFavorite === isFavorite);
+        }
+        if (debouncedSearch) {
+          const s = debouncedSearch.toLowerCase();
+          filtered = filtered.filter(item => 
+            item.name.toLowerCase().includes(s) || 
+            (item.brand && item.brand.toLowerCase().includes(s)) ||
+            item.tags.some(t => t.toLowerCase().includes(s))
+          );
+        }
+        setItems(filtered);
+        setTotalPages(1);
+        fetchStats();
+      } else {
+        const errMsg = typeof err.response?.data?.error === 'string'
+          ? err.response.data.error
+          : (err.response?.data?.error?.message || 'Không thể tải danh sách tủ đồ');
+        setError(errMsg);
+      }
     } finally {
       setLoading(false);
     }

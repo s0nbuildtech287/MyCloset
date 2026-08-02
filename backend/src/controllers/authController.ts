@@ -53,6 +53,169 @@ export const login = async (req: Request, res: Response) => {
             passwordHash: passwordHash,
           }
         });
+
+        // Create default closet for the new user
+        const defaultCloset = await prisma.closet.create({
+          data: {
+            userId: dbUser.id,
+            name: 'Tủ đồ chính',
+            isDefault: true,
+          }
+        });
+
+        // Seed 10 mock clothing items for this user
+        const mockItems = [
+          {
+            name: "Áo thun trắng Basic",
+            category: "top",
+            color: "Trắng",
+            brand: "Uniqlo",
+            season: "all",
+            originalImageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: true,
+            condition: "new",
+            notes: "Áo thun mặc hàng ngày thoải mái.",
+            tags: ["basic", "trắng", "t-shirt"]
+          },
+          {
+            name: "Áo Hoodie đen",
+            category: "top",
+            color: "Đen",
+            brand: "Champion",
+            season: "winter",
+            originalImageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: false,
+            condition: "new",
+            notes: "Áo hoodie ấm áp cho mùa đông.",
+            tags: ["hoodie", "đen", "ấm áp"]
+          },
+          {
+            name: "Quần Jeans xanh",
+            category: "bottom",
+            color: "Xanh dương",
+            brand: "Levi's",
+            season: "all",
+            originalImageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: true,
+            condition: "good",
+            notes: "Quần jean ống đứng dễ phối đồ.",
+            tags: ["jean", "xanh", "levi"]
+          },
+          {
+            name: "Quần Tây đen",
+            category: "bottom",
+            color: "Đen",
+            brand: "Zara",
+            season: "all",
+            originalImageUrl: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: false,
+            condition: "new",
+            notes: "Quần tây đi làm lịch sự.",
+            tags: ["trousers", "đen", "công sở"]
+          },
+          {
+            name: "Giày Sneaker trắng",
+            category: "shoes",
+            color: "Trắng",
+            brand: "Adidas",
+            season: "all",
+            originalImageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: true,
+            condition: "new",
+            notes: "Sneaker trắng năng động.",
+            tags: ["sneaker", "trắng", "thể thao"]
+          },
+          {
+            name: "Giày Chelsea Boots cổ điển",
+            category: "shoes",
+            color: "Nâu",
+            brand: "Timberland",
+            season: "winter",
+            originalImageUrl: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1608256246200-53e635b5b65f?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: false,
+            condition: "new",
+            notes: "Boots da lộn sang trọng.",
+            tags: ["boots", "nâu", "da lộn"]
+          },
+          {
+            name: "Áo khoác Bò Denim",
+            category: "outerwear",
+            color: "Xanh nhạt",
+            brand: "Levi's",
+            season: "fall",
+            originalImageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: false,
+            condition: "good",
+            notes: "Áo khoác bò phong cách.",
+            tags: ["jacket", "denim", "bò"]
+          },
+          {
+            name: "Áo khoác Da Biker",
+            category: "outerwear",
+            color: "Đen",
+            brand: "AllSaints",
+            season: "winter",
+            originalImageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: true,
+            condition: "new",
+            notes: "Áo khoác da biker cá tính.",
+            tags: ["jacket", "da", "biker"]
+          },
+          {
+            name: "Mũ lưỡi trai đen",
+            category: "accessory",
+            color: "Đen",
+            brand: "New Era",
+            season: "all",
+            originalImageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1588850561407-ed78c282e89b?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: false,
+            condition: "good",
+            notes: "Mũ lưỡi trai che nắng.",
+            tags: ["cap", "đen", "phụ kiện"]
+          },
+          {
+            name: "Kính râm Ray-Ban",
+            category: "accessory",
+            color: "Đen",
+            brand: "Ray-Ban",
+            season: "summer",
+            originalImageUrl: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500&q=80",
+            processedImageUrl: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=500&q=80",
+            processingStatus: "done",
+            isFavorite: false,
+            condition: "new",
+            notes: "Kính râm đi biển.",
+            tags: ["glasses", "kính", "phụ kiện"]
+          }
+        ];
+
+        for (const item of mockItems) {
+          await prisma.clothingItem.create({
+            data: {
+              ...item,
+              userId: dbUser.id,
+              closetId: defaultCloset.id
+            }
+          });
+        }
       }
 
       const accessToken = generateAccessToken(dbUser.id);
