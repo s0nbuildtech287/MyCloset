@@ -10,6 +10,8 @@ import AnalyticsDashboard from './components/wardrobe/AnalyticsDashboard'
 import AiStylistChat from './components/chat/AiStylistChat'
 import ClosetSelector from './components/wardrobe/ClosetSelector'
 import TravelTab from './components/travel/TravelTab'
+import IntroScreen from './components/intro/IntroScreen'
+import './components/intro/intro.css'
 import headerLogo from './assets/drobe1_cropped.png'
 import loginLogo from './assets/drobe1.png'
 import type { ClothingItem } from '../../shared/types'
@@ -19,10 +21,12 @@ import { LogOut, PlusCircle, LayoutGrid, Sparkles, Layers, BarChart3, Briefcase,
 
 
 function App() {
-  const { user, isAuthenticated, setAuth, clearAuth } = useAuthStore()
+  const { user, accessToken, isAuthenticated, setAuth, clearAuth } = useAuthStore()
   // Form states - prefilled for internal testing as requested
   const [email, setEmail] = useState('xu4ns0n@drobe.com')
   const [password, setPassword] = useState('123456')
+  const [name, setName] = useState('')
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login')
 
   
   // App navigation and edit states
@@ -38,6 +42,8 @@ function App() {
   const [isUserInfoOpen, setIsUserInfoOpen] = useState(false)
   const [theme, setTheme] = useState<Theme>(getSystemTheme())
   const [langDemo, setLangDemo] = useState<'VI' | 'EN'>('VI')
+  const [showLoginPanel, setShowLoginPanel] = useState(false)
+  const isDemo = accessToken === 'mock-access-token'
 
   useEffect(() => {
     applyTheme(theme)
@@ -150,14 +156,27 @@ function App() {
     window.location.hash = `#/${tab}`;
   };
 
+  const enterDemo = () => {
+    setAuth({ id: 'demo-user', email: 'demo@drobe.local', name: 'Khách khám phá', avatarUrl: null, createdAt: new Date().toISOString() }, 'mock-access-token')
+    navigateToTab('wardrobe')
+  }
+
+  const navigateWithAuth = (tab: string) => {
+    if (isDemo && tab === 'add_item') {
+      setSuccess('Đăng nhập để bắt đầu sử dụng chức năng này')
+      setShowLoginPanel(true)
+      return
+    }
+    navigateToTab(tab)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccess('')
     
-    const isMock = (email.toLowerCase().includes('xu4ns0n') || email === 'xu4ns0n') && password === 'Sondeptrai123@k';
-    const endpoint = '/auth/login'
-    const payload = { email, password }
+    const endpoint = authMode === 'register' ? '/auth/register' : '/auth/login'
+    const payload = authMode === 'register' ? { name, email, password } : { email, password }
     
     try {
       const response = await apiClient.post(endpoint, payload)
@@ -166,24 +185,10 @@ function App() {
       setSuccess(`Thành công! Chào mừng ${user.name || user.email}`)
       setError('')
     } catch (err: any) {
-      if (isMock) {
-        // Bypass when backend server is down/stopped (e.g. Render online deployment)
-        const mockUser = {
-          id: "00000000-0000-0000-0000-000000000000",
-          email: email.includes('@') ? email : `${email}@drobe.com`,
-          name: "xu4ns0n",
-          avatarUrl: null,
-          createdAt: new Date().toISOString()
-        }
-        setAuth(mockUser, "mock-access-token")
-        setSuccess(`Thành công! Chào mừng xu4ns0n (Bypass Mode)`)
-        setError('')
-      } else {
-        const errMsg = typeof err.response?.data?.error === 'string' 
-          ? err.response.data.error 
-          : (err.response?.data?.error?.message || 'Đăng nhập không thành công');
-        setError(errMsg);
-      }
+      const errMsg = typeof err.response?.data?.error === 'string' 
+        ? err.response.data.error 
+        : (err.response?.data?.error?.message || (authMode === 'register' ? 'Đăng ký không thành công' : 'Đăng nhập không thành công'));
+      setError(errMsg);
     }
   }
 
@@ -220,6 +225,7 @@ function App() {
 
 
   if (!isAuthenticated || !user) {
+    if (!showLoginPanel) return <IntroScreen onExplore={enterDemo} onLogin={() => setShowLoginPanel(true)} />
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FAF6F1] via-[#FFFBF9] to-[#F3ECE4] dark:from-[#181614] dark:via-[#1E1B18] dark:to-[#12100F] font-sans flex items-center justify-center p-4 relative transition-colors">
         {/* Floating Theme Switcher on Login Page */}
@@ -266,9 +272,15 @@ function App() {
 
           <form className="space-y-5 text-left" onSubmit={handleSubmit}>
             <div className="space-y-4">
+              {authMode === 'register' && (
+                <div>
+                  <label htmlFor="name" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">Tên hiển thị</label>
+                  <input id="name" type="text" required value={name} onChange={(e) => setName(e.target.value)} className="mt-1 block w-full px-3 py-2 border border-stone-200 dark:border-stone-700 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-[#C4704F] focus:border-[#C4704F] text-sm bg-white dark:bg-stone-900 text-stone-950 dark:text-stone-100" placeholder="Tên của bạn" />
+                </div>
+              )}
               <div>
                 <label htmlFor="email" className="block text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-wider">
-                  Email đăng nhập
+                  Email
                 </label>
                 <input
                   id="email"
@@ -302,7 +314,7 @@ function App() {
                 type="submit"
                 className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-[#C4704F] hover:bg-[#b05f3f] focus:outline-none transition-colors"
               >
-                Đăng Nhập
+                {authMode === 'register' ? 'Tạo tài khoản' : 'Đăng nhập'}
               </button>
             </div>
 
@@ -310,6 +322,14 @@ function App() {
               Hệ thống tủ đồ nội bộ cá nhân
             </div>
           </form>
+
+          <button type="button" onClick={() => { setAuthMode(authMode === 'login' ? 'register' : 'login'); setError(''); setSuccess(''); }} className="w-full text-xs font-bold text-[#C4704F] hover:text-[#a85d40] transition-colors">
+            {authMode === 'login' ? 'Chưa có tài khoản? Đăng ký ngay' : 'Đã có tài khoản? Đăng nhập'}
+          </button>
+
+          <button type="button" onClick={() => setShowLoginPanel(false)} className="w-full text-xs font-semibold text-stone-400 hover:text-[#C4704F] transition-colors">
+            ← Quay lại trang giới thiệu
+          </button>
 
         </div>
       </div>
@@ -364,7 +384,7 @@ function App() {
                   return (
                     <button
                       key={item.tab}
-                      onClick={() => { navigateToTab(item.tab); setEditingItem(null); }}
+                      onClick={() => { navigateWithAuth(item.tab); setEditingItem(null); }}
                       className={`w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
                         isActive
                           ? 'bg-[#C4704F]/10 dark:bg-[#C4704F]/20 text-[#C4704F] dark:text-[#E28A64] shadow-xs font-extrabold'
@@ -415,7 +435,7 @@ function App() {
               return (
                 <button
                   key={item.tab}
-                  onClick={() => { navigateToTab(item.tab); setEditingItem(null); }}
+                  onClick={() => { navigateWithAuth(item.tab); setEditingItem(null); }}
                   className={`flex flex-col items-center gap-1 py-1 px-3 text-[11px] font-bold transition-all ${
                     isActive ? 'text-[#C4704F] dark:text-[#E28A64] font-extrabold' : 'text-stone-400 dark:text-stone-500 hover:text-stone-600 dark:hover:text-stone-300'
                   }`}
